@@ -37,7 +37,7 @@ try:
     target.parent.mkdir(parents=True,exist_ok=True)
     with tar.extractfile(member) as stream:target.write_bytes(stream.read())
  package=dest/'package'
- required=['index.html','styles.css','server.mjs','src/app.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','tests/server.test.mjs']
+ required=['index.html','styles.css','server.mjs','src/app.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/browser-focus.mjs','tests/server.test.mjs']
  for path in required:assert (package/path).is_file(),path
  for forbidden in ['receiving','node_modules','.env','.git']:assert not (package/forbidden).exists(),forbidden
  test=run(['npm','test'],cwd=package)
@@ -65,6 +65,12 @@ try:
  browser_receipt=json.loads((out/'browser/receipt.json').read_text())
  assert browser_receipt['ok']
  receipt['browser']={'ok':True,'checks':browser_receipt['checks'],'errors':browser_receipt['browserErrors']}
+ focus=run(['node','scripts/browser-focus.mjs',url,str(out/'focus')],cwd=package,timeout=90)
+ (out/'package-focus.log').write_text(focus.stdout+focus.stderr)
+ assert focus.returncode==0,focus.stdout+focus.stderr
+ focus_receipt=json.loads((out/'focus/receipt.json').read_text())
+ assert focus_receipt['passed'] is True
+ receipt['focus']={'exit_code':focus.returncode,'passed':True,'checks':[check['name'] for check in focus_receipt['checks']]}
  os.killpg(server.pid,signal.SIGTERM);server.wait(timeout=10);server=None
  game=package/'src/games.js';original=game.read_bytes()
  try:
