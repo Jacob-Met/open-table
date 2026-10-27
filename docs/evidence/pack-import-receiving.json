@@ -1,0 +1,810 @@
+{
+  "schema": "open-table.pack-import-receiving.v1",
+  "recorded_at": "2026-10-27T07:58:57Z",
+  "actor": "estate-90d252-20261027",
+  "task_id": "open-table-pack-import-intent-90d252",
+  "qualification_base": "ec2a618ad2e3a83a69c2777dfff2af4df61cde82",
+  "integration_base": "316050a6f194d2eb64b0a5606f050637378fbdd0",
+  "integration_base_tree": "550e0a9955efbdefd12fb6bacfb16134d251e788",
+  "integration_refresh": {
+    "method": "Compared every Git blob in both complete recursive trees; only these documentation files changed.",
+    "changed": [
+      {
+        "path": "README.md",
+        "old": "0f6714e1264d3f555895db7f9be16a23d1731913",
+        "new": "868eba4ea284543788d4e42706c2bbbcd04f55ae"
+      },
+      {
+        "path": "docs/RECEIVING.md",
+        "old": "e04140828d66a131e637110e3ce5d4f38a5d11c6",
+        "new": "89d752b2cbe7bc0e6e8e69920cd6871dc401053a"
+      },
+      {
+        "path": "docs/SUBMISSION_DRAFT.md",
+        "new": "04efddf73644c83c9f1426a48a6bd483ef6bf322"
+      }
+    ]
+  },
+  "source_sha256": "cdb6a4db2f0b254c440ce46d9f71fd80141657c11d64ea22aefa7d10b03fffcd",
+  "ruleset_pins_blob": "ab3a54e1e4b5b86fec27a9549216451d44929965",
+  "focused_script_sha256": "49a6f8701c7797944d3271cb9ba38d04f31bbc229f3448b6ca073f0384e61927",
+  "baseline": {
+    "exit_code": 1,
+    "script_sha256": "49a6f8701c7797944d3271cb9ba38d04f31bbc229f3448b6ca073f0384e61927",
+    "passed": false,
+    "cases": [
+      {
+        "name": "current valid import changes observable pack state",
+        "passed": true,
+        "error": null
+      },
+      {
+        "name": "current malformed import reports rejection and preserves game",
+        "passed": true,
+        "error": null
+      },
+      {
+        "name": "slow A cannot replace faster newer B",
+        "passed": false,
+        "error": "AssertionError [ERR_ASSERTION]: stale completion must preserve observable current state and status"
+      },
+      {
+        "name": "slow valid A cannot replace latest rejected import",
+        "passed": false,
+        "error": "AssertionError [ERR_ASSERTION]: stale completion must preserve observable current state and status"
+      },
+      {
+        "name": "explicit pack choice supersedes pending import",
+        "passed": false,
+        "error": "AssertionError [ERR_ASSERTION]: stale completion must preserve observable current state and status"
+      },
+      {
+        "name": "explicit game choice supersedes pending import",
+        "passed": false,
+        "error": "AssertionError [ERR_ASSERTION]: stale completion must preserve observable current state and status"
+      },
+      {
+        "name": "actual legal turn supersedes pending import",
+        "passed": false,
+        "error": "AssertionError [ERR_ASSERTION]: stale completion must preserve observable current state and status"
+      },
+      {
+        "name": "private handoff and intended reveal survive stale completion",
+        "passed": false,
+        "error": "AssertionError [ERR_ASSERTION]: stale completion must preserve observable current state and status"
+      },
+      {
+        "name": "Save pack render preserves current pending import",
+        "passed": true,
+        "error": null
+      },
+      {
+        "name": "no-file early return after DOM input clear preserves pending import",
+        "passed": true,
+        "error": null
+      },
+      {
+        "name": "private reveal alone supersedes pending import",
+        "passed": false,
+        "error": "AssertionError [ERR_ASSERTION]: stale completion must preserve observable current state and status"
+      },
+      {
+        "name": "stale read rejection cannot overwrite newer success",
+        "passed": false,
+        "error": "AssertionError [ERR_ASSERTION]: stale completion must preserve observable current state and status"
+      },
+      {
+        "name": "automatic same-root replacement ignores stale success and rejection",
+        "passed": false,
+        "error": "AssertionError [ERR_ASSERTION]: old detached content and live region remain unchanged"
+      },
+      {
+        "name": "destroy/remount ignores stale success",
+        "passed": false,
+        "error": "AssertionError [ERR_ASSERTION]: destroyed content and live region remain unchanged"
+      },
+      {
+        "name": "destroy/remount ignores stale rejection",
+        "passed": false,
+        "error": "AssertionError [ERR_ASSERTION]: destroyed content and live region remain unchanged"
+      },
+      {
+        "name": "obsolete destroy handle cannot clear newer mount",
+        "passed": false,
+        "error": "AssertionError [ERR_ASSERTION]: old handle may not clear newer app"
+      }
+    ],
+    "browserErrors": []
+  },
+  "initial_harness_correction": {
+    "script_sha256": "754cf1ec1766c34e4d45c7ad555a171f8b4c65227315c6a3b9d502ce93739ae2",
+    "observation": "CDP DOM.setFileInputFiles([]) left one file selected. This was a test-driver failure, not a product defect. The corrected test clears the native input with value='' and explicitly dispatches change; it claims only the no-file early return.",
+    "original_receipt": "/tmp/estate-90d252-20261027/open-table-baseline/pack-import-receipt.json",
+    "corrected_baseline_receipt": "/tmp/estate-90d252-20261027/open-table-baseline-v2/pack-import-receipt.json"
+  },
+  "source": {
+    "native": {
+      "command": "npm test",
+      "tests": 48,
+      "pass": 48,
+      "fail": 0,
+      "log": "/tmp/estate-90d252-20261027/open-table-candidate/native.log"
+    },
+    "browser_receipts": [
+      {
+        "receipt_file": "/tmp/estate-90d252-20261027/open-table-candidate/existing-browser/receipt.json",
+        "receipt": {
+          "checks": [
+            "Real HTTP entry point, selected ARIA states and visible active choice",
+            "Beacon mouse and keyboard play reaches exact seven and stops",
+            "Scanning changes selection without moving; explicit confirmation moves once",
+            "Held/repeated Enter cannot reveal the next private hand; a fresh press can",
+            "Space confirmation leaves the next hand covered",
+            "Waiting observer DOM is identical for two different pending opponent choices",
+            "Equal-stakes Pocket win and draw work through actual controls",
+            "Actual UI download contains only a pinned adaptation selection",
+            "Actual file-input reopen reruns the checker and covers private cards",
+            "Tampered pack is rejected without changing the current selection",
+            "Designer leak witness stays separate from live play and cannot activate",
+            "Proposal review is grounded, text-only, and invalidated by editing",
+            "Complete good workshop check activates only an approved pack",
+            "Narrow layouts stay within viewport and retain usable controls",
+            "No runtime exceptions or non-loopback page requests"
+          ],
+          "screenshots": [
+            "/tmp/estate-90d252-20261027/open-table-candidate/existing-browser/desktop-table.png",
+            "/tmp/estate-90d252-20261027/open-table-candidate/existing-browser/desktop-workshop.png",
+            "/tmp/estate-90d252-20261027/open-table-candidate/existing-browser/mobile-overview.png",
+            "/tmp/estate-90d252-20261027/open-table-candidate/existing-browser/mobile-table.png"
+          ],
+          "startedAt": "2026-10-27T07:46:19.027Z",
+          "packPath": "/tmp/estate-90d252-20261027/open-table-candidate/existing-browser/downloads/pocket-signals-shape-text.open-table.json",
+          "ok": true,
+          "finishedAt": "2026-10-27T07:46:23.658Z",
+          "browserErrors": []
+        }
+      },
+      {
+        "receipt_file": "/tmp/estate-90d252-20261027/open-table-candidate/pack-import/pack-import-receipt.json",
+        "receipt": {
+          "suite": "pack-import-browser",
+          "startedAt": "2026-10-27T07:46:23.862Z",
+          "cases": [
+            {
+              "name": "current valid import changes observable pack state",
+              "passed": true
+            },
+            {
+              "name": "current malformed import reports rejection and preserves game",
+              "passed": true
+            },
+            {
+              "name": "slow A cannot replace faster newer B",
+              "passed": true
+            },
+            {
+              "name": "slow valid A cannot replace latest rejected import",
+              "passed": true
+            },
+            {
+              "name": "explicit pack choice supersedes pending import",
+              "passed": true
+            },
+            {
+              "name": "explicit game choice supersedes pending import",
+              "passed": true
+            },
+            {
+              "name": "actual legal turn supersedes pending import",
+              "passed": true
+            },
+            {
+              "name": "private handoff and intended reveal survive stale completion",
+              "passed": true
+            },
+            {
+              "name": "Save pack render preserves current pending import",
+              "passed": true
+            },
+            {
+              "name": "no-file early return after DOM input clear preserves pending import",
+              "passed": true
+            },
+            {
+              "name": "private reveal alone supersedes pending import",
+              "passed": true
+            },
+            {
+              "name": "stale read rejection cannot overwrite newer success",
+              "passed": true
+            },
+            {
+              "name": "automatic same-root replacement ignores stale success and rejection",
+              "passed": true
+            },
+            {
+              "name": "destroy/remount ignores stale success",
+              "passed": true
+            },
+            {
+              "name": "destroy/remount ignores stale rejection",
+              "passed": true
+            },
+            {
+              "name": "obsolete destroy handle cannot clear newer mount",
+              "passed": true
+            }
+          ],
+          "url": "http://127.0.0.1:38427",
+          "browserErrors": [],
+          "finishedAt": "2026-10-27T07:46:27.403Z",
+          "passed": true
+        }
+      }
+    ]
+  },
+  "private_package": {
+    "archive": {
+      "id": "open-table@0.1.0",
+      "name": "open-table",
+      "version": "0.1.0",
+      "size": 462383,
+      "unpackedSize": 637052,
+      "shasum": "3e2c9a94279bfe13188d78e8a1307a40e643b4f3",
+      "integrity": "sha512-cXl7bifl5TJ6vQFd2QunyKsAMXHl2hz2JSRuyAAalsIJef6quyR7A075DQvJiWaUbJUa5L30DQjeWa8kMB4LbQ==",
+      "filename": "open-table-0.1.0.tgz",
+      "files": [
+        {
+          "path": "README.md",
+          "size": 8022,
+          "mode": 420
+        },
+        {
+          "path": "docs/evidence/browser-qualified.json",
+          "size": 1847,
+          "mode": 420
+        },
+        {
+          "path": "docs/evidence/held-enter-baseline.json",
+          "size": 382,
+          "mode": 420
+        },
+        {
+          "path": "docs/evidence/model-development.json",
+          "size": 28735,
+          "mode": 420
+        },
+        {
+          "path": "docs/evidence/package-native-tests.txt",
+          "size": 8102,
+          "mode": 420
+        },
+        {
+          "path": "docs/evidence/package-qualified.json",
+          "size": 2054,
+          "mode": 420
+        },
+        {
+          "path": "docs/evidence/published-initial.json",
+          "size": 349,
+          "mode": 420
+        },
+        {
+          "path": "docs/images/desktop-table.png",
+          "size": 150746,
+          "mode": 420
+        },
+        {
+          "path": "docs/images/desktop-workshop.png",
+          "size": 148564,
+          "mode": 420
+        },
+        {
+          "path": "docs/images/mobile-overview.png",
+          "size": 62078,
+          "mode": 420
+        },
+        {
+          "path": "docs/images/mobile-table.png",
+          "size": 52866,
+          "mode": 420
+        },
+        {
+          "path": "docs/RECEIVING.md",
+          "size": 5430,
+          "mode": 420
+        },
+        {
+          "path": "docs/RECOVERY.json",
+          "size": 5311,
+          "mode": 420
+        },
+        {
+          "path": "docs/RESEARCH.md",
+          "size": 4000,
+          "mode": 420
+        },
+        {
+          "path": "index.html",
+          "size": 659,
+          "mode": 420
+        },
+        {
+          "path": "package.json",
+          "size": 753,
+          "mode": 420
+        },
+        {
+          "path": "scripts/browser-driver.mjs",
+          "size": 10357,
+          "mode": 420
+        },
+        {
+          "path": "scripts/browser-initial.mjs",
+          "size": 2032,
+          "mode": 420
+        },
+        {
+          "path": "scripts/browser-receive.mjs",
+          "size": 14291,
+          "mode": 420
+        },
+        {
+          "path": "scripts/model-development.mjs",
+          "size": 1685,
+          "mode": 420
+        },
+        {
+          "path": "scripts/pack-import-browser.mjs",
+          "size": 14230,
+          "mode": 420
+        },
+        {
+          "path": "scripts/receive-package.py",
+          "size": 5040,
+          "mode": 420
+        },
+        {
+          "path": "scripts/write-ruleset-pins.mjs",
+          "size": 1604,
+          "mode": 420
+        },
+        {
+          "path": "server.mjs",
+          "size": 2166,
+          "mode": 420
+        },
+        {
+          "path": "src/adaptations.js",
+          "size": 7844,
+          "mode": 420
+        },
+        {
+          "path": "src/app.js",
+          "size": 24751,
+          "mode": 420
+        },
+        {
+          "path": "src/catalog-data.js",
+          "size": 7114,
+          "mode": 420
+        },
+        {
+          "path": "src/catalog.js",
+          "size": 588,
+          "mode": 420
+        },
+        {
+          "path": "src/designer-fixtures.js",
+          "size": 1577,
+          "mode": 420
+        },
+        {
+          "path": "src/games.js",
+          "size": 5347,
+          "mode": 420
+        },
+        {
+          "path": "src/model-experiment.js",
+          "size": 10561,
+          "mode": 420
+        },
+        {
+          "path": "src/model-proposal.js",
+          "size": 4524,
+          "mode": 420
+        },
+        {
+          "path": "src/pack.js",
+          "size": 2433,
+          "mode": 420
+        },
+        {
+          "path": "src/ruleset-pins.js",
+          "size": 811,
+          "mode": 420
+        },
+        {
+          "path": "styles.css",
+          "size": 14539,
+          "mode": 420
+        },
+        {
+          "path": "tests/action-meaning-invariant.test.mjs",
+          "size": 5364,
+          "mode": 420
+        },
+        {
+          "path": "tests/adaptations.test.mjs",
+          "size": 5457,
+          "mode": 420
+        },
+        {
+          "path": "tests/designer-fixtures.test.mjs",
+          "size": 1580,
+          "mode": 420
+        },
+        {
+          "path": "tests/games.test.mjs",
+          "size": 5722,
+          "mode": 420
+        },
+        {
+          "path": "tests/model-proposal.test.mjs",
+          "size": 3951,
+          "mode": 420
+        },
+        {
+          "path": "tests/pack.test.mjs",
+          "size": 2022,
+          "mode": 420
+        },
+        {
+          "path": "tests/server.test.mjs",
+          "size": 1564,
+          "mode": 420
+        }
+      ],
+      "entryCount": 42,
+      "bundled": []
+    },
+    "archive_sha256": "b8d888d6ed6f7a0caacfe93feea41264b560dba100e31e55abee7c466ad56f3f",
+    "file_hashes": {
+      "index.html": "e80987988e59cf9a259515e6dc5045ca6efb7f3eae8fd6b8e4dbe7fbfa96fb0a",
+      "styles.css": "dc519d490a61ec54d70a885e7cf35f92c214afe5d5c646723e0582c26ec8568f",
+      "server.mjs": "0e114b5df22be42b2c1ea701bbbc6d394b4fe4290e90a6fb4330dfa22b581bcf",
+      "src/app.js": "cdb6a4db2f0b254c440ce46d9f71fd80141657c11d64ea22aefa7d10b03fffcd",
+      "src/ruleset-pins.js": "27d7d74f5b92e87fbfe67bc825814da2f5eb1975936f76cfcdf5a905ba8438ad",
+      "scripts/pack-import-browser.mjs": "49a6f8701c7797944d3271cb9ba38d04f31bbc229f3448b6ca073f0384e61927",
+      "scripts/browser-receive.mjs": "dc642decaf26f4181dec40c9d080d8921a70853c62008fd8e823b39d6f7e0f3d",
+      "scripts/browser-driver.mjs": "78b986b3d4cb459f51d680b12db4025110c0fc0cc95040f7f1880b314a6208b2"
+    },
+    "runs": [
+      {
+        "name": "existing-browser",
+        "command": [
+          "node",
+          "scripts/browser-receive.mjs"
+        ],
+        "exit_code": 0
+      },
+      {
+        "name": "pack-import",
+        "command": [
+          "node",
+          "scripts/pack-import-browser.mjs"
+        ],
+        "exit_code": 0
+      }
+    ],
+    "server_stopped": true,
+    "native_source_summary": [
+      "# tests 48",
+      "# pass 48",
+      "# fail 0"
+    ],
+    "browser_receipts": [
+      {
+        "receipt_file": "/tmp/estate-90d252-20261027/open-table-package-01/existing-browser/receipt.json",
+        "receipt": {
+          "checks": [
+            "Real HTTP entry point, selected ARIA states and visible active choice",
+            "Beacon mouse and keyboard play reaches exact seven and stops",
+            "Scanning changes selection without moving; explicit confirmation moves once",
+            "Held/repeated Enter cannot reveal the next private hand; a fresh press can",
+            "Space confirmation leaves the next hand covered",
+            "Waiting observer DOM is identical for two different pending opponent choices",
+            "Equal-stakes Pocket win and draw work through actual controls",
+            "Actual UI download contains only a pinned adaptation selection",
+            "Actual file-input reopen reruns the checker and covers private cards",
+            "Tampered pack is rejected without changing the current selection",
+            "Designer leak witness stays separate from live play and cannot activate",
+            "Proposal review is grounded, text-only, and invalidated by editing",
+            "Complete good workshop check activates only an approved pack",
+            "Narrow layouts stay within viewport and retain usable controls",
+            "No runtime exceptions or non-loopback page requests"
+          ],
+          "screenshots": [
+            "/tmp/estate-90d252-20261027/open-table-package-01/existing-browser/desktop-table.png",
+            "/tmp/estate-90d252-20261027/open-table-package-01/existing-browser/desktop-workshop.png",
+            "/tmp/estate-90d252-20261027/open-table-package-01/existing-browser/mobile-overview.png",
+            "/tmp/estate-90d252-20261027/open-table-package-01/existing-browser/mobile-table.png"
+          ],
+          "startedAt": "2026-10-27T07:56:49.435Z",
+          "packPath": "/tmp/estate-90d252-20261027/open-table-package-01/existing-browser/downloads/pocket-signals-shape-text.open-table.json",
+          "ok": true,
+          "finishedAt": "2026-10-27T07:56:54.299Z",
+          "browserErrors": []
+        }
+      },
+      {
+        "receipt_file": "/tmp/estate-90d252-20261027/open-table-package-01/pack-import/pack-import-receipt.json",
+        "receipt": {
+          "suite": "pack-import-browser",
+          "startedAt": "2026-10-27T07:56:54.434Z",
+          "cases": [
+            {
+              "name": "current valid import changes observable pack state",
+              "passed": true
+            },
+            {
+              "name": "current malformed import reports rejection and preserves game",
+              "passed": true
+            },
+            {
+              "name": "slow A cannot replace faster newer B",
+              "passed": true
+            },
+            {
+              "name": "slow valid A cannot replace latest rejected import",
+              "passed": true
+            },
+            {
+              "name": "explicit pack choice supersedes pending import",
+              "passed": true
+            },
+            {
+              "name": "explicit game choice supersedes pending import",
+              "passed": true
+            },
+            {
+              "name": "actual legal turn supersedes pending import",
+              "passed": true
+            },
+            {
+              "name": "private handoff and intended reveal survive stale completion",
+              "passed": true
+            },
+            {
+              "name": "Save pack render preserves current pending import",
+              "passed": true
+            },
+            {
+              "name": "no-file early return after DOM input clear preserves pending import",
+              "passed": true
+            },
+            {
+              "name": "private reveal alone supersedes pending import",
+              "passed": true
+            },
+            {
+              "name": "stale read rejection cannot overwrite newer success",
+              "passed": true
+            },
+            {
+              "name": "automatic same-root replacement ignores stale success and rejection",
+              "passed": true
+            },
+            {
+              "name": "destroy/remount ignores stale success",
+              "passed": true
+            },
+            {
+              "name": "destroy/remount ignores stale rejection",
+              "passed": true
+            },
+            {
+              "name": "obsolete destroy handle cannot clear newer mount",
+              "passed": true
+            }
+          ],
+          "url": "http://127.0.0.1:44365",
+          "browserErrors": [],
+          "finishedAt": "2026-10-27T07:56:58.061Z",
+          "passed": true
+        }
+      }
+    ],
+    "launch": "npm start with PORT=0 from fresh extracted package",
+    "qualification_scope": "Runtime qualification archive from the original qualification base plus the app/pins/test delta. The later integration-base change is three preserved documentation files; this archive is not claimed as the final merged delivery."
+  },
+  "owner_compatibility": {
+    "original_owner": "hamon-76408-20261027",
+    "owner_base": "0043e7d5c7a0e8f92cbc2ba1819ed27fcbc096e5",
+    "candidate_source_sha256": "bf68b2642c09a7e7f18fa00f89ad1b0cc1e963982b0caefe07a55b9e1d598a99",
+    "scope": "Isolated compatibility only. The original owner checkout was untouched. This base lacks maintained PR1; these results do not claim maintained integration or adoption of owner work.",
+    "baseline": {
+      "failed": 2,
+      "passed": 2
+    },
+    "candidate": {
+      "native_exit": 0,
+      "existing_browser_checks": 15,
+      "focused_browser_cases": 16,
+      "composition_cases": 4,
+      "owner_continuous_checks": 5,
+      "all_passed": true
+    },
+    "continuous_receipt": {
+      "schema": "open-table.continuous-receiving.v1",
+      "startedAt": "2026-10-27T07:58:08.276Z",
+      "sourceSha256": "bf68b2642c09a7e7f18fa00f89ad1b0cc1e963982b0caefe07a55b9e1d598a99",
+      "checks": [
+        "Start and successive Beacon confirmations each require a fresh Enter press",
+        "Pocket pauses under its curtain; Reveal resumes without committing on the held key",
+        "Pause persists across speed changes, private turns and a harmless rerender",
+        "Workshop, mode changes and pack reopen cancel scanning and cover private choices",
+        "Speed replaces one timer; finish and Space activation preserve deliberate boundaries"
+      ],
+      "observations": [
+        {
+          "check": "Start and successive Beacon confirmations each require a fresh Enter press",
+          "state": {
+            "position": "Shared path, marker at 2",
+            "focus": "confirm-choice",
+            "covered": false,
+            "privateVisible": false,
+            "hand": [],
+            "choice": "Confirm: Choice 2: Advance 2",
+            "toggle": "true",
+            "result": null,
+            "rounds": "",
+            "live": "Marker at 2. Player 1 to move.",
+            "timers": [
+              {
+                "delay": 1400,
+                "ticks": 1,
+                "ageMs": 1608.7000000029802
+              }
+            ],
+            "maxTimers": 1,
+            "starts": 3
+          }
+        },
+        {
+          "check": "Pocket pauses under its curtain; Reveal resumes without committing on the held key",
+          "state": {
+            "position": null,
+            "focus": "reveal-hand",
+            "covered": true,
+            "privateVisible": false,
+            "hand": [],
+            "choice": null,
+            "toggle": null,
+            "result": null,
+            "rounds": "Round 1: P1 played 2 · P2 played 1",
+            "live": "Both cards revealed. Round 1 is complete. Pass to Player 1.",
+            "timers": [],
+            "maxTimers": 1,
+            "starts": 5
+          }
+        },
+        {
+          "check": "Pause persists across speed changes, private turns and a harmless rerender",
+          "state": {
+            "position": null,
+            "focus": "confirm-choice",
+            "covered": false,
+            "privateVisible": true,
+            "hand": [
+              "Card 1, circle",
+              "Card 3, square"
+            ],
+            "choice": "Confirm: Choice 1: Commit 1",
+            "toggle": "true",
+            "result": null,
+            "rounds": "",
+            "live": "Adaptation pack saved.",
+            "timers": [
+              {
+                "delay": 1400,
+                "ticks": 0,
+                "ageMs": 1
+              }
+            ],
+            "maxTimers": 1,
+            "starts": 7
+          }
+        },
+        {
+          "check": "Workshop, mode changes and pack reopen cancel scanning and cover private choices",
+          "state": {
+            "position": null,
+            "focus": "private-title",
+            "covered": false,
+            "privateVisible": true,
+            "hand": [
+              "Card 2, triangle",
+              "Card 4, diamond"
+            ],
+            "choice": "Confirm: Choice 1: Commit 2",
+            "toggle": "false",
+            "result": null,
+            "rounds": "",
+            "live": "Adaptation pack reopened. Private cards are covered.",
+            "timers": [],
+            "maxTimers": 1,
+            "starts": 10
+          }
+        },
+        {
+          "check": "Speed replaces one timer; finish and Space activation preserve deliberate boundaries",
+          "state": {
+            "position": "Shared path, marker at 2",
+            "focus": "toggle-scan",
+            "covered": false,
+            "privateVisible": false,
+            "hand": [],
+            "choice": "Confirm: Choice 1: Advance 1",
+            "toggle": "false",
+            "result": null,
+            "rounds": "",
+            "live": "Marker at 2. Player 1 to move.",
+            "timers": [],
+            "maxTimers": 1,
+            "starts": 15
+          }
+        }
+      ],
+      "ok": true,
+      "finishedAt": "2026-10-27T07:58:20.429Z",
+      "browserErrors": []
+    },
+    "candidate_metadata_note": "The four-case receiver's candidateCommit field records the owner base; the working-tree delta is separately bound by candidate_source_sha256 and the retained patch.",
+    "artifacts": "/tmp/estate-90d252-20261027/open-table-composed-01",
+    "picker": {
+      "mode": "CDP Page.setInterceptFileChooserDialog",
+      "commandAccepted": true,
+      "limitation": "No confirmed driver event-subscription API was supplied; fileChooserOpened is not independently observed. Connected replacement-input click is asserted. No file selection is supplied after interception."
+    }
+  },
+  "independent_review": {
+    "implementation_review": "Reviewed exact app delta; no blocking findings.",
+    "product_verification": "Authored focused receiver; independently assessed source semantics and control correction; no blocking findings.",
+    "recovery_review": "Reviewed owner composition and native original-ID recovery contract.",
+    "execution": "All product builds and browser/native runs executed by the retained lead through Renpo; reviewers used brokered source and receipts."
+  },
+  "recovery": {
+    "package_original_operation": "estate-90d252-ot-package-start-01",
+    "package_original_command": "estate-90d252-ot-package-01",
+    "original_owner": "node-72e09d180ec675855992b3cbfb59e9e8",
+    "original_result": "Recovered with identical owner/incarnation/generation/operation/command/arguments via original broker under the documented idempotent native contract. Terminal exit1 occurred after npm pack succeeded because the receiving wrapper expected one JSON document; prepack and npm each emitted JSON.",
+    "resume_command": "estate-90d252-ot-package-resume-02",
+    "resume_result": "Resumed from existing archive after verifying its npm SHA1 and SHA512 integrity. No second package generation; actual npm-start and both browser suites passed; owned server stopped.",
+    "original_incarnation": "6d623deaac81c47d8d70cb4e706c2457",
+    "original_generation": 2,
+    "original_request_sha256": "d288a5d57e97edf059056ec563abf47d4209043cd52396058c25b97f7830549d",
+    "resume_request_sha256": "45494716714147bd75504b39e821f4b59a98af3a3db6383f3f1cb4427a24b5a1",
+    "unresolved_reads": [
+      {
+        "owner": "node-72e09d180ec675855992b3cbfb59e9e8",
+        "operation_id": "estate-90d252-package-journal-read-start-03",
+        "tool": "mcp_local-host__command_start_0d2c33c0ad37060f",
+        "command_id": "estate-90d252-package-journal-read-03",
+        "state": "Unresolved read-only diagnostic after routing failures; no package effect outstanding. Not required for the independently received native recovery contract."
+      },
+      {
+        "owner": "node-2b8c9803b6069b758adef320e07b48ed",
+        "operation_id": "estate-90d252-recovery-board-body-01",
+        "tool": "mcp_connected_apps__app_github_fetch_issue_070efc24dfaf5637",
+        "state": "Read-only issue1354 request interrupted after prolonged stall without a provider receipt. No replay or failure inferred."
+      },
+      {
+        "owner": "node-2b8c9803b6069b758adef320e07b48ed",
+        "operation_id": "estate-90d252-pv-open-table-repo-01",
+        "tool": "mcp_connected_apps__app_github_get_repo_091fb43a97bc6387",
+        "state": "Read-only repository metadata request interrupted after prolonged stall without a provider receipt. No replay or failure inferred."
+      }
+    ]
+  }
+}
