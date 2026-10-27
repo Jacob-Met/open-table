@@ -37,7 +37,7 @@ try:
     target.parent.mkdir(parents=True,exist_ok=True)
     with tar.extractfile(member) as stream:target.write_bytes(stream.read())
  package=dest/'package'
- required=['index.html','styles.css','server.mjs','src/app.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/browser-focus.mjs','scripts/pack-import-browser.mjs','tests/server.test.mjs']
+ required=['index.html','styles.css','server.mjs','src/app.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/browser-focus.mjs','scripts/pack-import-browser.mjs','scripts/continuous-receive.mjs','scripts/continuous-boundary-receive.mjs','tests/server.test.mjs']
  for path in required:assert (package/path).is_file(),path
  for forbidden in ['receiving','node_modules','.env','.git']:assert not (package/forbidden).exists(),forbidden
  test=run(['npm','test'],cwd=package)
@@ -78,6 +78,25 @@ try:
  pack_import_receipt=json.loads((out/'pack-import/pack-import-receipt.json').read_text())
  assert pack_import_receipt['passed'] is True
  receipt['pack_import']={'exit_code':pack_import.returncode,'passed':True,'checks':[case['name'] for case in pack_import_receipt['cases']]}
+ app_sha256=hashlib.sha256((package/'src/app.js').read_bytes()).hexdigest()
+ continuous=run(['node','scripts/continuous-receive.mjs'],cwd=package,env=dict(os.environ,OPEN_TABLE_RECEIVING_URL=url,OPEN_TABLE_CONTINUOUS_DIR=str(out/'continuous')),timeout=90)
+ (out/'package-continuous.log').write_text(continuous.stdout+continuous.stderr)
+ assert continuous.returncode==0,continuous.stdout+continuous.stderr
+ continuous_receipt=json.loads((out/'continuous/receipt.json').read_text())
+ assert continuous_receipt['schema']=='open-table.continuous-receiving.v1'
+ assert continuous_receipt['ok'] is True and len(continuous_receipt['checks'])==5
+ assert continuous_receipt['browserErrors']==[]
+ assert continuous_receipt['sourceSha256']==app_sha256,'Continuous course source differs from extracted app'
+ receipt['continuous']={'exit_code':continuous.returncode,'schema':continuous_receipt['schema'],'ok':True,'checks':continuous_receipt['checks'],'errors':continuous_receipt['browserErrors'],'sourceSha256':continuous_receipt['sourceSha256'],'packageAppSha256':app_sha256,'source_hash_agreement':True}
+ boundary=run(['node','scripts/continuous-boundary-receive.mjs'],cwd=package,env=dict(os.environ,OPEN_TABLE_RECEIVING_URL=url,OPEN_TABLE_BOUNDARY_DIR=str(out/'continuous-boundary')),timeout=90)
+ (out/'package-continuous-boundary.log').write_text(boundary.stdout+boundary.stderr)
+ assert boundary.returncode==0,boundary.stdout+boundary.stderr
+ boundary_receipt=json.loads((out/'continuous-boundary/receipt.json').read_text())
+ assert boundary_receipt['suite']=='continuous-boundary' and boundary_receipt['pass'] is True
+ assert [course['name'] for course in boundary_receipt['courses']]==['key-release','obsolete-timer','transcript-parity']
+ assert all(course['pass'] is True for course in boundary_receipt['courses']) and boundary_receipt['browserErrors']==[]
+ assert boundary_receipt['appSHA256']==boundary_receipt['servedAppSHA256']==app_sha256,'Boundary course or served source differs from extracted app'
+ receipt['continuous_boundary']={'exit_code':boundary.returncode,'suite':boundary_receipt['suite'],'pass':True,'courses':[course['name'] for course in boundary_receipt['courses']],'errors':boundary_receipt['browserErrors'],'appSHA256':boundary_receipt['appSHA256'],'servedAppSHA256':boundary_receipt['servedAppSHA256'],'packageAppSha256':app_sha256,'source_hash_agreement':True}
  os.killpg(server.pid,signal.SIGTERM);server.wait(timeout=10);server=None
  game=package/'src/games.js';original=game.read_bytes()
  try:

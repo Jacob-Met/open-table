@@ -2,3 +2,4 @@ node_modules/
 receiving/
 *.tgz
 .env
+!release-artifacts/*.tgz

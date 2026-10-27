@@ -1,0 +1,78 @@
+{
+  "schema": "open-table.continuous-receiving.v1",
+  "startedAt": "2026-10-27T01:52:17.607Z",
+  "sourceSha256": "c9de4481d435238a16dcbcbb30fa18e3f47e86e9019a64bd92cb5b6afd8794d2",
+  "checks": [
+    "Start and successive Beacon confirmations each require a fresh Enter press",
+    "Pocket pauses under its curtain; Reveal resumes without committing on the held key"
+  ],
+  "observations": [
+    {
+      "check": "Start and successive Beacon confirmations each require a fresh Enter press",
+      "state": {
+        "position": "Shared path, marker at 2",
+        "focus": "confirm-choice",
+        "covered": false,
+        "privateVisible": false,
+        "hand": [],
+        "choice": "Confirm: Choice 2: Advance 2",
+        "toggle": "true",
+        "result": null,
+        "rounds": "",
+        "live": "Marker at 2. Player 1 to move.",
+        "timers": [
+          {
+            "delay": 1400,
+            "ticks": 1,
+            "ageMs": 1614.7999999970198
+          }
+        ],
+        "maxTimers": 1,
+        "starts": 3
+      }
+    },
+    {
+      "check": "Pocket pauses under its curtain; Reveal resumes without committing on the held key",
+      "state": {
+        "position": null,
+        "focus": "reveal-hand",
+        "covered": true,
+        "privateVisible": false,
+        "hand": [],
+        "choice": null,
+        "toggle": null,
+        "result": null,
+        "rounds": "Round 1: P1 played 2 · P2 played 1",
+        "live": "Both cards revealed. Round 1 is complete. Pass to Player 1.",
+        "timers": [],
+        "maxTimers": 1,
+        "starts": 5
+      }
+    }
+  ],
+  "ok": false,
+  "failure": {
+    "message": "The input did not match the regular expression /Commit card 2/. Input:\n\n'Confirm: Choice 1: Commit 2'\n",
+    "stack": "AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Commit card 2/. Input:\n\n'Confirm: Choice 1: Commit 2'\n\n    at file:///home/ubuntu/hamon-work/hamon-76408-20261027/open-table/scripts/continuous-receive.mjs:78:66\n    at async check (file:///home/ubuntu/hamon-work/hamon-76408-20261027/open-table/scripts/continuous-receive.mjs:28:32)\n    at async file:///home/ubuntu/hamon-work/hamon-76408-20261027/open-table/scripts/continuous-receive.mjs:76:2"
+  },
+  "lastState": {
+    "position": null,
+    "focus": "scan-speed",
+    "covered": false,
+    "privateVisible": true,
+    "hand": [
+      "Card 2, triangle",
+      "Card 4, diamond"
+    ],
+    "choice": "Confirm: Choice 1: Commit 2",
+    "toggle": "false",
+    "result": null,
+    "rounds": "",
+    "live": "Access pack changed. Private cards are covered.",
+    "timers": [],
+    "maxTimers": 1,
+    "starts": 6
+  },
+  "finishedAt": "2026-10-27T01:52:26.066Z",
+  "browserErrors": []
+}
