@@ -272,7 +272,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
    el('footer',{class:'footer'},el('p',{},'OPEN TABLE / An original, private prototype. Rule equivalence is checked for these finite games; accessibility and enjoyment need playtesting with people.'),
     el('p',{},'A place for every player.')));
   content.replaceChildren(page);
-  if(focusId)content.querySelector('#'+focusId)?.focus({preventScroll:true});
+  if(focusId)content.querySelector('#'+focusId)?.focus();
  }
  mounted.set(root,stopScan);render();
  return {destroy(){stopScan();mounted.delete(root);root.replaceChildren();}};
