@@ -3,6 +3,7 @@
 import json,os,subprocess,tarfile,tempfile,hashlib,time,select,signal,re
 from pathlib import Path
 root=Path(__file__).resolve().parents[1]
+(root/'receiving').mkdir(parents=True,exist_ok=True)
 out=Path(tempfile.mkdtemp(prefix='package-',dir=root/'receiving'))
 receipt={'started_at':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'output':str(out)}
 def run(args,cwd=root,env=None,timeout=90):
