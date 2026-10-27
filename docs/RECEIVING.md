@@ -52,7 +52,7 @@ The [qualified archive](../release-artifacts/open-table-0.1.0-af04f2b.tgz) is re
 
 The four development baseline proposals validated and selected all required component targets. Two omitted required grounding references: beacon.rule.win and pocket.rule.reveal. This was recorded as incomplete grounding, despite all selected fixed adapters passing their finite checker. No reserved case or model request was executed.
 
-## Continuous scanning — 0.2.0 candidate
+## Continuous scanning — 0.2.0
 
 The observed starting limitation was that scanning stopped after each move, forcing repeated setup. A second real keyboard defect was reproduced on published application SHA-256 691604387eea9a2895a4de34db6ffc05df7a4ba0d2b895767970458d80aa6c63: Enter on Start moved focus to Confirm; a repeated keydown immediately advanced the marker from 0 to 1. See `docs/evidence/continuous-start-baseline.json`.
 
@@ -64,4 +64,4 @@ The first focused course stopped on an incorrect receiver expectation: the adapt
 
 The lead reviewed the rendered scanning state in `docs/images/continuous-beacon.png`: selected choice, focused Confirm, Pause, speed, and guidance are visible. The independent retained reviewers assessed the source delta and receiving evidence. These checks do not replace physical-switch or screen-reader receiving with people.
 
-Clean-package and published-head receiving for this increment remain pending at this source checkpoint.
+Frozen source e70766598475b3dbbc273d0129dff3d2aadd5ad7 produced a 47-file, 628,888-byte archive with SHA-256 d0f61dca9ab8009bb284e5e9e72c944c75f0a9a1299b800fdc966c6905260aeb. Its separate extraction passed 42 native/HTTP tests, all 15 existing browser scenarios and the five new continuous-scan courses through its own npm start. The stale-source startup negative still refused to listen. Exact receipt: docs/evidence/package-continuous.json. Both retained reviewers found no blocking issue in the relayed source delta; the lead executed the checks. Native Space confirms on release; Enter activates on keydown. This evidence/archive update changes no runtime, scripts, tests, or package configuration from the qualified source. Private source integration is the next step.

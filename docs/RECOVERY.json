@@ -117,7 +117,7 @@
     "No competition submission without required owner review",
     "Existing #2/#10/#27 and PR26 fleet/global rollout holds preserved"
   ],
-  "nextUsefulAdvance": "Qualify and integrate the continuous-scan package; prepare the bounded model request runner while the established #1630 owner qualifies the existing NVIDIA/Nebius route.",
+  "nextUsefulAdvance": "Integrate the qualified continuous-scan source; advance the bounded model-request runner and designer fixture review while existing #1630 account-route dependency remains.",
   "currentIncrement": {
     "name": "continuous scan across turns",
     "branch": "feat/continuous-turn-scan",
@@ -125,14 +125,18 @@
     "nativeTests": 42,
     "browserRegressionScenarios": 15,
     "focusedBrowserCourses": 5,
-    "packageReceiving": "pending",
-    "published": "pending",
+    "packageReceiving": "passed: 42 native/HTTP, 15 general browser, 5 continuous browser, stale-source refusal",
+    "published": "pending normal PR integration",
     "operations": {
       "baseline": "hamon-76408-20261027-open-table-continuous-baseline-01",
       "patch": "hamon-76408-20261027-continuous-app-patch-01",
       "focused": "hamon-76408-20261027-continuous-browser-02",
       "regression": "hamon-76408-20261027-continuous-regression-01",
       "native": "hamon-76408-20261027-continuous-native-01"
-    }
+    },
+    "sourceCommit": "e70766598475b3dbbc273d0129dff3d2aadd5ad7",
+    "archiveSha256": "d0f61dca9ab8009bb284e5e9e72c944c75f0a9a1299b800fdc966c6905260aeb",
+    "archive": "release-artifacts/open-table-0.2.0-e707665.tgz",
+    "packageOperation": "hamon-76408-20261027-continuous-frozen-package-01"
   }
 }
