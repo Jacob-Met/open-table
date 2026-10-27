@@ -37,7 +37,7 @@ try:
     target.parent.mkdir(parents=True,exist_ok=True)
     with tar.extractfile(member) as stream:target.write_bytes(stream.read())
  package=dest/'package'
- required=['index.html','styles.css','server.mjs','src/app.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/browser-focus.mjs','tests/server.test.mjs']
+ required=['index.html','styles.css','server.mjs','src/app.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/browser-focus.mjs','scripts/pack-import-browser.mjs','tests/server.test.mjs']
  for path in required:assert (package/path).is_file(),path
  for forbidden in ['receiving','node_modules','.env','.git']:assert not (package/forbidden).exists(),forbidden
  test=run(['npm','test'],cwd=package)
@@ -71,6 +71,13 @@ try:
  focus_receipt=json.loads((out/'focus/receipt.json').read_text())
  assert focus_receipt['passed'] is True
  receipt['focus']={'exit_code':focus.returncode,'passed':True,'checks':[check['name'] for check in focus_receipt['checks']]}
+ env=dict(os.environ,OPEN_TABLE_RECEIVING_URL=url,OPEN_TABLE_RECEIVING_DIR=str(out/'pack-import'))
+ pack_import=run(['node','scripts/pack-import-browser.mjs'],cwd=package,env=env,timeout=90)
+ (out/'package-pack-import.log').write_text(pack_import.stdout+pack_import.stderr)
+ assert pack_import.returncode==0,pack_import.stdout+pack_import.stderr
+ pack_import_receipt=json.loads((out/'pack-import/pack-import-receipt.json').read_text())
+ assert pack_import_receipt['passed'] is True
+ receipt['pack_import']={'exit_code':pack_import.returncode,'passed':True,'checks':[case['name'] for case in pack_import_receipt['cases']]}
  os.killpg(server.pid,signal.SIGTERM);server.wait(timeout=10);server=None
  game=package/'src/games.js';original=game.read_bytes()
  try:

@@ -39,6 +39,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
  if(state.game!==gameId)throw new Error('Fixture game mismatch');
  outcome(state);
  let screen='play',mode='shape-text',seat=null,status='',statusError=false;
+ let alive=true,importGeneration=0;
  let scanIndex=0,scanTimer=null,scanDelay=1400,labMode=null,labResult=null,proposalText='',proposal=null,proposalError='';
  const checks=new Map(),content=el('div'),live=el('div',{class:'visually-hidden',role:'status','aria-live':'polite','aria-atomic':'true','data-testid':'public-live'});
  root.replaceChildren(content,live);
@@ -56,7 +57,10 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
   if(!check.ok||!check.complete||check.verdict!=='equivalent')throw new Error('This adaptation has not passed the complete rule check.');
   return check;
  }
- function cover(){stopScan();seat=null;scanIndex=0;}
+ function cover({invalidatePendingImport=true}={}){
+  if(invalidatePendingImport)importGeneration++;
+  stopScan();seat=null;scanIndex=0;
+ }
  function reset(id=selectedGame){
   cover();selectedGame=id;state=fresh(id);labMode=null;labResult=null;proposal=null;proposalError='';proposalText='';
   notify('New game ready.');render(id==='pocket-signals'?'reveal-hand':'table-title');announce('New '+GAMES[id].title+' game ready.');
@@ -91,15 +95,20 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
  function packPanel(){
   const input=el('input',{type:'file',accept:'.json,application/json',class:'visually-hidden',id:'pack-file','aria-label':'Open an adaptation pack'});
   input.addEventListener('change',async()=>{
+   if(!alive)return;
    const file=input.files?.[0];if(!file)return;
+   const generation=++importGeneration;
+   const isCurrent=()=>alive&&generation===importGeneration;
    try{
     if(file.size>65536)throw new Error('Pack is too large.');
-    const received=importPack(await file.text());
-    cover();if(received.gameId!==selectedGame){selectedGame=received.gameId;state=fresh(selectedGame);}
+    const text=await file.text();
+    if(!isCurrent())return;
+    const received=importPack(text);
+    cover({invalidatePendingImport:false});if(received.gameId!==selectedGame){selectedGame=received.gameId;state=fresh(selectedGame);}
     mode=received.adapter;checks.set(selectedGame+':'+mode,received.check);
     notify('Pack reopened and checked again against the current rules.');
     render(selectedGame==='pocket-signals'?'reveal-hand':'table-title');announce('Adaptation pack reopened. Private cards are covered.');
-   }catch(error){notify('Could not open pack: '+error.message,true);render('open-pack');}
+   }catch(error){if(!isCurrent())return;notify('Could not open pack: '+error.message,true);render('open-pack');}
   });
   return el('section',{class:'pack-panel','aria-labelledby':'pack-title'},
    el('p',{class:'eyebrow'},'MAKE ROOM AT THE TABLE'),el('h3',{id:'pack-title'},'Your access pack'),
@@ -130,7 +139,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
   if(seat!==v.turn)return el('div',{class:'table-surface','data-testid':'board'},title,rounds,
    el('div',{class:'curtain','data-testid':'handoff'},el('div',{class:'curtain-mark','aria-hidden':'true'},'◇ ◇'),
     el('h3',{},'Over to Player '+(v.turn+1)),el('p',{},'Pass the device. When the other player has looked away, uncover your own cards.'),
-    el('button',{id:'reveal-hand',onKeyDown:e=>{if(e.repeat&&(e.key==='Enter'||e.key===' '))e.preventDefault();},onClick:()=>{seat=v.turn;scanIndex=0;render('private-title');}},'I’m Player '+(v.turn+1)+' — show my hand')));
+    el('button',{id:'reveal-hand',onKeyDown:e=>{if(e.repeat&&(e.key==='Enter'||e.key===' '))e.preventDefault();},onClick:()=>{importGeneration++;seat=v.turn;scanIndex=0;render('private-title');}},'I’m Player '+(v.turn+1)+' — show my hand')));
   const ownView=createAdapter(mode).observe(state,seat);
   return el('div',{class:'table-surface','data-testid':'board'},title,rounds,
    el('p',{class:'private-label',id:'private-title',tabindex:'-1'},'Player '+(seat+1)+' · your private hand · round '+ownView.round),
@@ -259,6 +268,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
     el('button',{class:'negative',onClick:()=>{if(selectedGame!=='pocket-signals'){selectedGame='pocket-signals';state=fresh(selectedGame);proposal=null;proposalText='';}runLab('reveal-opponent');},'data-lab':'reveal-opponent'},'Negative control: leak a Pocket Signals hand')),
    labEvidence()),proposalPanel()));}
  function render(focusId){
+  if(!alive)return;
   stopScan();
   const page=el('div',{class:'shell'},el('header',{class:'topbar'},el('div',{class:'brand'},el('span',{class:'brand-mark','aria-hidden':'true'}),'OPEN TABLE'),
    el('span',{class:'top-note'},'Original games. Thoughtful adaptations.'),
@@ -274,7 +284,12 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
   content.replaceChildren(page);
   if(focusId)content.querySelector('#'+focusId)?.focus();
  }
- mounted.set(root,stopScan);render();
- return {destroy(){stopScan();mounted.delete(root);root.replaceChildren();}};
+ function dispose(){
+  if(!alive)return;
+  alive=false;importGeneration++;stopScan();
+  if(mounted.get(root)===dispose){mounted.delete(root);root.replaceChildren();}
+ }
+ mounted.set(root,dispose);render();
+ return {destroy:dispose};
 }
 if(document.getElementById('app'))mountApp(document.getElementById('app'));
