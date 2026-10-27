@@ -61,3 +61,7 @@ The retained [correction receiving record](https://github.com/Jacob-Met/hamon/is
 The same record reports a separate 41-file corrected package, 458,452 bytes, SHA-256 `57483832c771568dea09a5722ba6b428c0e2175fd75ef4e2106a006c20af120e`. Its independent extraction passed the same 48 checks and 15 browser scenarios through its own `npm start`. The first package receiving attempt had an overescaped URL regex; the application started correctly, that original harness failure was retained, and the corrected harness then passed. Adoption of this package as the maintained release artifact is not established by the current archive link.
 
 The separately qualified continuous-turn owner-stack counterpart is not part of PR #1. These existing receipts concern the exact correction tree and package; this documentation clarification adds no new runtime execution or broader product qualification.
+
+## Continuous-scan integration on current source
+
+The earlier owner-stack qualification above remains historical. The subsequent [continuous-scan integration note](CONTINUOUS_INTEGRATION.md) records its source lineage and the separate receiving needed for composition with the maintained import-intent, focus, and package behavior. Integration of source does not replace or requalify either historical release archive.

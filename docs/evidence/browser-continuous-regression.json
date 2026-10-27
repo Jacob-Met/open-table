@@ -1,0 +1,30 @@
+{
+  "checks": [
+    "Real HTTP entry point, selected ARIA states and visible active choice",
+    "Beacon mouse and keyboard play reaches exact seven and stops",
+    "Scanning changes selection without moving; explicit confirmation moves once",
+    "Held/repeated Enter cannot reveal the next private hand; a fresh press can",
+    "Space confirmation leaves the next hand covered",
+    "Waiting observer DOM is identical for two different pending opponent choices",
+    "Equal-stakes Pocket win and draw work through actual controls",
+    "Actual UI download contains only a pinned adaptation selection",
+    "Actual file-input reopen reruns the checker and covers private cards",
+    "Tampered pack is rejected without changing the current selection",
+    "Designer leak witness stays separate from live play and cannot activate",
+    "Proposal review is grounded, text-only, and invalidated by editing",
+    "Complete good workshop check activates only an approved pack",
+    "Narrow layouts stay within viewport and retain usable controls",
+    "No runtime exceptions or non-loopback page requests"
+  ],
+  "screenshots": [
+    "/home/ubuntu/hamon-work/hamon-76408-20261027/open-table/receiving/browser-continuous-regression-01/desktop-table.png",
+    "/home/ubuntu/hamon-work/hamon-76408-20261027/open-table/receiving/browser-continuous-regression-01/desktop-workshop.png",
+    "/home/ubuntu/hamon-work/hamon-76408-20261027/open-table/receiving/browser-continuous-regression-01/mobile-overview.png",
+    "/home/ubuntu/hamon-work/hamon-76408-20261027/open-table/receiving/browser-continuous-regression-01/mobile-table.png"
+  ],
+  "startedAt": "2026-10-27T01:52:42.868Z",
+  "packPath": "/home/ubuntu/hamon-work/hamon-76408-20261027/open-table/receiving/browser-continuous-regression-01/downloads/pocket-signals-shape-text.open-table.json",
+  "ok": true,
+  "finishedAt": "2026-10-27T01:52:48.019Z",
+  "browserErrors": []
+}

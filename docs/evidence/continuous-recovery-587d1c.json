@@ -1,0 +1,192 @@
+{
+  "schema": "open-table.recovery-receiving.v1",
+  "tree": "f69bf86f161d540464adfc47745c239d360fe830",
+  "started_at": "2026-10-27T07:58:20.663250+00:00",
+  "checks": [
+    {
+      "name": "native",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "exit_code": 0,
+      "log": "/home/ubuntu/hamon-work/estate-587d1c9027e7-20261027/receiving/base-01/native.log"
+    },
+    {
+      "name": "browser-general",
+      "command": [
+        "node",
+        "scripts/browser-receive.mjs"
+      ],
+      "exit_code": 0,
+      "log": "/home/ubuntu/hamon-work/estate-587d1c9027e7-20261027/receiving/base-01/browser-general.log",
+      "browser_receipt": {
+        "checks": [
+          "Real HTTP entry point, selected ARIA states and visible active choice",
+          "Beacon mouse and keyboard play reaches exact seven and stops",
+          "Scanning changes selection without moving; explicit confirmation moves once",
+          "Held/repeated Enter cannot reveal the next private hand; a fresh press can",
+          "Space confirmation leaves the next hand covered",
+          "Waiting observer DOM is identical for two different pending opponent choices",
+          "Equal-stakes Pocket win and draw work through actual controls",
+          "Actual UI download contains only a pinned adaptation selection",
+          "Actual file-input reopen reruns the checker and covers private cards",
+          "Tampered pack is rejected without changing the current selection",
+          "Designer leak witness stays separate from live play and cannot activate",
+          "Proposal review is grounded, text-only, and invalidated by editing",
+          "Complete good workshop check activates only an approved pack",
+          "Narrow layouts stay within viewport and retain usable controls",
+          "No runtime exceptions or non-loopback page requests"
+        ],
+        "screenshots": [
+          "/home/ubuntu/hamon-work/estate-587d1c9027e7-20261027/receiving/base-01/browser-general/desktop-table.png",
+          "/home/ubuntu/hamon-work/estate-587d1c9027e7-20261027/receiving/base-01/browser-general/desktop-workshop.png",
+          "/home/ubuntu/hamon-work/estate-587d1c9027e7-20261027/receiving/base-01/browser-general/mobile-overview.png",
+          "/home/ubuntu/hamon-work/estate-587d1c9027e7-20261027/receiving/base-01/browser-general/mobile-table.png"
+        ],
+        "startedAt": "2026-10-27T07:58:21.392Z",
+        "packPath": "/home/ubuntu/hamon-work/estate-587d1c9027e7-20261027/receiving/base-01/browser-general/downloads/pocket-signals-shape-text.open-table.json",
+        "ok": true,
+        "finishedAt": "2026-10-27T07:58:25.445Z",
+        "browserErrors": []
+      }
+    },
+    {
+      "name": "browser-continuous",
+      "command": [
+        "node",
+        "scripts/continuous-receive.mjs"
+      ],
+      "exit_code": 0,
+      "log": "/home/ubuntu/hamon-work/estate-587d1c9027e7-20261027/receiving/base-01/browser-continuous.log",
+      "browser_receipt": {
+        "schema": "open-table.continuous-receiving.v1",
+        "startedAt": "2026-10-27T07:58:25.558Z",
+        "sourceSha256": "c9de4481d435238a16dcbcbb30fa18e3f47e86e9019a64bd92cb5b6afd8794d2",
+        "checks": [
+          "Start and successive Beacon confirmations each require a fresh Enter press",
+          "Pocket pauses under its curtain; Reveal resumes without committing on the held key",
+          "Pause persists across speed changes, private turns and a harmless rerender",
+          "Workshop, mode changes and pack reopen cancel scanning and cover private choices",
+          "Speed replaces one timer; finish and Space activation preserve deliberate boundaries"
+        ],
+        "observations": [
+          {
+            "check": "Start and successive Beacon confirmations each require a fresh Enter press",
+            "state": {
+              "position": "Shared path, marker at 2",
+              "focus": "confirm-choice",
+              "covered": false,
+              "privateVisible": false,
+              "hand": [],
+              "choice": "Confirm: Choice 2: Advance 2",
+              "toggle": "true",
+              "result": null,
+              "rounds": "",
+              "live": "Marker at 2. Player 1 to move.",
+              "timers": [
+                {
+                  "delay": 1400,
+                  "ticks": 1,
+                  "ageMs": 1603
+                }
+              ],
+              "maxTimers": 1,
+              "starts": 3
+            }
+          },
+          {
+            "check": "Pocket pauses under its curtain; Reveal resumes without committing on the held key",
+            "state": {
+              "position": null,
+              "focus": "reveal-hand",
+              "covered": true,
+              "privateVisible": false,
+              "hand": [],
+              "choice": null,
+              "toggle": null,
+              "result": null,
+              "rounds": "Round 1: P1 played 2 \u00b7 P2 played 1",
+              "live": "Both cards revealed. Round 1 is complete. Pass to Player 1.",
+              "timers": [],
+              "maxTimers": 1,
+              "starts": 5
+            }
+          },
+          {
+            "check": "Pause persists across speed changes, private turns and a harmless rerender",
+            "state": {
+              "position": null,
+              "focus": "confirm-choice",
+              "covered": false,
+              "privateVisible": true,
+              "hand": [
+                "Card 1, circle",
+                "Card 3, square"
+              ],
+              "choice": "Confirm: Choice 1: Commit 1",
+              "toggle": "true",
+              "result": null,
+              "rounds": "",
+              "live": "Adaptation pack saved.",
+              "timers": [
+                {
+                  "delay": 1400,
+                  "ticks": 0,
+                  "ageMs": 1.5
+                }
+              ],
+              "maxTimers": 1,
+              "starts": 7
+            }
+          },
+          {
+            "check": "Workshop, mode changes and pack reopen cancel scanning and cover private choices",
+            "state": {
+              "position": null,
+              "focus": "private-title",
+              "covered": false,
+              "privateVisible": true,
+              "hand": [
+                "Card 2, triangle",
+                "Card 4, diamond"
+              ],
+              "choice": "Confirm: Choice 1: Commit 2",
+              "toggle": "false",
+              "result": null,
+              "rounds": "",
+              "live": "Adaptation pack reopened. Private cards are covered.",
+              "timers": [],
+              "maxTimers": 1,
+              "starts": 10
+            }
+          },
+          {
+            "check": "Speed replaces one timer; finish and Space activation preserve deliberate boundaries",
+            "state": {
+              "position": "Shared path, marker at 2",
+              "focus": "toggle-scan",
+              "covered": false,
+              "privateVisible": false,
+              "hand": [],
+              "choice": "Confirm: Choice 1: Advance 1",
+              "toggle": "false",
+              "result": null,
+              "rounds": "",
+              "live": "Marker at 2. Player 1 to move.",
+              "timers": [],
+              "maxTimers": 1,
+              "starts": 15
+            }
+          }
+        ],
+        "ok": true,
+        "finishedAt": "2026-10-27T07:58:37.761Z",
+        "browserErrors": []
+      }
+    }
+  ],
+  "app_sha256": "c9de4481d435238a16dcbcbb30fa18e3f47e86e9019a64bd92cb5b6afd8794d2",
+  "ok": true,
+  "finished_at": "2026-10-27T07:58:37.880132+00:00"
+}

@@ -123,3 +123,11 @@ Use the event's video requirements and avoid exposing private coordination recor
 The accompanying README and receiving edits label the initial 42-test archive, record the already-merged correction's 48-check/15-browser qualification, and remove an obsolete future-tense receipt sentence. They preserve the historical package SHA, original failures, and the distinction between merged source and release-artifact adoption.
 
 This candidate changes documentation only. Runtime source, generated pins, tests, package configuration, product ownership, and submission/account state remain outside this content task.
+
+### 2026-10-27 — private Part B source-adoption addendum
+
+The earlier copy, version basis, screenshot inspection, and package identities above remain the original content task’s record. The later private source integration is documented separately in [CONTINUOUS_INTEGRATION.md](CONTINUOUS_INTEGRATION.md). It adds start-once scanning across turns, with scanning paused while a private hand is covered and resumed only after a fresh reveal activation. Confirmation remains deliberate; scanning alone does not commit a move.
+
+This addendum accompanies the source integration; its adoption and receiving identity must be read from that integration’s PR and receipt, rather than attributed to the older content task or its fixed historical archive. Part A and the earlier media qualification remain unchanged. The integration note identifies the separately received private archive for the new source; the older archives and their receipts retain their original identities. The existing product/model owner and the separate historical-archive demonstration scope remain intact.
+
+All submission-review, account, spending, security, public-source, license, model-runtime, judge-access, and event-readiness dependencies above remain unresolved by this source change. No entrant-facing publication, submission, account action, or event-readiness claim is made.

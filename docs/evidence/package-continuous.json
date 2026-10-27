@@ -1,0 +1,59 @@
+{
+  "started_at": "2026-10-27T01:55:28Z",
+  "output": "/home/ubuntu/hamon-work/hamon-76408-20261027/open-table/receiving/package-qfuicu30",
+  "source_commit": "e70766598475b3dbbc273d0129dff3d2aadd5ad7",
+  "archive": {
+    "path": "/home/ubuntu/hamon-work/hamon-76408-20261027/open-table/receiving/package-qfuicu30/open-table-0.2.0.tgz",
+    "sha256": "d0f61dca9ab8009bb284e5e9e72c944c75f0a9a1299b800fdc966c6905260aeb",
+    "size": 628888,
+    "file_count": 47
+  },
+  "native_tests": {
+    "exit_code": 0,
+    "passed": 42
+  },
+  "entrypoint": {
+    "command": "npm start",
+    "cwd": "/home/ubuntu/hamon-work/hamon-76408-20261027/open-table/receiving/package-qfuicu30/unpacked/package",
+    "url": "http://127.0.0.1:45027/"
+  },
+  "browser": {
+    "ok": true,
+    "checks": [
+      "Real HTTP entry point, selected ARIA states and visible active choice",
+      "Beacon mouse and keyboard play reaches exact seven and stops",
+      "Scanning changes selection without moving; explicit confirmation moves once",
+      "Held/repeated Enter cannot reveal the next private hand; a fresh press can",
+      "Space confirmation leaves the next hand covered",
+      "Waiting observer DOM is identical for two different pending opponent choices",
+      "Equal-stakes Pocket win and draw work through actual controls",
+      "Actual UI download contains only a pinned adaptation selection",
+      "Actual file-input reopen reruns the checker and covers private cards",
+      "Tampered pack is rejected without changing the current selection",
+      "Designer leak witness stays separate from live play and cannot activate",
+      "Proposal review is grounded, text-only, and invalidated by editing",
+      "Complete good workshop check activates only an approved pack",
+      "Narrow layouts stay within viewport and retain usable controls",
+      "No runtime exceptions or non-loopback page requests"
+    ],
+    "errors": []
+  },
+  "continuous": {
+    "ok": true,
+    "checks": [
+      "Start and successive Beacon confirmations each require a fresh Enter press",
+      "Pocket pauses under its curtain; Reveal resumes without committing on the held key",
+      "Pause persists across speed changes, private turns and a harmless rerender",
+      "Workshop, mode changes and pack reopen cancel scanning and cover private choices",
+      "Speed replaces one timer; finish and Space activation preserve deliberate boundaries"
+    ],
+    "errors": [],
+    "sourceSha256": "c9de4481d435238a16dcbcbb30fa18e3f47e86e9019a64bd92cb5b6afd8794d2"
+  },
+  "stale_source_gate": {
+    "exit_code": 1,
+    "server_started": false
+  },
+  "ok": true,
+  "finished_at": "2026-10-27T01:55:47Z"
+}

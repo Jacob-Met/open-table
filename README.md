@@ -28,6 +28,8 @@ The rules use public labels Player 1 and Player 2; engine observer IDs are 0 and
 
 Choose **Shapes + words** for explicit numbered, named-shape controls, or **Scan + select** for manual cycling or timed scanning followed by explicit confirmation. Scanning alone does not make a move. Automatic scan intervals are 1.4, 2.4, or 4 seconds. This qualifies the action-selection mechanism after setup; whole-application single-switch navigation and physical switch hardware have not been evaluated.
 
+In **Scan + select**, start automatic scanning once to continue across successive turns. The highlight changes without making a move; each confirmation requires a deliberate activation. Pocket Signals pauses behind the private handoff curtain. After looking away and passing the device, a fresh press on **Show my hand** reveals the next player’s cards and resumes scanning. Release the key before confirming a choice. **Pause auto scan** stops automatic selection; **Next choice** remains available for manual stepping. See [continuous-scan integration and receiving scope](docs/CONTINUOUS_INTEGRATION.md).
+
 Both original and adapted choices appear for the same acting player. Pocket Signals clears private cards and both choice panels before handing the device over. A repeated held Enter cannot activate the next player's reveal control; a fresh press still works.
 
 This is cooperative **local pass-and-play on a trusted device**. It is not secure remote multiplayer. Full game truth exists in the local application memory; anyone controlling the device or developer tools can inspect it. Players should look away for the other person's private turn.

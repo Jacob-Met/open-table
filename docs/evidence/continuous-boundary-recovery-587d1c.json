@@ -1,0 +1,845 @@
+{
+  "suite": "continuous-boundary",
+  "startedAt": "2026-10-27T08:04:16.641Z",
+  "appSHA256": "c9de4481d435238a16dcbcbb30fa18e3f47e86e9019a64bd92cb5b6afd8794d2",
+  "pass": true,
+  "courses": [
+    {
+      "name": "key-release",
+      "pass": true,
+      "evidence": {
+        "publicEvidence": {
+          "toggleBefore": {
+            "position": "Shared path, marker at 0",
+            "covered": false,
+            "privateVisible": false,
+            "hand": [],
+            "choice": "Confirm: Choice 1: Advance 1",
+            "toggle": "false",
+            "result": null,
+            "rounds": "",
+            "live": "Access pack changed. Private cards are covered.",
+            "focus": "toggle-scan"
+          },
+          "enabled": {
+            "position": "Shared path, marker at 0",
+            "covered": false,
+            "privateVisible": false,
+            "hand": [],
+            "choice": "Confirm: Choice 1: Advance 1",
+            "toggle": "true",
+            "result": null,
+            "rounds": "",
+            "live": "Access pack changed. Private cards are covered.",
+            "focus": "confirm-choice"
+          },
+          "moved": {
+            "position": "Shared path, marker at 1",
+            "covered": false,
+            "privateVisible": false,
+            "hand": [],
+            "choice": "Confirm: Choice 1: Advance 1",
+            "toggle": "true",
+            "result": null,
+            "rounds": "",
+            "live": "Marker at 1. Player 2 to move.",
+            "focus": "confirm-choice"
+          },
+          "fresh": {
+            "position": "Shared path, marker at 2",
+            "covered": false,
+            "privateVisible": false,
+            "hand": [],
+            "choice": "Confirm: Choice 1: Advance 1",
+            "toggle": "true",
+            "result": null,
+            "rounds": "",
+            "live": "Marker at 2. Player 1 to move.",
+            "focus": "confirm-choice"
+          },
+          "released": {
+            "position": "Shared path, marker at 3",
+            "covered": false,
+            "privateVisible": false,
+            "hand": [],
+            "choice": "Confirm: Choice 1: Advance 1",
+            "toggle": "true",
+            "result": null,
+            "rounds": "",
+            "live": "Marker at 3. Player 2 to move.",
+            "focus": "confirm-choice"
+          }
+        },
+        "privateEvidence": {
+          "handoff": {
+            "position": null,
+            "covered": true,
+            "privateVisible": false,
+            "hand": [],
+            "choice": null,
+            "toggle": null,
+            "result": null,
+            "rounds": "",
+            "live": "Choice committed privately. Pass to Player 2.",
+            "focus": "reveal-hand"
+          },
+          "revealed": {
+            "position": null,
+            "covered": false,
+            "privateVisible": true,
+            "hand": [
+              "Card 1, circle",
+              "Card 3, square"
+            ],
+            "choice": "Confirm: Choice 1: Commit 1",
+            "toggle": "true",
+            "result": null,
+            "rounds": "",
+            "live": "Choice committed privately. Pass to Player 2.",
+            "focus": "confirm-choice"
+          }
+        }
+      }
+    },
+    {
+      "name": "obsolete-timer",
+      "pass": true,
+      "evidence": {
+        "paused": {
+          "position": "Shared path, marker at 0",
+          "covered": false,
+          "privateVisible": false,
+          "hand": [],
+          "choice": "Confirm: Choice 1: Advance 1",
+          "toggle": "false",
+          "result": null,
+          "rounds": "",
+          "live": "Access pack changed. Private cards are covered.",
+          "focus": "toggle-scan"
+        },
+        "afterOldPaused": {
+          "position": "Shared path, marker at 0",
+          "covered": false,
+          "privateVisible": false,
+          "hand": [],
+          "choice": "Confirm: Choice 1: Advance 1",
+          "toggle": "false",
+          "result": null,
+          "rounds": "",
+          "live": "Access pack changed. Private cards are covered.",
+          "focus": "toggle-scan"
+        },
+        "resumed": {
+          "position": "Shared path, marker at 0",
+          "covered": false,
+          "privateVisible": false,
+          "hand": [],
+          "choice": "Confirm: Choice 1: Advance 1",
+          "toggle": "true",
+          "result": null,
+          "rounds": "",
+          "live": "Access pack changed. Private cards are covered.",
+          "focus": "confirm-choice"
+        },
+        "advanced": {
+          "position": "Shared path, marker at 0",
+          "covered": false,
+          "privateVisible": false,
+          "hand": [],
+          "choice": "Confirm: Choice 2: Advance 2",
+          "toggle": "true",
+          "result": null,
+          "rounds": "",
+          "live": "Access pack changed. Private cards are covered.",
+          "focus": "confirm-choice"
+        },
+        "navigation": {
+          "position": null,
+          "covered": false,
+          "privateVisible": false,
+          "hand": [],
+          "choice": null,
+          "toggle": null,
+          "result": null,
+          "rounds": "",
+          "live": "Adaptation workshop. All failure examples are synthetic.",
+          "focus": "workshop-title"
+        }
+      }
+    },
+    {
+      "name": "transcript-parity",
+      "pass": true,
+      "evidence": [
+        {
+          "manual": {
+            "game": "beacon-steps",
+            "steps": [
+              {
+                "before": {
+                  "position": "Shared path, marker at 0",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "false",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Access pack changed. Private cards are covered.",
+                  "focus": "scan-speed"
+                },
+                "after": {
+                  "position": "Shared path, marker at 1",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "false",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 1. Player 2 to move.",
+                  "focus": "table-title"
+                }
+              },
+              {
+                "before": {
+                  "position": "Shared path, marker at 1",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "false",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 1. Player 2 to move.",
+                  "focus": "table-title"
+                },
+                "after": {
+                  "position": "Shared path, marker at 2",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "false",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 2. Player 1 to move.",
+                  "focus": "table-title"
+                }
+              },
+              {
+                "before": {
+                  "position": "Shared path, marker at 2",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "false",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 2. Player 1 to move.",
+                  "focus": "table-title"
+                },
+                "after": {
+                  "position": "Shared path, marker at 3",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "false",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 3. Player 2 to move.",
+                  "focus": "table-title"
+                }
+              },
+              {
+                "before": {
+                  "position": "Shared path, marker at 3",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "false",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 3. Player 2 to move.",
+                  "focus": "table-title"
+                },
+                "after": {
+                  "position": "Shared path, marker at 4",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "false",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 4. Player 1 to move.",
+                  "focus": "table-title"
+                }
+              },
+              {
+                "before": {
+                  "position": "Shared path, marker at 4",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "false",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 4. Player 1 to move.",
+                  "focus": "table-title"
+                },
+                "after": {
+                  "position": "Shared path, marker at 5",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "false",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 5. Player 2 to move.",
+                  "focus": "table-title"
+                }
+              },
+              {
+                "before": {
+                  "position": "Shared path, marker at 5",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "false",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 5. Player 2 to move.",
+                  "focus": "table-title"
+                },
+                "after": {
+                  "position": "Shared path, marker at 6",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "false",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 6. Player 1 to move.",
+                  "focus": "table-title"
+                }
+              },
+              {
+                "before": {
+                  "position": "Shared path, marker at 6",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "false",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 6. Player 1 to move.",
+                  "focus": "table-title"
+                },
+                "after": {
+                  "position": "Shared path, marker at 7",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": null,
+                  "toggle": null,
+                  "result": "Player 1 takes it.The marker reached the seventh light.Play again ↗",
+                  "rounds": "",
+                  "live": "Game complete. Player 1 wins.",
+                  "focus": "new-game"
+                }
+              }
+            ],
+            "final": {
+              "position": "Shared path, marker at 7",
+              "covered": false,
+              "privateVisible": false,
+              "hand": [],
+              "choice": null,
+              "toggle": null,
+              "result": "Player 1 takes it.The marker reached the seventh light.Play again ↗",
+              "rounds": "",
+              "live": "Game complete. Player 1 wins.",
+              "focus": "new-game"
+            }
+          },
+          "continuous": {
+            "game": "beacon-steps",
+            "steps": [
+              {
+                "before": {
+                  "position": "Shared path, marker at 0",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "true",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Access pack changed. Private cards are covered.",
+                  "focus": "confirm-choice"
+                },
+                "after": {
+                  "position": "Shared path, marker at 1",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "true",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 1. Player 2 to move.",
+                  "focus": "confirm-choice"
+                }
+              },
+              {
+                "before": {
+                  "position": "Shared path, marker at 1",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "true",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 1. Player 2 to move.",
+                  "focus": "confirm-choice"
+                },
+                "after": {
+                  "position": "Shared path, marker at 2",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "true",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 2. Player 1 to move.",
+                  "focus": "confirm-choice"
+                }
+              },
+              {
+                "before": {
+                  "position": "Shared path, marker at 2",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "true",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 2. Player 1 to move.",
+                  "focus": "confirm-choice"
+                },
+                "after": {
+                  "position": "Shared path, marker at 3",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "true",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 3. Player 2 to move.",
+                  "focus": "confirm-choice"
+                }
+              },
+              {
+                "before": {
+                  "position": "Shared path, marker at 3",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "true",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 3. Player 2 to move.",
+                  "focus": "confirm-choice"
+                },
+                "after": {
+                  "position": "Shared path, marker at 4",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "true",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 4. Player 1 to move.",
+                  "focus": "confirm-choice"
+                }
+              },
+              {
+                "before": {
+                  "position": "Shared path, marker at 4",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "true",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 4. Player 1 to move.",
+                  "focus": "confirm-choice"
+                },
+                "after": {
+                  "position": "Shared path, marker at 5",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "true",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 5. Player 2 to move.",
+                  "focus": "confirm-choice"
+                }
+              },
+              {
+                "before": {
+                  "position": "Shared path, marker at 5",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "true",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 5. Player 2 to move.",
+                  "focus": "confirm-choice"
+                },
+                "after": {
+                  "position": "Shared path, marker at 6",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "true",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 6. Player 1 to move.",
+                  "focus": "confirm-choice"
+                }
+              },
+              {
+                "before": {
+                  "position": "Shared path, marker at 6",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": "Confirm: Choice 1: Advance 1",
+                  "toggle": "true",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Marker at 6. Player 1 to move.",
+                  "focus": "confirm-choice"
+                },
+                "after": {
+                  "position": "Shared path, marker at 7",
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": null,
+                  "toggle": null,
+                  "result": "Player 1 takes it.The marker reached the seventh light.Play again ↗",
+                  "rounds": "",
+                  "live": "Game complete. Player 1 wins.",
+                  "focus": "new-game"
+                }
+              }
+            ],
+            "final": {
+              "position": "Shared path, marker at 7",
+              "covered": false,
+              "privateVisible": false,
+              "hand": [],
+              "choice": null,
+              "toggle": null,
+              "result": "Player 1 takes it.The marker reached the seventh light.Play again ↗",
+              "rounds": "",
+              "live": "Game complete. Player 1 wins.",
+              "focus": "new-game"
+            }
+          }
+        },
+        {
+          "manual": {
+            "game": "pocket-signals",
+            "steps": [
+              {
+                "before": {
+                  "position": null,
+                  "covered": false,
+                  "privateVisible": true,
+                  "hand": [
+                    "Card 2, triangle",
+                    "Card 4, diamond"
+                  ],
+                  "choice": "Confirm: Choice 1: Commit 2",
+                  "toggle": "false",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Private cards covered.",
+                  "focus": "private-title"
+                },
+                "after": {
+                  "position": null,
+                  "covered": true,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": null,
+                  "toggle": null,
+                  "result": null,
+                  "rounds": "",
+                  "live": "Choice committed privately. Pass to Player 2.",
+                  "focus": "reveal-hand"
+                }
+              },
+              {
+                "before": {
+                  "position": null,
+                  "covered": false,
+                  "privateVisible": true,
+                  "hand": [
+                    "Card 1, circle",
+                    "Card 3, square"
+                  ],
+                  "choice": "Confirm: Choice 1: Commit 1",
+                  "toggle": "false",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Choice committed privately. Pass to Player 2.",
+                  "focus": "private-title"
+                },
+                "after": {
+                  "position": null,
+                  "covered": true,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": null,
+                  "toggle": null,
+                  "result": null,
+                  "rounds": "Round 1: P1 played 2 · P2 played 1",
+                  "live": "Both cards revealed. Round 1 is complete. Pass to Player 1.",
+                  "focus": "reveal-hand"
+                }
+              },
+              {
+                "before": {
+                  "position": null,
+                  "covered": false,
+                  "privateVisible": true,
+                  "hand": [
+                    "Card 4, diamond"
+                  ],
+                  "choice": "Confirm: Choice 1: Commit 4",
+                  "toggle": "false",
+                  "result": null,
+                  "rounds": "Round 1: P1 played 2 · P2 played 1",
+                  "live": "Both cards revealed. Round 1 is complete. Pass to Player 1.",
+                  "focus": "private-title"
+                },
+                "after": {
+                  "position": null,
+                  "covered": true,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": null,
+                  "toggle": null,
+                  "result": null,
+                  "rounds": "Round 1: P1 played 2 · P2 played 1",
+                  "live": "Choice committed privately. Pass to Player 2.",
+                  "focus": "reveal-hand"
+                }
+              },
+              {
+                "before": {
+                  "position": null,
+                  "covered": false,
+                  "privateVisible": true,
+                  "hand": [
+                    "Card 3, square"
+                  ],
+                  "choice": "Confirm: Choice 1: Commit 3",
+                  "toggle": "false",
+                  "result": null,
+                  "rounds": "Round 1: P1 played 2 · P2 played 1",
+                  "live": "Choice committed privately. Pass to Player 2.",
+                  "focus": "private-title"
+                },
+                "after": {
+                  "position": null,
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": null,
+                  "toggle": null,
+                  "result": "Player 1 takes it.Two rounds, one point each. The table is open for another game.Play again ↗",
+                  "rounds": "Round 1: P1 played 2 · P2 played 1Round 2: P1 played 4 · P2 played 3",
+                  "live": "Game complete. Player 1 wins.",
+                  "focus": "new-game"
+                }
+              }
+            ],
+            "final": {
+              "position": null,
+              "covered": false,
+              "privateVisible": false,
+              "hand": [],
+              "choice": null,
+              "toggle": null,
+              "result": "Player 1 takes it.Two rounds, one point each. The table is open for another game.Play again ↗",
+              "rounds": "Round 1: P1 played 2 · P2 played 1Round 2: P1 played 4 · P2 played 3",
+              "live": "Game complete. Player 1 wins.",
+              "focus": "new-game"
+            }
+          },
+          "continuous": {
+            "game": "pocket-signals",
+            "steps": [
+              {
+                "before": {
+                  "position": null,
+                  "covered": false,
+                  "privateVisible": true,
+                  "hand": [
+                    "Card 2, triangle",
+                    "Card 4, diamond"
+                  ],
+                  "choice": "Confirm: Choice 1: Commit 2",
+                  "toggle": "true",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Private cards covered.",
+                  "focus": "confirm-choice"
+                },
+                "after": {
+                  "position": null,
+                  "covered": true,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": null,
+                  "toggle": null,
+                  "result": null,
+                  "rounds": "",
+                  "live": "Choice committed privately. Pass to Player 2.",
+                  "focus": "reveal-hand"
+                }
+              },
+              {
+                "before": {
+                  "position": null,
+                  "covered": false,
+                  "privateVisible": true,
+                  "hand": [
+                    "Card 1, circle",
+                    "Card 3, square"
+                  ],
+                  "choice": "Confirm: Choice 1: Commit 1",
+                  "toggle": "true",
+                  "result": null,
+                  "rounds": "",
+                  "live": "Choice committed privately. Pass to Player 2.",
+                  "focus": "confirm-choice"
+                },
+                "after": {
+                  "position": null,
+                  "covered": true,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": null,
+                  "toggle": null,
+                  "result": null,
+                  "rounds": "Round 1: P1 played 2 · P2 played 1",
+                  "live": "Both cards revealed. Round 1 is complete. Pass to Player 1.",
+                  "focus": "reveal-hand"
+                }
+              },
+              {
+                "before": {
+                  "position": null,
+                  "covered": false,
+                  "privateVisible": true,
+                  "hand": [
+                    "Card 4, diamond"
+                  ],
+                  "choice": "Confirm: Choice 1: Commit 4",
+                  "toggle": "true",
+                  "result": null,
+                  "rounds": "Round 1: P1 played 2 · P2 played 1",
+                  "live": "Both cards revealed. Round 1 is complete. Pass to Player 1.",
+                  "focus": "confirm-choice"
+                },
+                "after": {
+                  "position": null,
+                  "covered": true,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": null,
+                  "toggle": null,
+                  "result": null,
+                  "rounds": "Round 1: P1 played 2 · P2 played 1",
+                  "live": "Choice committed privately. Pass to Player 2.",
+                  "focus": "reveal-hand"
+                }
+              },
+              {
+                "before": {
+                  "position": null,
+                  "covered": false,
+                  "privateVisible": true,
+                  "hand": [
+                    "Card 3, square"
+                  ],
+                  "choice": "Confirm: Choice 1: Commit 3",
+                  "toggle": "true",
+                  "result": null,
+                  "rounds": "Round 1: P1 played 2 · P2 played 1",
+                  "live": "Choice committed privately. Pass to Player 2.",
+                  "focus": "confirm-choice"
+                },
+                "after": {
+                  "position": null,
+                  "covered": false,
+                  "privateVisible": false,
+                  "hand": [],
+                  "choice": null,
+                  "toggle": null,
+                  "result": "Player 1 takes it.Two rounds, one point each. The table is open for another game.Play again ↗",
+                  "rounds": "Round 1: P1 played 2 · P2 played 1Round 2: P1 played 4 · P2 played 3",
+                  "live": "Game complete. Player 1 wins.",
+                  "focus": "new-game"
+                }
+              }
+            ],
+            "final": {
+              "position": null,
+              "covered": false,
+              "privateVisible": false,
+              "hand": [],
+              "choice": null,
+              "toggle": null,
+              "result": "Player 1 takes it.Two rounds, one point each. The table is open for another game.Play again ↗",
+              "rounds": "Round 1: P1 played 2 · P2 played 1Round 2: P1 played 4 · P2 played 3",
+              "live": "Game complete. Player 1 wins.",
+              "focus": "new-game"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "browserErrors": [],
+  "url": "http://127.0.0.1:38287/",
+  "servedAppSHA256": "c9de4481d435238a16dcbcbb30fa18e3f47e86e9019a64bd92cb5b6afd8794d2",
+  "finishedAt": "2026-10-27T08:04:23.922Z"
+}
