@@ -1,0 +1,285 @@
+
+> open-table@0.1.0 pretest
+> node scripts/write-ruleset-pins.mjs --check
+
+{
+  "format": "open-table.ruleset-binding.v1",
+  "checked": true,
+  "pins": {
+    "beacon-steps": "sha256:45dd9d61d203ceff72cba174f1111430253d3874244c91e9dd2801622faf14b5",
+    "pocket-signals": "sha256:7f07c7abf26f0e88009bbf9315867471ff4b75988786be2fcc5175b8109f5ef4"
+  },
+  "sourceDigests": {
+    "src/adaptations.js": "cd317752d09172982ffe0624b455ca59c5eb6372a065ddd3383a70b644fc4d47",
+    "src/app.js": "691604387eea9a2895a4de34db6ffc05df7a4ba0d2b895767970458d80aa6c63",
+    "src/designer-fixtures.js": "b06000d1e299c163919a3c508faffc6e4c444a60da01296df15a41f44d0be207",
+    "src/games.js": "609b8537fe5994dd60345337da80234ed02a9f676f6bfef2b2ea02433b953e7c",
+    "src/pack.js": "7d210a16429351cdcecd1839b291860e2a43854a19ae244c25f0e160c369b78f"
+  }
+}
+
+> open-table@0.1.0 test
+> node --test tests/*.test.mjs
+
+TAP version 13
+# Subtest: independent public-action and private-commit references
+ok 1 - independent public-action and private-commit references
+  ---
+  duration_ms: 3.435928
+  type: 'test'
+  ...
+# Subtest: equal-stakes outcome references distinguish win and draw
+ok 2 - equal-stakes outcome references distinguish win and draw
+  ---
+  duration_ms: 0.383938
+  type: 'test'
+  ...
+# Subtest: fixed good encodings preserve independently specified choices and views
+ok 3 - fixed good encodings preserve independently specified choices and views
+  ---
+  duration_ms: 1.23312
+  type: 'test'
+  ...
+# Subtest: complete good modes reach independently counted state spaces
+ok 4 - complete good modes reach independently counted state spaces
+  ---
+  duration_ms: 212.570249
+  type: 'test'
+  ...
+# Subtest: dropping a legal choice is rejected immediately
+ok 5 - dropping a legal choice is rejected immediately
+  ---
+  duration_ms: 0.463743
+  type: 'test'
+  ...
+# Subtest: leak pair has indistinguishable reference states and replayable traces
+ok 6 - leak pair has indistinguishable reference states and replayable traces
+  ---
+  duration_ms: 1.074576
+  type: 'test'
+  ...
+# Subtest: reverse information loss and leakage in labels are checked
+ok 7 - reverse information loss and leakage in labels are checked
+  ---
+  duration_ms: 0.732657
+  type: 'test'
+  ...
+# Subtest: transition, outcome, and bounded coverage failures cannot pass
+ok 8 - transition, outcome, and bounded coverage failures cannot pass
+  ---
+  duration_ms: 0.368707
+  type: 'test'
+  ...
+# Subtest: candidate cannot rewrite queued reference state
+ok 9 - candidate cannot rewrite queued reference state
+  ---
+  duration_ms: 0.376373
+  type: 'test'
+  ...
+# Subtest: opaque fixtures resolve into reproducible legal traces
+ok 10 - opaque fixtures resolve into reproducible legal traces
+  ---
+  duration_ms: 3.3383
+  type: 'test'
+  ...
+# Subtest: Beacon fixtures exercise boundary and genuine terminal win
+ok 11 - Beacon fixtures exercise boundary and genuine terminal win
+  ---
+  duration_ms: 0.283641
+  type: 'test'
+  ...
+# Subtest: Pocket fixtures bind hidden pending choices and equal-stakes draw
+ok 12 - Pocket fixtures bind hidden pending choices and equal-stakes draw
+  ---
+  duration_ms: 0.490823
+  type: 'test'
+  ...
+# Subtest: Beacon requires exact arrival, alternates actors and stops at seven
+ok 13 - Beacon requires exact arrival, alternates actors and stops at seven
+  ---
+  duration_ms: 2.529849
+  type: 'test'
+  ...
+# Subtest: equal round stakes retain distinct winning and drawing pairings
+ok 14 - equal round stakes retain distinct winning and drawing pairings
+  ---
+  duration_ms: 1.179534
+  type: 'test'
+  ...
+# Subtest: reveal is atomic, conserves cards and returns to first player
+ok 15 - reveal is atomic, conserves cards and returns to first player
+  ---
+  duration_ms: 0.528189
+  type: 'test'
+  ...
+# Subtest: private observations hide opponent hand and pending values
+ok 16 - private observations hide opponent hand and pending values
+  ---
+  duration_ms: 0.426593
+  type: 'test'
+  ...
+# Subtest: transitions and projections detach from frozen input
+ok 17 - transitions and projections detach from frozen input
+  ---
+  duration_ms: 0.480467
+  type: 'test'
+  ...
+# Subtest: unordered hands canonicalize without mutating supplied order
+ok 18 - unordered hands canonicalize without mutating supplied order
+  ---
+  duration_ms: 1.51274
+  type: 'test'
+  ...
+# Subtest: malformed and unreachable states fail every state consumer
+ok 19 - malformed and unreachable states fail every state consumer
+  ---
+  duration_ms: 0.841598
+  type: 'test'
+  ...
+# Subtest: malformed action and player IDs cannot alter approved rules
+ok 20 - malformed action and player IDs cannot alter approved rules
+  ---
+  duration_ms: 0.972113
+  type: 'test'
+  ...
+# Subtest: accepts a detached proposal bound to current trusted catalog
+ok 21 - accepts a detached proposal bound to current trusted catalog
+  ---
+  duration_ms: 2.599761
+  type: 'test'
+  ...
+# Subtest: variant is unapproved routing classification, not rule authority
+ok 22 - variant is unapproved routing classification, not rule authority
+  ---
+  duration_ms: 0.542775
+  type: 'test'
+  ...
+# Subtest: rejects stale pin
+ok 23 - rejects stale pin
+  ---
+  duration_ms: 0.175263
+  type: 'test'
+  ...
+# Subtest: rejects wrong game
+ok 24 - rejects wrong game
+  ---
+  duration_ms: 0.107289
+  type: 'test'
+  ...
+# Subtest: rejects model rules
+ok 25 - rejects model rules
+  ---
+  duration_ms: 0.113243
+  type: 'test'
+  ...
+# Subtest: rejects model certification
+ok 26 - rejects model certification
+  ---
+  duration_ms: 0.100948
+  type: 'test'
+  ...
+# Subtest: rejects invented adapter
+ok 27 - rejects invented adapter
+  ---
+  duration_ms: 0.138615
+  type: 'test'
+  ...
+# Subtest: rejects negative leakage mode
+ok 28 - rejects negative leakage mode
+  ---
+  duration_ms: 0.105812
+  type: 'test'
+  ...
+# Subtest: rejects negative drop mode
+ok 29 - rejects negative drop mode
+  ---
+  duration_ms: 0.266088
+  type: 'test'
+  ...
+# Subtest: rejects component outside mode
+ok 30 - rejects component outside mode
+  ---
+  duration_ms: 0.326053
+  type: 'test'
+  ...
+# Subtest: rejects permission override
+ok 31 - rejects permission override
+  ---
+  duration_ms: 0.168549
+  type: 'test'
+  ...
+# Subtest: rejects invented source
+ok 32 - rejects invented source
+  ---
+  duration_ms: 0.139476
+  type: 'test'
+  ...
+# Subtest: rejects live witness
+ok 33 - rejects live witness
+  ---
+  duration_ms: 0.102609
+  type: 'test'
+  ...
+# Subtest: rejects raw state
+ok 34 - rejects raw state
+  ---
+  duration_ms: 0.095807
+  type: 'test'
+  ...
+# Subtest: rejects witness verdict
+ok 35 - rejects witness verdict
+  ---
+  duration_ms: 0.095014
+  type: 'test'
+  ...
+# Subtest: rejects unknown player
+ok 36 - rejects unknown player
+  ---
+  duration_ms: 1.799891
+  type: 'test'
+  ...
+# Subtest: catalog cannot promote designer negative mode
+ok 37 - catalog cannot promote designer negative mode
+  ---
+  duration_ms: 0.433041
+  type: 'test'
+  ...
+# Subtest: rejects fences and prototype-shaped fields
+ok 38 - rejects fences and prototype-shaped fields
+  ---
+  duration_ms: 0.172765
+  type: 'test'
+  ...
+# Subtest: pack export and reopening run the actual finite checker for each approved mode
+ok 39 - pack export and reopening run the actual finite checker for each approved mode
+  ---
+  duration_ms: 324.171347
+  type: 'test'
+  ...
+# Subtest: import cannot restore secrets, trust imported evidence or change rules
+ok 40 - import cannot restore secrets, trust imported evidence or change rules
+  ---
+  duration_ms: 52.026321
+  type: 'test'
+  ...
+# Subtest: catalog is detached, referenced components exist, synthetic descriptions contain no states
+ok 41 - catalog is detached, referenced components exist, synthetic descriptions contain no states
+  ---
+  duration_ms: 0.337185
+  type: 'test'
+  ...
+# Subtest: real HTTP entry point serves all transitive browser imports and denies unrelated files
+ok 42 - real HTTP entry point serves all transitive browser imports and denies unrelated files
+  ---
+  duration_ms: 78.856538
+  type: 'test'
+  ...
+1..42
+# tests 42
+# suites 0
+# pass 42
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 499.804216

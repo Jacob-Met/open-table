@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/Jacob-Met/open-table",
+  "private": true,
+  "head": "af04f2b1213784b48422cb9fcd8f26aa86dcdbff",
+  "tree": "396778cb963236481fa21f051aacd8a3e036dd66",
+  "remote_head_matches": true,
+  "remote_tree_matches": true,
+  "qualified_package_sha256": "ba67362d36389ab13bf823a9f64b879e80b9bfd71deaae86213a90da24dbe19c"
+}

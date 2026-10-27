@@ -39,3 +39,15 @@ This is finite-game implementation and application receiving, not a human access
 The source pin used by the qualified browser run binds the renderer and pack implementation as well as rules/checker/fixtures. Future semantic changes require regenerated pins and applicable receiving; a previous successful receipt is not an authorization to activate changed code.
 
 Clean-package and published-source receipts will be appended after their actual execution.
+
+## Clean package and private source integration
+
+Frozen source commit: af04f2b1213784b48422cb9fcd8f26aa86dcdbff. The actual npm archive contains 36 files, 450,037 bytes, SHA-256 ba67362d36389ab13bf823a9f64b879e80b9bfd71deaae86213a90da24dbe19c.
+
+A separate extraction passed all 42 native/HTTP tests. Its own maintained npm start command verified pins and launched the application. Its own packaged browser receiver then passed all 15 scenarios against that running server. A deliberate post-extraction game-source edit made npm start exit 1 at the pin gate before starting a server; original bytes were restored. No installed dependency or checkout-only asset was needed.
+
+The initial commit was pushed to private Jacob-Met/open-table main. Both the Git remote head and GitHub commit tree were read back and matched exactly: source af04f2b1213784b48422cb9fcd8f26aa86dcdbff, tree 396778cb963236481fa21f051aacd8a3e036dd66. This evidence-only update preserves all qualified application/script/test/package source bytes.
+
+The [qualified archive](../release-artifacts/open-table-0.1.0-af04f2b.tgz) is retained privately alongside the source. See docs/evidence/package-qualified.json and published-initial.json for exact execution identities and paths.
+
+The four development baseline proposals validated and selected all required component targets. Two omitted required grounding references: beacon.rule.win and pocket.rule.reveal. This was recorded as incomplete grounding, despite all selected fixed adapters passing their finite checker. No reserved case or model request was executed.

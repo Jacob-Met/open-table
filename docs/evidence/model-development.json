@@ -1,0 +1,276 @@
+{
+  "sourceHash": "8028af1480d2b59edd8e293468bca1cef5f8bcf9336f18b480ee0db4c00ab281",
+  "providerRequests": 0,
+  "reservedCasesExecuted": false,
+  "rows": [
+    {
+      "id": "beacon-colour-independent",
+      "source": "deterministic-baseline",
+      "request": {
+        "experimentVersion": "open-table.authoring-experiment.v1",
+        "caseId": "beacon-colour-independent",
+        "split": "development",
+        "gameId": "beacon-steps",
+        "rulesetPin": "sha256:45dd9d61d203ceff72cba174f1111430253d3874244c91e9dd2801622faf14b5",
+        "messages": [
+          {
+            "role": "system",
+            "content": "Draft one OPEN TABLE adaptation proposal from the supplied approved catalog and access goal.\nReturn JSON only, with exactly schema, gameId, rulesetPin, classification, summary, changes, witnessCandidates.\nschema is open-table.proposal.v1. Echo the supplied gameId and rulesetPin.\nclassification is equivalence-candidate or variant. It states intent, not a verified result.\nEach of 1..8 changes has exactly adapter, componentRef, sourceRefs, rationale. Use only supplied adapter/component pairs and authored source references.\nDo not invent or edit game rules, scores, deals, actions, disclosure, player identity, adapters, or approval fields.\nIf any requested part changes a mechanic or disclosed information, use variant. Explain that unsupported part and ground it in the approved rules, while proposing only supported access changes.\nwitnessCandidates may contain 0..12 objects with exactly fixtureRef, check, viewer. Use only supplied synthetic fixture references; check is legal-actions, outcome, or player-view; viewer is public, 0, or 1.\nViewer numbers in witness candidates are engine observer IDs, never permission to change a live viewer. Public player labels 1 and 2 correspond to engine observer IDs 0 and 1.\nA witness is a candidate for independent checking, not a certificate. Never claim universal accessibility, human validation, or model-certified equivalence.\nSummaries and rationales are concise plain text, with maximum lengths 1200 and 800 characters respectively."
+          },
+          {
+            "role": "user",
+            "content": "{\"accessGoal\":\"Give the current trail position and the target distinct named shapes plus text, so neither depends on colour. Preserve all moves and the winning condition.\",\"approvedCatalog\":{\"gameId\":\"beacon-steps\",\"title\":\"Beacon Steps\",\"rulesetPin\":\"sha256:45dd9d61d203ceff72cba174f1111430253d3874244c91e9dd2801622faf14b5\",\"rules\":[{\"ref\":\"beacon.rule.start\",\"text\":\"Begin at position 0. Player 1 takes the first turn; players then alternate.\"},{\"ref\":\"beacon.rule.move\",\"text\":\"On a turn, advance exactly 1 or 2 positions. A move past position 7 is illegal.\"},{\"ref\":\"beacon.rule.win\",\"text\":\"The player whose move reaches position 7 exactly wins. The game ends immediately.\"},{\"ref\":\"beacon.rule.public\",\"text\":\"Position, target, turn, legal public moves, and the outcome are public. There is no hidden game information.\"}],\"components\":[{\"ref\":\"public.position\",\"label\":\"Current position\",\"description\":\"The shared position from 0 to 7, with its number and a redundant named shape or marker.\"},{\"ref\":\"public.target\",\"label\":\"Target\",\"description\":\"The fixed public target, position 7, expressed as text as well as a marker.\"},{\"ref\":\"public.turn\",\"label\":\"Turn\",\"description\":\"The player allowed to act, using a player name or number in addition to a visual indicator.\"},{\"ref\":\"public.outcome\",\"label\":\"Outcome\",\"description\":\"The winning player when the target is reached; no additional moves after the terminal outcome.\"},{\"ref\":\"actions.advance\",\"label\":\"Advance controls\",\"description\":\"Only the engine-approved advance-by-1 or advance-by-2 actions. Selection is separate from explicit commitment.\"}],\"adapters\":{\"shape-text\":[\"public.position\",\"public.target\",\"public.turn\",\"public.outcome\",\"actions.advance\"],\"switch-select\":[\"actions.advance\"]},\"sourceRefs\":[\"beacon.rule.start\",\"beacon.rule.move\",\"beacon.rule.win\",\"beacon.rule.public\"],\"fixtures\":[{\"ref\":\"ot-fixture-001\",\"description\":\"Synthetic Beacon state near the target, for checking the remaining legal action set.\"},{\"ref\":\"ot-fixture-002\",\"description\":\"Synthetic Beacon terminal state, for checking the exact winning outcome.\"}]}}"
+          }
+        ]
+      },
+      "proposal": {
+        "schema": "open-table.proposal.v1",
+        "gameId": "beacon-steps",
+        "rulesetPin": "sha256:45dd9d61d203ceff72cba174f1111430253d3874244c91e9dd2801622faf14b5",
+        "classification": "equivalence-candidate",
+        "summary": "Fixed-catalog draft for the requested access goal. The selector cannot establish that every requested intent is covered; independent checking and author review remain required.",
+        "changes": [
+          {
+            "adapter": "shape-text",
+            "componentRef": "public.position",
+            "sourceRefs": [
+              "beacon.rule.move"
+            ],
+            "rationale": "Use the fixed shape-text adapter for Current position. Preserve the authored rule: On a turn, advance exactly 1 or 2 positions. A move past position 7 is illegal."
+          },
+          {
+            "adapter": "shape-text",
+            "componentRef": "public.target",
+            "sourceRefs": [
+              "beacon.rule.public"
+            ],
+            "rationale": "Use the fixed shape-text adapter for Target. Preserve the authored rule: Position, target, turn, legal public moves, and the outcome are public. There is no hidden game information."
+          }
+        ],
+        "witnessCandidates": []
+      },
+      "comparison": {
+        "classificationMatches": true,
+        "missingTargets": [],
+        "additionalTargets": [],
+        "missingSourceRefs": [
+          "beacon.rule.win"
+        ],
+        "manualReviewConditions": [
+          "Distinguishes the moving position from the fixed target 7.",
+          "Adds redundant presentation without extra moves or a new win condition."
+        ]
+      },
+      "checks": [
+        {
+          "adapter": "shape-text",
+          "ok": true,
+          "complete": true,
+          "verdict": "equivalent",
+          "gameId": "beacon-steps",
+          "states": 14,
+          "transitions": 22,
+          "initialStates": 1,
+          "scope": "All reachable states of this finite original game."
+        }
+      ]
+    },
+    {
+      "id": "beacon-one-switch",
+      "source": "deterministic-baseline",
+      "request": {
+        "experimentVersion": "open-table.authoring-experiment.v1",
+        "caseId": "beacon-one-switch",
+        "split": "development",
+        "gameId": "beacon-steps",
+        "rulesetPin": "sha256:45dd9d61d203ceff72cba174f1111430253d3874244c91e9dd2801622faf14b5",
+        "messages": [
+          {
+            "role": "system",
+            "content": "Draft one OPEN TABLE adaptation proposal from the supplied approved catalog and access goal.\nReturn JSON only, with exactly schema, gameId, rulesetPin, classification, summary, changes, witnessCandidates.\nschema is open-table.proposal.v1. Echo the supplied gameId and rulesetPin.\nclassification is equivalence-candidate or variant. It states intent, not a verified result.\nEach of 1..8 changes has exactly adapter, componentRef, sourceRefs, rationale. Use only supplied adapter/component pairs and authored source references.\nDo not invent or edit game rules, scores, deals, actions, disclosure, player identity, adapters, or approval fields.\nIf any requested part changes a mechanic or disclosed information, use variant. Explain that unsupported part and ground it in the approved rules, while proposing only supported access changes.\nwitnessCandidates may contain 0..12 objects with exactly fixtureRef, check, viewer. Use only supplied synthetic fixture references; check is legal-actions, outcome, or player-view; viewer is public, 0, or 1.\nViewer numbers in witness candidates are engine observer IDs, never permission to change a live viewer. Public player labels 1 and 2 correspond to engine observer IDs 0 and 1.\nA witness is a candidate for independent checking, not a certificate. Never claim universal accessibility, human validation, or model-certified equivalence.\nSummaries and rationales are concise plain text, with maximum lengths 1200 and 800 characters respectively."
+          },
+          {
+            "role": "user",
+            "content": "{\"accessGoal\":\"Let a player use one switch to cycle through available advance actions and explicitly confirm a selection. Selection must not move the token. Keep the same legal moves near the target.\",\"approvedCatalog\":{\"gameId\":\"beacon-steps\",\"title\":\"Beacon Steps\",\"rulesetPin\":\"sha256:45dd9d61d203ceff72cba174f1111430253d3874244c91e9dd2801622faf14b5\",\"rules\":[{\"ref\":\"beacon.rule.start\",\"text\":\"Begin at position 0. Player 1 takes the first turn; players then alternate.\"},{\"ref\":\"beacon.rule.move\",\"text\":\"On a turn, advance exactly 1 or 2 positions. A move past position 7 is illegal.\"},{\"ref\":\"beacon.rule.win\",\"text\":\"The player whose move reaches position 7 exactly wins. The game ends immediately.\"},{\"ref\":\"beacon.rule.public\",\"text\":\"Position, target, turn, legal public moves, and the outcome are public. There is no hidden game information.\"}],\"components\":[{\"ref\":\"public.position\",\"label\":\"Current position\",\"description\":\"The shared position from 0 to 7, with its number and a redundant named shape or marker.\"},{\"ref\":\"public.target\",\"label\":\"Target\",\"description\":\"The fixed public target, position 7, expressed as text as well as a marker.\"},{\"ref\":\"public.turn\",\"label\":\"Turn\",\"description\":\"The player allowed to act, using a player name or number in addition to a visual indicator.\"},{\"ref\":\"public.outcome\",\"label\":\"Outcome\",\"description\":\"The winning player when the target is reached; no additional moves after the terminal outcome.\"},{\"ref\":\"actions.advance\",\"label\":\"Advance controls\",\"description\":\"Only the engine-approved advance-by-1 or advance-by-2 actions. Selection is separate from explicit commitment.\"}],\"adapters\":{\"shape-text\":[\"public.position\",\"public.target\",\"public.turn\",\"public.outcome\",\"actions.advance\"],\"switch-select\":[\"actions.advance\"]},\"sourceRefs\":[\"beacon.rule.start\",\"beacon.rule.move\",\"beacon.rule.win\",\"beacon.rule.public\"],\"fixtures\":[{\"ref\":\"ot-fixture-001\",\"description\":\"Synthetic Beacon state near the target, for checking the remaining legal action set.\"},{\"ref\":\"ot-fixture-002\",\"description\":\"Synthetic Beacon terminal state, for checking the exact winning outcome.\"}]}}"
+          }
+        ]
+      },
+      "proposal": {
+        "schema": "open-table.proposal.v1",
+        "gameId": "beacon-steps",
+        "rulesetPin": "sha256:45dd9d61d203ceff72cba174f1111430253d3874244c91e9dd2801622faf14b5",
+        "classification": "equivalence-candidate",
+        "summary": "Fixed-catalog draft for the requested access goal. The selector cannot establish that every requested intent is covered; independent checking and author review remain required.",
+        "changes": [
+          {
+            "adapter": "switch-select",
+            "componentRef": "actions.advance",
+            "sourceRefs": [
+              "beacon.rule.move"
+            ],
+            "rationale": "Use the fixed switch-select adapter for Advance controls. Preserve the authored rule: On a turn, advance exactly 1 or 2 positions. A move past position 7 is illegal."
+          }
+        ],
+        "witnessCandidates": []
+      },
+      "comparison": {
+        "classificationMatches": true,
+        "missingTargets": [],
+        "additionalTargets": [],
+        "missingSourceRefs": [],
+        "manualReviewConditions": [
+          "Selection and game commitment remain separate.",
+          "Only currently legal advances are offered; the near-target case cannot overshoot 7."
+        ]
+      },
+      "checks": [
+        {
+          "adapter": "switch-select",
+          "ok": true,
+          "complete": true,
+          "verdict": "equivalent",
+          "gameId": "beacon-steps",
+          "states": 14,
+          "transitions": 22,
+          "initialStates": 1,
+          "scope": "All reachable states of this finite original game."
+        }
+      ]
+    },
+    {
+      "id": "pocket-private-reading",
+      "source": "deterministic-baseline",
+      "request": {
+        "experimentVersion": "open-table.authoring-experiment.v1",
+        "caseId": "pocket-private-reading",
+        "split": "development",
+        "gameId": "pocket-signals",
+        "rulesetPin": "sha256:7f07c7abf26f0e88009bbf9315867471ff4b75988786be2fcc5175b8109f5ef4",
+        "messages": [
+          {
+            "role": "system",
+            "content": "Draft one OPEN TABLE adaptation proposal from the supplied approved catalog and access goal.\nReturn JSON only, with exactly schema, gameId, rulesetPin, classification, summary, changes, witnessCandidates.\nschema is open-table.proposal.v1. Echo the supplied gameId and rulesetPin.\nclassification is equivalence-candidate or variant. It states intent, not a verified result.\nEach of 1..8 changes has exactly adapter, componentRef, sourceRefs, rationale. Use only supplied adapter/component pairs and authored source references.\nDo not invent or edit game rules, scores, deals, actions, disclosure, player identity, adapters, or approval fields.\nIf any requested part changes a mechanic or disclosed information, use variant. Explain that unsupported part and ground it in the approved rules, while proposing only supported access changes.\nwitnessCandidates may contain 0..12 objects with exactly fixtureRef, check, viewer. Use only supplied synthetic fixture references; check is legal-actions, outcome, or player-view; viewer is public, 0, or 1.\nViewer numbers in witness candidates are engine observer IDs, never permission to change a live viewer. Public player labels 1 and 2 correspond to engine observer IDs 0 and 1.\nA witness is a candidate for independent checking, not a certificate. Never claim universal accessibility, human validation, or model-certified equivalence.\nSummaries and rationales are concise plain text, with maximum lengths 1200 and 800 characters respectively."
+          },
+          {
+            "role": "user",
+            "content": "{\"accessGoal\":\"Give the current player text and named shape labels for their own remaining hand and their own pending card, available on a deliberate private request. Do not announce the opponent hand or unrevealed commitment.\",\"approvedCatalog\":{\"gameId\":\"pocket-signals\",\"title\":\"Pocket Signals\",\"rulesetPin\":\"sha256:7f07c7abf26f0e88009bbf9315867471ff4b75988786be2fcc5175b8109f5ef4\",\"rules\":[{\"ref\":\"pocket.rule.deal\",\"text\":\"Use the five distinct cards numbered 1 through 5. Each player receives an unordered hand of two distinct cards, without replacement across both hands; one card is undealt. There are 30 valid assignments of hands to the two players.\"},{\"ref\":\"pocket.rule.order\",\"text\":\"Play exactly two rounds. Player 1 commits first in each round, followed by Player 2.\"},{\"ref\":\"pocket.rule.commit\",\"text\":\"A player privately commits one available card from their own hand. A player cannot select an opponent card or a card already spent.\"},{\"ref\":\"pocket.rule.reveal\",\"text\":\"Player 2 committing completes the round and reveals both committed cards together. Both cards are spent, the pending commitments are cleared, and the next round, if any, starts with Player 1.\"},{\"ref\":\"pocket.rule.points\",\"text\":\"In each round the higher card earns exactly one point. No round tie is possible because the four dealt cards are distinct.\"},{\"ref\":\"pocket.rule.finish\",\"text\":\"After the second reveal, the player with more points wins. A final score of 1–1 is a draw.\"},{\"ref\":\"pocket.rule.private\",\"text\":\"Round, turn, scores, paired revealed history, and the outcome are public. A player may see only their own remaining hand and own pending card. The opponent hand and an unrevealed opponent commitment remain hidden.\"}],\"components\":[{\"ref\":\"public.round\",\"label\":\"Round\",\"description\":\"The shared round or completion status, expressed in words and numbers.\"},{\"ref\":\"public.turn\",\"label\":\"Turn\",\"description\":\"Which player may commit next, without disclosing that player’s selected or available card values.\"},{\"ref\":\"public.scores\",\"label\":\"Scores\",\"description\":\"The publicly earned points for both players, with equal one-point stakes in each round.\"},{\"ref\":\"public.history\",\"label\":\"Revealed rounds\",\"description\":\"Only completed pairs of revealed cards and their round result. Never a still-pending opponent card.\"},{\"ref\":\"public.outcome\",\"label\":\"Outcome\",\"description\":\"The final winning player or draw after two completed rounds.\"},{\"ref\":\"private.own-hand\",\"label\":\"Your hand\",\"description\":\"The locally bound viewer’s own remaining cards only, with readable card values and redundant shapes. This component cannot choose a different viewer.\"},{\"ref\":\"private.own-pending\",\"label\":\"Your pending card\",\"description\":\"Only the bound viewer’s own committed card while the round is pending. No private values enter shared announcements.\"},{\"ref\":\"actions.commit\",\"label\":\"Commit controls\",\"description\":\"Only the acting player’s engine-approved card choices, presented in their private view. Selection alone does not commit or reveal a card.\"}],\"adapters\":{\"shape-text\":[\"public.round\",\"public.turn\",\"public.scores\",\"public.history\",\"public.outcome\",\"private.own-hand\",\"private.own-pending\",\"actions.commit\"],\"switch-select\":[\"actions.commit\"]},\"sourceRefs\":[\"pocket.rule.deal\",\"pocket.rule.order\",\"pocket.rule.commit\",\"pocket.rule.reveal\",\"pocket.rule.points\",\"pocket.rule.finish\",\"pocket.rule.private\"],\"fixtures\":[{\"ref\":\"ot-fixture-003\",\"description\":\"Two synthetic pending-commit worlds for checking the waiting observer’s information partition. Private fixture details remain in the designer inspector.\"},{\"ref\":\"ot-fixture-004\",\"description\":\"A synthetic completed two-round draw, for checking the equal-stakes terminal outcome.\"}]}}"
+          }
+        ]
+      },
+      "proposal": {
+        "schema": "open-table.proposal.v1",
+        "gameId": "pocket-signals",
+        "rulesetPin": "sha256:7f07c7abf26f0e88009bbf9315867471ff4b75988786be2fcc5175b8109f5ef4",
+        "classification": "equivalence-candidate",
+        "summary": "Fixed-catalog draft for the requested access goal. The selector cannot establish that every requested intent is covered; independent checking and author review remain required.",
+        "changes": [
+          {
+            "adapter": "shape-text",
+            "componentRef": "private.own-hand",
+            "sourceRefs": [
+              "pocket.rule.private"
+            ],
+            "rationale": "Use the fixed shape-text adapter for Your hand. Preserve the authored rule: Round, turn, scores, paired revealed history, and the outcome are public. A player may see only their own remaining hand and own pending card. The opponent hand and an unrevealed opponent commitment remain hidden."
+          },
+          {
+            "adapter": "shape-text",
+            "componentRef": "private.own-pending",
+            "sourceRefs": [
+              "pocket.rule.private"
+            ],
+            "rationale": "Use the fixed shape-text adapter for Your pending card. Preserve the authored rule: Round, turn, scores, paired revealed history, and the outcome are public. A player may see only their own remaining hand and own pending card. The opponent hand and an unrevealed opponent commitment remain hidden."
+          }
+        ],
+        "witnessCandidates": []
+      },
+      "comparison": {
+        "classificationMatches": true,
+        "missingTargets": [],
+        "additionalTargets": [],
+        "missingSourceRefs": [],
+        "manualReviewConditions": [
+          "Uses only the already-bound viewer observation.",
+          "Does not move private values into public labels or shared announcements.",
+          "Does not claim an audio channel or a local shared device guarantees secrecy."
+        ]
+      },
+      "checks": [
+        {
+          "adapter": "shape-text",
+          "ok": true,
+          "complete": true,
+          "verdict": "equivalent",
+          "gameId": "pocket-signals",
+          "states": 450,
+          "transitions": 420,
+          "initialStates": 30,
+          "scope": "All reachable states of this finite original game."
+        }
+      ]
+    },
+    {
+      "id": "pocket-one-switch",
+      "source": "deterministic-baseline",
+      "request": {
+        "experimentVersion": "open-table.authoring-experiment.v1",
+        "caseId": "pocket-one-switch",
+        "split": "development",
+        "gameId": "pocket-signals",
+        "rulesetPin": "sha256:7f07c7abf26f0e88009bbf9315867471ff4b75988786be2fcc5175b8109f5ef4",
+        "messages": [
+          {
+            "role": "system",
+            "content": "Draft one OPEN TABLE adaptation proposal from the supplied approved catalog and access goal.\nReturn JSON only, with exactly schema, gameId, rulesetPin, classification, summary, changes, witnessCandidates.\nschema is open-table.proposal.v1. Echo the supplied gameId and rulesetPin.\nclassification is equivalence-candidate or variant. It states intent, not a verified result.\nEach of 1..8 changes has exactly adapter, componentRef, sourceRefs, rationale. Use only supplied adapter/component pairs and authored source references.\nDo not invent or edit game rules, scores, deals, actions, disclosure, player identity, adapters, or approval fields.\nIf any requested part changes a mechanic or disclosed information, use variant. Explain that unsupported part and ground it in the approved rules, while proposing only supported access changes.\nwitnessCandidates may contain 0..12 objects with exactly fixtureRef, check, viewer. Use only supplied synthetic fixture references; check is legal-actions, outcome, or player-view; viewer is public, 0, or 1.\nViewer numbers in witness candidates are engine observer IDs, never permission to change a live viewer. Public player labels 1 and 2 correspond to engine observer IDs 0 and 1.\nA witness is a candidate for independent checking, not a certificate. Never claim universal accessibility, human validation, or model-certified equivalence.\nSummaries and rationales are concise plain text, with maximum lengths 1200 and 800 characters respectively."
+          },
+          {
+            "role": "user",
+            "content": "{\"accessGoal\":\"Let the acting player choose an available card with one switch and commit only after explicit confirmation. Keep commitments private until the existing paired reveal.\",\"approvedCatalog\":{\"gameId\":\"pocket-signals\",\"title\":\"Pocket Signals\",\"rulesetPin\":\"sha256:7f07c7abf26f0e88009bbf9315867471ff4b75988786be2fcc5175b8109f5ef4\",\"rules\":[{\"ref\":\"pocket.rule.deal\",\"text\":\"Use the five distinct cards numbered 1 through 5. Each player receives an unordered hand of two distinct cards, without replacement across both hands; one card is undealt. There are 30 valid assignments of hands to the two players.\"},{\"ref\":\"pocket.rule.order\",\"text\":\"Play exactly two rounds. Player 1 commits first in each round, followed by Player 2.\"},{\"ref\":\"pocket.rule.commit\",\"text\":\"A player privately commits one available card from their own hand. A player cannot select an opponent card or a card already spent.\"},{\"ref\":\"pocket.rule.reveal\",\"text\":\"Player 2 committing completes the round and reveals both committed cards together. Both cards are spent, the pending commitments are cleared, and the next round, if any, starts with Player 1.\"},{\"ref\":\"pocket.rule.points\",\"text\":\"In each round the higher card earns exactly one point. No round tie is possible because the four dealt cards are distinct.\"},{\"ref\":\"pocket.rule.finish\",\"text\":\"After the second reveal, the player with more points wins. A final score of 1–1 is a draw.\"},{\"ref\":\"pocket.rule.private\",\"text\":\"Round, turn, scores, paired revealed history, and the outcome are public. A player may see only their own remaining hand and own pending card. The opponent hand and an unrevealed opponent commitment remain hidden.\"}],\"components\":[{\"ref\":\"public.round\",\"label\":\"Round\",\"description\":\"The shared round or completion status, expressed in words and numbers.\"},{\"ref\":\"public.turn\",\"label\":\"Turn\",\"description\":\"Which player may commit next, without disclosing that player’s selected or available card values.\"},{\"ref\":\"public.scores\",\"label\":\"Scores\",\"description\":\"The publicly earned points for both players, with equal one-point stakes in each round.\"},{\"ref\":\"public.history\",\"label\":\"Revealed rounds\",\"description\":\"Only completed pairs of revealed cards and their round result. Never a still-pending opponent card.\"},{\"ref\":\"public.outcome\",\"label\":\"Outcome\",\"description\":\"The final winning player or draw after two completed rounds.\"},{\"ref\":\"private.own-hand\",\"label\":\"Your hand\",\"description\":\"The locally bound viewer’s own remaining cards only, with readable card values and redundant shapes. This component cannot choose a different viewer.\"},{\"ref\":\"private.own-pending\",\"label\":\"Your pending card\",\"description\":\"Only the bound viewer’s own committed card while the round is pending. No private values enter shared announcements.\"},{\"ref\":\"actions.commit\",\"label\":\"Commit controls\",\"description\":\"Only the acting player’s engine-approved card choices, presented in their private view. Selection alone does not commit or reveal a card.\"}],\"adapters\":{\"shape-text\":[\"public.round\",\"public.turn\",\"public.scores\",\"public.history\",\"public.outcome\",\"private.own-hand\",\"private.own-pending\",\"actions.commit\"],\"switch-select\":[\"actions.commit\"]},\"sourceRefs\":[\"pocket.rule.deal\",\"pocket.rule.order\",\"pocket.rule.commit\",\"pocket.rule.reveal\",\"pocket.rule.points\",\"pocket.rule.finish\",\"pocket.rule.private\"],\"fixtures\":[{\"ref\":\"ot-fixture-003\",\"description\":\"Two synthetic pending-commit worlds for checking the waiting observer’s information partition. Private fixture details remain in the designer inspector.\"},{\"ref\":\"ot-fixture-004\",\"description\":\"A synthetic completed two-round draw, for checking the equal-stakes terminal outcome.\"}]}}"
+          }
+        ]
+      },
+      "proposal": {
+        "schema": "open-table.proposal.v1",
+        "gameId": "pocket-signals",
+        "rulesetPin": "sha256:7f07c7abf26f0e88009bbf9315867471ff4b75988786be2fcc5175b8109f5ef4",
+        "classification": "equivalence-candidate",
+        "summary": "Fixed-catalog draft for the requested access goal. The selector cannot establish that every requested intent is covered; independent checking and author review remain required.",
+        "changes": [
+          {
+            "adapter": "switch-select",
+            "componentRef": "actions.commit",
+            "sourceRefs": [
+              "pocket.rule.commit"
+            ],
+            "rationale": "Use the fixed switch-select adapter for Commit controls. Preserve the authored rule: A player privately commits one available card from their own hand. A player cannot select an opponent card or a card already spent."
+          }
+        ],
+        "witnessCandidates": []
+      },
+      "comparison": {
+        "classificationMatches": true,
+        "missingTargets": [],
+        "additionalTargets": [],
+        "missingSourceRefs": [
+          "pocket.rule.reveal"
+        ],
+        "manualReviewConditions": [
+          "Offers only the acting player's legal card choices.",
+          "Does not reveal on selection or alter the two-player commitment order."
+        ]
+      },
+      "checks": [
+        {
+          "adapter": "switch-select",
+          "ok": true,
+          "complete": true,
+          "verdict": "equivalent",
+          "gameId": "pocket-signals",
+          "states": 450,
+          "transitions": 420,
+          "initialStates": 30,
+          "scope": "All reachable states of this finite original game."
+        }
+      ]
+    }
+  ]
+}

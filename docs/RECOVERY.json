@@ -28,7 +28,24 @@
       "mobile-table.png"
     ],
     "modelRequests": 0,
-    "publicRelease": false
+    "publicRelease": false,
+    "package": {
+      "sourceCommit": "af04f2b1213784b48422cb9fcd8f26aa86dcdbff",
+      "sha256": "ba67362d36389ab13bf823a9f64b879e80b9bfd71deaae86213a90da24dbe19c",
+      "nativeTests": 42,
+      "browserScenarios": 15,
+      "staleSourceStartupRejected": true,
+      "retainedArchive": "release-artifacts/open-table-0.1.0-af04f2b.tgz"
+    },
+    "publishedInitialSource": {
+      "repository": "https://github.com/Jacob-Met/open-table",
+      "private": true,
+      "head": "af04f2b1213784b48422cb9fcd8f26aa86dcdbff",
+      "tree": "396778cb963236481fa21f051aacd8a3e036dd66",
+      "remote_head_matches": true,
+      "remote_tree_matches": true,
+      "qualified_package_sha256": "ba67362d36389ab13bf823a9f64b879e80b9bfd71deaae86213a90da24dbe19c"
+    }
   },
   "priorIncrement": {
     "cliPR": "https://github.com/Jacob-Met/hamon-cli/pull/54",
@@ -85,10 +102,12 @@
     "initialBrowserFailure": "hamon-76408-20261027-open-table-browser-initial-02",
     "qualifiedBrowser": "hamon-76408-20261027-open-table-browser-receiving-01",
     "native": "hamon-76408-20261027-open-table-native-01",
-    "modelDevelopment": "hamon-76408-20261027-open-table-model-development-01"
+    "modelDevelopment": "hamon-76408-20261027-open-table-model-development-01",
+    "package": "hamon-76408-20261027-open-table-package-01",
+    "publishInitial": "hamon-76408-20261027-open-table-publish-01",
+    "publishEvidence": "hamon-76408-20261027-open-table-publish-evidence-01"
   },
   "remaining": [
-    "Clean package and published-source receiving",
     "Known authorized NVIDIA/Nebius account/model route and bounded real inference",
     "Human access playtests; hardware switch and screen-reader receiving",
     "Further original game/designer workflow capability"
@@ -97,5 +116,6 @@
     "No new credentials, persistent access, security changes, spending or public release implied",
     "No competition submission without required owner review",
     "Existing #2/#10/#27 and PR26 fleet/global rollout holds preserved"
-  ]
+  ],
+  "nextUsefulAdvance": "Continuous scan across consecutive turns after explicit opt-in, preserving private handoff and fresh-key protection; actual NVIDIA/Nebius access receiving through existing #1630 owner."
 }
