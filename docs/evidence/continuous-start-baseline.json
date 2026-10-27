@@ -1,0 +1,13 @@
+{
+  "sourceSha256": "691604387eea9a2895a4de34db6ffc05df7a4ba0d2b895767970458d80aa6c63",
+  "afterStart": {
+    "position": "Shared path, marker at 0",
+    "focus": "confirm-choice"
+  },
+  "afterRepeat": {
+    "position": "Shared path, marker at 1",
+    "focus": "table-title"
+  },
+  "unintendedMove": true,
+  "errors": []
+}

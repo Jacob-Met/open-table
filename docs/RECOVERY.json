@@ -117,5 +117,22 @@
     "No competition submission without required owner review",
     "Existing #2/#10/#27 and PR26 fleet/global rollout holds preserved"
   ],
-  "nextUsefulAdvance": "Continuous scan across consecutive turns after explicit opt-in, preserving private handoff and fresh-key protection; actual NVIDIA/Nebius access receiving through existing #1630 owner."
+  "nextUsefulAdvance": "Qualify and integrate the continuous-scan package; prepare the bounded model request runner while the established #1630 owner qualifies the existing NVIDIA/Nebius route.",
+  "currentIncrement": {
+    "name": "continuous scan across turns",
+    "branch": "feat/continuous-turn-scan",
+    "appSha256": "c9de4481d435238a16dcbcbb30fa18e3f47e86e9019a64bd92cb5b6afd8794d2",
+    "nativeTests": 42,
+    "browserRegressionScenarios": 15,
+    "focusedBrowserCourses": 5,
+    "packageReceiving": "pending",
+    "published": "pending",
+    "operations": {
+      "baseline": "hamon-76408-20261027-open-table-continuous-baseline-01",
+      "patch": "hamon-76408-20261027-continuous-app-patch-01",
+      "focused": "hamon-76408-20261027-continuous-browser-02",
+      "regression": "hamon-76408-20261027-continuous-regression-01",
+      "native": "hamon-76408-20261027-continuous-native-01"
+    }
+  }
 }

@@ -36,7 +36,7 @@ try:
     target.parent.mkdir(parents=True,exist_ok=True)
     with tar.extractfile(member) as stream:target.write_bytes(stream.read())
  package=dest/'package'
- required=['index.html','styles.css','server.mjs','src/app.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','tests/server.test.mjs']
+ required=['index.html','styles.css','server.mjs','src/app.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/continuous-receive.mjs','tests/server.test.mjs']
  for path in required:assert (package/path).is_file(),path
  for forbidden in ['receiving','node_modules','.env','.git']:assert not (package/forbidden).exists(),forbidden
  test=run(['npm','test'],cwd=package)
@@ -64,6 +64,12 @@ try:
  browser_receipt=json.loads((out/'browser/receipt.json').read_text())
  assert browser_receipt['ok']
  receipt['browser']={'ok':True,'checks':browser_receipt['checks'],'errors':browser_receipt['browserErrors']}
+ continuous=run(['node','scripts/continuous-receive.mjs'],cwd=package,env=dict(env,OPEN_TABLE_CONTINUOUS_DIR=str(out/'continuous')),timeout=90)
+ (out/'package-continuous.log').write_text(continuous.stdout+continuous.stderr)
+ assert continuous.returncode==0,continuous.stdout+continuous.stderr
+ continuous_receipt=json.loads((out/'continuous/receipt.json').read_text())
+ assert continuous_receipt['ok']
+ receipt['continuous']={'ok':True,'checks':continuous_receipt['checks'],'errors':continuous_receipt['browserErrors'],'sourceSha256':continuous_receipt['sourceSha256']}
  os.killpg(server.pid,signal.SIGTERM);server.wait(timeout=10);server=None
  game=package/'src/games.js';original=game.read_bytes()
  try:

@@ -26,9 +26,9 @@ The normal start, test, and package commands verify the generated source pins. A
 
 The rules use public labels Player 1 and Player 2; engine observer IDs are 0 and 1 respectively.
 
-Choose **Shapes + words** for explicit numbered, named-shape controls, or **Scan + select** for manual cycling or timed scanning followed by explicit confirmation. Scanning alone does not make a move. Automatic scan intervals are 1.4, 2.4, or 4 seconds. This qualifies the action-selection mechanism after setup; whole-application single-switch navigation and physical switch hardware have not been evaluated.
+Choose **Shapes + words** for explicit numbered, named-shape controls, or **Scan + select** for manual cycling or timed scanning followed by explicit confirmation. Start auto scan once to keep it running across successive turns. Each new turn gets a full selection interval; pressing Confirm makes exactly one move. Private handoffs stop scanning and keep the next hand covered until a fresh press on Show my hand. Pause, changing games or packs, opening a pack, and entering the workshop stop the run. Scanning alone does not make a move. Automatic scan intervals are 1.4, 2.4, or 4 seconds. This qualifies the action-selection mechanism after setup; whole-application single-switch navigation and physical switch hardware have not been evaluated.
 
-Both original and adapted choices appear for the same acting player. Pocket Signals clears private cards and both choice panels before handing the device over. A repeated held Enter cannot activate the next player's reveal control; a fresh press still works.
+Both original and adapted choices appear for the same acting player. Pocket Signals clears private cards and both choice panels before handing the device over. Repeated held Enter or Space is suppressed on Start/Pause, Confirm, Show my hand, and Play again. Fresh presses remain usable after focus moves between these controls.
 
 This is cooperative **local pass-and-play on a trusted device**. It is not secure remote multiplayer. Full game truth exists in the local application memory; anyone controlling the device or developer tools can inspect it. Players should look away for the other person's private turn.
 
@@ -70,14 +70,17 @@ This command makes zero provider requests and does not run the reserved cases. E
 ```sh
 npm test
 node scripts/browser-receive.mjs
+node scripts/continuous-receive.mjs
 npm pack
 ```
 
-The browser course uses the installed Chrome at `/usr/local/bin/google-chrome` and Node's built-in CDP transport. It starts its own loopback server and browser profile, blocks non-loopback page traffic, and closes only the process it launched. Set `OPEN_TABLE_RECEIVING_URL` to receive an already-running copy, or `OPEN_TABLE_RECEIVING_DIR` to retain a separate run. The scripts do not inspect signed-in browser profiles.
+The browser course uses the installed Chrome at `/usr/local/bin/google-chrome` and Node's built-in CDP transport. It starts its own loopback server and browser profile, blocks non-loopback page traffic, and closes only the process it launched. Set `OPEN_TABLE_RECEIVING_URL` to receive an already-running copy, `OPEN_TABLE_RECEIVING_DIR` for a separate general browser run, or `OPEN_TABLE_CONTINUOUS_DIR` for a fresh continuous-scan run. The scripts do not inspect signed-in browser profiles.
 
-The qualified source passed 42 native/HTTP tests and 15 actual-browser scenarios on Node 22.23.4 / Chrome 156.0.8078.47. Browser evidence covers complete game outcomes, scan/confirm behavior, private handoffs and a repeated-key regression, indistinguishable private states, actual downloads/file-input reopening, rejected imports, proposal boundaries, designer separation, and 1440/390/320-pixel layouts. Desktop and narrow screenshots were visually reviewed.
+The 0.2.0 application source passed 42 native/HTTP tests, 15 existing actual-browser scenarios, and five focused continuous-scan courses on Node 22.23.4 / Chrome 156.0.8078.47. Browser evidence covers complete game outcomes, scan/confirm behavior, private handoffs and a repeated-key regression, indistinguishable private states, actual downloads/file-input reopening, rejected imports, proposal boundaries, designer separation, and 1440/390/320-pixel layouts. Desktop and narrow screenshots were visually reviewed.
 
-See [receiving evidence](docs/RECEIVING.md), [research and model-route limits](docs/RESEARCH.md), and [recovery state](docs/RECOVERY.json). The separate clean archive also passed all 42 native/HTTP and 15 browser scenarios through its own npm start. Private remote source/tree identity was verified. The [qualified private archive](release-artifacts/open-table-0.1.0-af04f2b.tgz) is retained for review.
+The focused course checks actual repeated key events, successive turns, private handoffs, pause persistence, timer replacement/cancellation, pack reopen, and the finished-game boundary. At most one scan interval was active; none remained behind a handoff curtain, while paused, offscreen, or after finish. The desktop scan state was visually reviewed. A fresh clean-package receiving result for 0.2.0 is recorded separately when complete.
+
+See [receiving evidence](docs/RECEIVING.md), [research and model-route limits](docs/RESEARCH.md), and [recovery state](docs/RECOVERY.json). The retained 0.1.0 clean archive also passed all 42 native/HTTP and 15 browser scenarios through its own npm start. Private remote source/tree identity was verified. The [qualified private archive](release-artifacts/open-table-0.1.0-af04f2b.tgz) is retained for review.
 
 ## Ownership
 

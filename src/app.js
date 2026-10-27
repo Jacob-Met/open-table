@@ -24,6 +24,9 @@ function el(tag,attrs={},...children){
  }
  return node;
 }
+function freshActivation(event){
+ if(event.repeat&&(event.key==='Enter'||event.key===' '))event.preventDefault();
+}
 const actionText=a=>a.type==='advance'?'Advance '+a.steps+' '+(a.steps===1?'space':'spaces'):'Commit card '+a.card;
 const labelFor=mode=>PACKS[mode]?.title||mode;
 function download(name,text){
@@ -39,11 +42,11 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
  if(state.game!==gameId)throw new Error('Fixture game mismatch');
  outcome(state);
  let screen='play',mode='shape-text',seat=null,status='',statusError=false;
- let scanIndex=0,scanTimer=null,scanDelay=1400,labMode=null,labResult=null,proposalText='',proposal=null,proposalError='';
+ let scanIndex=0,scanTimer=null,scanDelay=1400,scanEpoch=0,continuousScan=false,labMode=null,labResult=null,proposalText='',proposal=null,proposalError='';
  const checks=new Map(),content=el('div'),live=el('div',{class:'visually-hidden',role:'status','aria-live':'polite','aria-atomic':'true','data-testid':'public-live'});
  root.replaceChildren(content,live);
  function fresh(id){const roots=initialStates(id);return roots[Math.floor(Math.random()*roots.length)];}
- function stopScan(){if(scanTimer!==null)clearInterval(scanTimer);scanTimer=null;}
+ function stopScan(){if(scanTimer!==null)clearInterval(scanTimer);scanTimer=null;scanEpoch++;}
  function announce(text){live.textContent=text;}
  function notify(text,error=false){status=text;statusError=error;}
  function publicView(){
@@ -58,11 +61,12 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
  }
  function cover(){stopScan();seat=null;scanIndex=0;}
  function reset(id=selectedGame){
+  if(id!==selectedGame)continuousScan=false;
   cover();selectedGame=id;state=fresh(id);labMode=null;labResult=null;proposal=null;proposalError='';proposalText='';
   notify('New game ready.');render(id==='pocket-signals'?'reveal-hand':'table-title');announce('New '+GAMES[id].title+' game ready.');
  }
  function changeScreen(next){
-  cover();screen=next;render(next==='play'?(selectedGame==='pocket-signals'?'reveal-hand':'table-title'):'workshop-title');
+  continuousScan=false;cover();screen=next;render(next==='play'?(selectedGame==='pocket-signals'?'reveal-hand':'table-title'):'workshop-title');
   announce(next==='play'?'Back at the table. Private cards are covered.':'Adaptation workshop. All failure examples are synthetic.');
  }
  function perform(choiceId){
@@ -80,7 +84,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
   announce(message);
  }
  function activatePack(pack){
-  checkedMode(selectedGame,pack);cover();mode=pack;
+  checkedMode(selectedGame,pack);continuousScan=false;cover();mode=pack;
   notify(labelFor(pack)+' is ready. Rules and player information are preserved in the complete finite-game check.');
   render(selectedGame==='pocket-signals'?'reveal-hand':'table-title');announce('Access pack changed. Private cards are covered.');
  }
@@ -95,7 +99,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
    try{
     if(file.size>65536)throw new Error('Pack is too large.');
     const received=importPack(await file.text());
-    cover();if(received.gameId!==selectedGame){selectedGame=received.gameId;state=fresh(selectedGame);}
+    continuousScan=false;cover();if(received.gameId!==selectedGame){selectedGame=received.gameId;state=fresh(selectedGame);}
     mode=received.adapter;checks.set(selectedGame+':'+mode,received.check);
     notify('Pack reopened and checked again against the current rules.');
     render(selectedGame==='pocket-signals'?'reveal-hand':'table-title');announce('Adaptation pack reopened. Private cards are covered.');
@@ -109,7 +113,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
     try{const pack=createPack(selectedGame,mode);download(selectedGame+'-'+mode+'.open-table.json',typeof pack==='string'?pack:JSON.stringify(pack,null,2));
      notify('Pack saved with its rule pin. Private cards and play history are not included.');render('save-pack');announce('Adaptation pack saved.');
     }catch(e){notify(e.message,true);render('save-pack');}
-   }},'Save pack ↓'),el('button',{id:'open-pack',onClick:()=>input.click()},'Open pack ↑')),input,statusNode());
+   }},'Save pack ↓'),el('button',{id:'open-pack',onClick:()=>{continuousScan=false;cover();render('open-pack');content.querySelector('#pack-file').click();}},'Open pack ↑')),input,statusNode());
  }
  function rulesPanel(){return el('section',{class:'rules-panel'},el('h3',{},'How to play'),
   el('ol',{},GAMES[selectedGame].rules.map(text=>el('li',{},text))),
@@ -130,7 +134,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
   if(seat!==v.turn)return el('div',{class:'table-surface','data-testid':'board'},title,rounds,
    el('div',{class:'curtain','data-testid':'handoff'},el('div',{class:'curtain-mark','aria-hidden':'true'},'◇ ◇'),
     el('h3',{},'Over to Player '+(v.turn+1)),el('p',{},'Pass the device. When the other player has looked away, uncover your own cards.'),
-    el('button',{id:'reveal-hand',onKeyDown:e=>{if(e.repeat&&(e.key==='Enter'||e.key===' '))e.preventDefault();},onClick:()=>{seat=v.turn;scanIndex=0;render('private-title');}},'I’m Player '+(v.turn+1)+' — show my hand')));
+    el('button',{id:'reveal-hand',onKeyDown:freshActivation,onClick:()=>{seat=v.turn;scanIndex=0;render('private-title');}},'I’m Player '+(v.turn+1)+' — show my hand')));
   const ownView=createAdapter(mode).observe(state,seat);
   return el('div',{class:'table-surface','data-testid':'board'},title,rounds,
    el('p',{class:'private-label',id:'private-title',tabindex:'-1'},'Player '+(seat+1)+' · your private hand · round '+ownView.round),
@@ -141,27 +145,33 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
  }
  function endResult(v){return el('div',{class:'end-result'},el('h3',{},v.outcome.winner===null?'A well-matched draw.':'Player '+(v.outcome.winner+1)+' takes it.'),
   el('p',{},selectedGame==='beacon-steps'?'The marker reached the seventh light.':'Two rounds, one point each. The table is open for another game.'),
-  el('button',{class:'primary',id:'new-game',onClick:()=>reset()},'Play again ↗'));}
+  el('button',{class:'primary',id:'new-game',onKeyDown:freshActivation,onClick:()=>reset()},'Play again ↗'));}
  function scanActions(choices){
   scanIndex=Math.min(scanIndex,choices.length-1);
   const list=el('ol',{class:'scan-choices','aria-label':'Available choices'},choices.map((c,i)=>el('li',{class:i===scanIndex?'selected':'','data-scan-index':i},c.label)));
-  const choose=el('button',{class:'primary',id:'confirm-choice',onClick:()=>perform(choices[scanIndex].id)},'Confirm: '+choices[scanIndex].label);
+  const choose=el('button',{class:'primary',id:'confirm-choice',onKeyDown:freshActivation,onClick:()=>perform(choices[scanIndex].id)},'Confirm: '+choices[scanIndex].label);
   const paint=()=>{
    list.querySelectorAll('li').forEach((n,i)=>{n.classList.toggle('selected',i===scanIndex);if(i===scanIndex)n.setAttribute('aria-current','true');else n.removeAttribute('aria-current');});
    choose.textContent='Confirm: '+choices[scanIndex].label;
   };
   const next=()=>{scanIndex=(scanIndex+1)%choices.length;paint();};
-  const toggle=el('button',{id:'toggle-scan',onClick:()=>{
-   if(scanTimer!==null){stopScan();toggle.textContent='Start auto scan';}
-   else{scanTimer=setInterval(next,scanDelay);toggle.textContent='Pause auto scan';choose.focus();}
-  }},'Start auto scan');
+  const begin=()=>{
+   stopScan();const epoch=scanEpoch;
+   scanTimer=setInterval(()=>{if(epoch===scanEpoch&&continuousScan)next();},scanDelay);
+  };
+  const toggle=el('button',{id:'toggle-scan','aria-pressed':continuousScan,onKeyDown:freshActivation,onClick:()=>{
+   continuousScan=!continuousScan;
+   if(continuousScan){begin();choose.focus();}else stopScan();
+   toggle.textContent=continuousScan?'Pause auto scan':'Start auto scan';
+   toggle.setAttribute('aria-pressed',String(continuousScan));
+  }},continuousScan?'Pause auto scan':'Start auto scan');
   const speed=el('select',{id:'scan-speed','aria-label':'Scan interval',onChange:e=>{
-   scanDelay=Number(e.target.value);if(scanTimer!==null){stopScan();scanTimer=setInterval(next,scanDelay);}
+   scanDelay=Number(e.target.value);if(scanTimer!==null)begin();
   }},[1400,2400,4000].map(ms=>el('option',{value:ms,selected:ms===scanDelay},ms/1000+' seconds')));
-  paint();
+  paint();if(continuousScan)begin();
   return el('div',{},list,el('div',{class:'scan-controls'},el('button',{id:'next-choice',onClick:next},'Next choice'),choose),
    el('div',{class:'scan-controls'},toggle,speed),
-   el('p',{class:'scan-hint'},'Scan automatically, then press Enter or Space on Confirm. You can also step through choices manually. No move happens until you confirm.'));
+   el('p',{class:'scan-hint'},'Start auto scan once to continue across turns. Press Enter or Space on Confirm to make one move. Private hands wait for a fresh press on Show my hand. Pause at any time, or use Next choice manually.'));
  }
  function comparison(v){
   if(v.outcome.terminal)return selectedGame==='beacon-steps'?endResult(v):null;
@@ -272,7 +282,8 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
    el('footer',{class:'footer'},el('p',{},'OPEN TABLE / An original, private prototype. Rule equivalence is checked for these finite games; accessibility and enjoyment need playtesting with people.'),
     el('p',{},'A place for every player.')));
   content.replaceChildren(page);
-  if(focusId)content.querySelector('#'+focusId)?.focus({preventScroll:true});
+  const target=continuousScan&&scanTimer!==null?'confirm-choice':focusId;
+  if(target)content.querySelector('#'+target)?.focus({preventScroll:true});
  }
  mounted.set(root,stopScan);render();
  return {destroy(){stopScan();mounted.delete(root);root.replaceChildren();}};

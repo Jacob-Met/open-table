@@ -51,3 +51,17 @@ The initial commit was pushed to private Jacob-Met/open-table main. Both the Git
 The [qualified archive](../release-artifacts/open-table-0.1.0-af04f2b.tgz) is retained privately alongside the source. See docs/evidence/package-qualified.json and published-initial.json for exact execution identities and paths.
 
 The four development baseline proposals validated and selected all required component targets. Two omitted required grounding references: beacon.rule.win and pocket.rule.reveal. This was recorded as incomplete grounding, despite all selected fixed adapters passing their finite checker. No reserved case or model request was executed.
+
+## Continuous scanning — 0.2.0 candidate
+
+The observed starting limitation was that scanning stopped after each move, forcing repeated setup. A second real keyboard defect was reproduced on published application SHA-256 691604387eea9a2895a4de34db6ffc05df7a4ba0d2b895767970458d80aa6c63: Enter on Start moved focus to Confirm; a repeated keydown immediately advanced the marker from 0 to 1. See `docs/evidence/continuous-start-baseline.json`.
+
+Application SHA-256 c9de4481d435238a16dcbcbb30fa18e3f47e86e9019a64bd92cb5b6afd8794d2 preserves explicit running intent across ordinary turns, restarts with a full dwell interval, suspends under the private curtain, and resumes only after deliberate Reveal. Pause and deliberate mode/workshop/import exits clear the run. Repeated Enter/Space is prevented on all four focus-transfer controls, including Play again. Timer generations invalidate callbacks from a previous render.
+
+Root executed all five focused browser courses in `continuous-qualified.json`, the original 15 browser scenarios in `browser-continuous-regression.json`, and all 42 native/HTTP tests. The focused receipt includes actual timer accounting and game/DOM observations: at most one live interval, none under the private curtain, paused, in the workshop, or at game end. Fresh Enter and Space positives remain usable. The browser observed no runtime errors or non-loopback page requests.
+
+The first focused course stopped on an incorrect receiver expectation: the adapter label is “Commit 2”, not “Commit card 2”. The receipt is retained in `continuous-receiver-label-failure.json`; only that matcher was corrected before a fresh successful run. This was a receiver error, separate from the retained product baseline defect.
+
+The lead reviewed the rendered scanning state in `docs/images/continuous-beacon.png`: selected choice, focused Confirm, Pause, speed, and guidance are visible. The independent retained reviewers assessed the source delta and receiving evidence. These checks do not replace physical-switch or screen-reader receiving with people.
+
+Clean-package and published-head receiving for this increment remain pending at this source checkpoint.
