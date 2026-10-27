@@ -34,7 +34,7 @@ This is cooperative **local pass-and-play on a trusted device**. It is not secur
 
 ## The workshop
 
-The independent checker enumerates every reachable state of each original game. It compares legal-action bijections, successor states, outcomes, and both directions of each player's information partition. Action labels are part of the observed information, so a label that gives away a hidden card fails. Authored candidate functions receive detached inputs and outputs, protecting the reference state and retained witnesses from mutation.
+The independent checker enumerates every reachable state of each original game. It compares legal-action bijections, successor states, outcomes, and both directions of each player's information partition. Action labels are part of the observed information, so a label that gives away a hidden card fails. Each visible choice ID must also decode to the same original action across states the player cannot distinguish. A hidden hand or pending move cannot silently change a button's meaning; a rejection retains the conflicting choice and two replayable synthetic worlds in designer diagnostics. Authored candidate functions receive detached inputs and outputs, protecting the reference state and retained witnesses from mutation.
 
 Two intentionally bad designer controls illustrate failure:
 
@@ -43,7 +43,7 @@ Two intentionally bad designer controls illustrate failure:
 
 These examples are separate from the live game. Negative controls cannot activate as access packs. The no-hidden-information Beacon game is not falsely rejected merely because a control is named “reveal opponent.”
 
-A finite equivalence result establishes preservation for these games and fixed adapters. It does not establish universal accessibility, enjoyment, usability with a screen reader or physical switch, or equivalence for arbitrary tabletop games. Human access playtests remain necessary.
+A finite equivalence result establishes preservation for these games and fixed, deterministic adapters. It does not establish universal accessibility, enjoyment, usability with a screen reader or physical switch, or equivalence for arbitrary tabletop games. Human access playtests remain necessary.
 
 ## Save and reopen
 

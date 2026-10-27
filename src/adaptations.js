@@ -85,10 +85,26 @@ export function checkAdaptation(gameId, candidate, { maxStates = 10000 } = {}) {
         const baseView = { observation: game.observe(state, player), actions: legal };
         const adaptedView = { observation: fromAdapter('observe', state, player), choices };
         const baseKey = canonical(baseView), adaptedKey = canonical(adaptedView);
-        const record = { entry: current, baseView, adaptedView, baseKey, adaptedKey };
+        // A visible choice must retain its meaning throughout a player's
+        // information class. Per-state action bijections alone do not ensure this.
+        const meanings = new Map(choices.map((choice, index) => [choice.id, {
+          key: canonical(decoded[index]), action: structuredClone(decoded[index])
+        }]));
+        const record = { entry: current, baseView, adaptedView, baseKey, adaptedKey, meanings };
         const sameBase = byBase[player].get(baseKey), sameAdapted = byAdapted[player].get(adaptedKey);
         if (sameBase && sameBase.adaptedKey !== adaptedKey) return pairFailure('information-leak', player, sameBase, record);
         if (sameAdapted && sameAdapted.baseKey !== baseKey) return pairFailure('information-loss', player, sameAdapted, record);
+        if (sameBase) for (const choice of choices) {
+          // Equal adapted views above include the same validated unique string IDs.
+          const prior = sameBase.meanings.get(choice.id), present = meanings.get(choice.id);
+          if (prior.key !== present.key) {
+            const result = pairFailure('action-meaning', player, sameBase, record);
+            result.counterexample.choiceId = choice.id;
+            result.counterexample.left.decodedAction = structuredClone(prior.action);
+            result.counterexample.right.decodedAction = structuredClone(present.action);
+            return result;
+          }
+        }
         if (!sameBase) byBase[player].set(baseKey, record);
         if (!sameAdapted) byAdapted[player].set(adaptedKey, record);
         for (let index = 0; index < choices.length; index++) {
