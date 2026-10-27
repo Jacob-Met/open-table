@@ -1,0 +1,4 @@
+node_modules/
+receiving/
+*.tgz
+.env

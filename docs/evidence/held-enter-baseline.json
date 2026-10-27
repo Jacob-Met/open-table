@@ -1,0 +1,15 @@
+{
+  "desktop": "/home/ubuntu/hamon-work/hamon-76408-20261027/open-table/receiving/browser-initial/desktop-initial.png",
+  "afterCommit": {
+    "covered": true,
+    "privateVisible": false,
+    "focus": "reveal-hand"
+  },
+  "afterRepeatedEnter": {
+    "covered": false,
+    "privateVisible": true,
+    "focus": "private-title"
+  },
+  "observedHandoffFailure": true,
+  "errors": []
+}

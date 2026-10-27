@@ -1,0 +1,30 @@
+{
+  "name": "open-table",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "pins": "node scripts/write-ruleset-pins.mjs",
+    "prestart": "node scripts/write-ruleset-pins.mjs --check",
+    "pretest": "node scripts/write-ruleset-pins.mjs --check",
+    "prepack": "node scripts/write-ruleset-pins.mjs --check",
+    "receive:browser": "node scripts/browser-receive.mjs",
+    "experiment:development": "node scripts/model-development.mjs"
+  },
+  "files": [
+    "index.html",
+    "styles.css",
+    "server.mjs",
+    "src",
+    "scripts",
+    "tests",
+    "README.md",
+    "docs"
+  ],
+  "license": "UNLICENSED"
+}

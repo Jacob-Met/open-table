@@ -1,0 +1,101 @@
+{
+  "team": "hamon-76408-20261027",
+  "prompt": {
+    "version": "2026-10-27.11",
+    "sequence": 11,
+    "blocks": 73,
+    "url": "https://chatgpt.com/space/page_6adfa81269708191a4347a4e5917ef6f",
+    "readCompleteThroughRenpo": true
+  },
+  "owner": "node-72e09d180ec675855992b3cbfb59e9e8",
+  "source": "/home/ubuntu/hamon-work/hamon-76408-20261027/open-table",
+  "repository": "https://github.com/Jacob-Met/open-table",
+  "claim": "https://github.com/Jacob-Met/hamon/issues/1631#issuecomment-6431153046",
+  "workers": [
+    "/root/consumer_advance",
+    "/root/backup_review",
+    "/root/ownership_recovery"
+  ],
+  "scope": "Selected concept 14 OPEN TABLE. Original finite games, adaptation authoring and exact preservation checks. Private prototype.",
+  "verified": {
+    "nativeAndHttpTests": 42,
+    "browserScenarios": 15,
+    "browserReceipt": "receiving/browser-qualified/receipt.json",
+    "pixelsReviewed": [
+      "desktop-table.png",
+      "desktop-workshop.png",
+      "mobile-overview.png",
+      "mobile-table.png"
+    ],
+    "modelRequests": 0,
+    "publicRelease": false
+  },
+  "priorIncrement": {
+    "cliPR": "https://github.com/Jacob-Met/hamon-cli/pull/54",
+    "merge": "0a0971fa1883b0f67eca44fcf3a6883d037a3f20",
+    "publishedSourceAndInstalledCommandReceived": true,
+    "backupTestCommit": "fd34db997d433c08ec6291497f9a2371f1d32761",
+    "deliveredToExistingOwner": "https://github.com/Jacob-Met/hamon/issues/1354#issuecomment-6431314223"
+  },
+  "stoppedCandidate": {
+    "name": "TRACEWALK",
+    "checkpoint": "61bd7739571b45ed7774cd0be318a2b2530bdc36",
+    "branch": "checkpoint/superseded-candidate-20261027",
+    "repository": "https://github.com/Jacob-Met/tracewalk",
+    "originalWorktree": "/home/ubuntu/hamon-work/hamon-76408-20261027/tracewalk",
+    "receivingWorktree": "/home/ubuntu/hamon-work/hamon-76408-20261027/tracewalk-receiving"
+  },
+  "uncertainOperations": [
+    {
+      "owner": "node-72e09d180ec675855992b3cbfb59e9e8",
+      "operation": "hamon-76408-consumer-stage-20261027-01",
+      "command": "hamon-76408-consumer-stage-20261027-01",
+      "kind": "possible source write to original TRACEWALK graph.js and graph.test.mjs only",
+      "state": "unresolved; original node_operation missing receipt did not establish non-dispatch; no replay"
+    },
+    {
+      "owner": "node-10dbc406f84a45113b2f175af35500f5",
+      "operation": "ownrec-7b4ea-board-start-01",
+      "command": "ownrec-7b4ea-board-read-01",
+      "kind": "read-only",
+      "state": "no host request record observed; no replay"
+    },
+    {
+      "owner": "node-10dbc406f84a45113b2f175af35500f5",
+      "operation": "backup-review-20261027-01-inspect-op",
+      "command": "backup-review-20261027-01-inspect",
+      "kind": "read-only",
+      "state": "no host request record observed; no replay"
+    },
+    {
+      "owner": "node-10dbc406f84a45113b2f175af35500f5",
+      "operation": "consumer-advance-1631-read-20261027-01",
+      "command": "consumer-advance-1631-read-20261027-01",
+      "kind": "read-only",
+      "state": "no host request record observed; no replay"
+    },
+    {
+      "owner": "node-10dbc406f84a45113b2f175af35500f5",
+      "operation": "hamon-76408-20261027-env-inspect-01",
+      "kind": "read-only",
+      "state": "unresolved original route; not replayed"
+    }
+  ],
+  "receivingOperations": {
+    "initialBrowserFailure": "hamon-76408-20261027-open-table-browser-initial-02",
+    "qualifiedBrowser": "hamon-76408-20261027-open-table-browser-receiving-01",
+    "native": "hamon-76408-20261027-open-table-native-01",
+    "modelDevelopment": "hamon-76408-20261027-open-table-model-development-01"
+  },
+  "remaining": [
+    "Clean package and published-source receiving",
+    "Known authorized NVIDIA/Nebius account/model route and bounded real inference",
+    "Human access playtests; hardware switch and screen-reader receiving",
+    "Further original game/designer workflow capability"
+  ],
+  "holds": [
+    "No new credentials, persistent access, security changes, spending or public release implied",
+    "No competition submission without required owner review",
+    "Existing #2/#10/#27 and PR26 fleet/global rollout holds preserved"
+  ]
+}

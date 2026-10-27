@@ -1,0 +1,280 @@
+import {initialStates,legalActions,step,observe,outcome} from './games.js';
+import {createAdapter,checkAdaptation} from './adaptations.js';
+import {parseModelProposal} from './model-proposal.js';
+import {getCatalog} from './catalog.js';
+import {createPack,importPack} from './pack.js';
+
+const GAMES={
+ 'beacon-steps':{title:'Beacon Steps',symbol:'↗',caption:'A shared path · open information',description:'One shared marker. One or two steps. Reach the seventh light.',rules:['Take turns moving the shared marker one or two spaces.','Land exactly on seven to win. You cannot move beyond it.','The whole board is public. There are no hidden cards or timers.']},
+ 'pocket-signals':{title:'Pocket Signals',symbol:'◇',caption:'A quiet duel · private cards',description:'Two cards each. Two private choices. Every round counts.',rules:['Each player receives two different cards from one to five; one card stays out.','Player 1 commits, then Player 2. Keep both choices private until both have committed.','Reveal together. The higher card earns one point. Play both rounds; a one–one score is a draw.']}
+};
+const PACKS={'shape-text':{title:'Shapes + words',description:'Numbers, named shapes, and explicit action labels.'},'switch-select':{title:'Scan + select',description:'Scan the existing choices, then confirm one action.'}};
+const SHAPES=['','●','▲','■','◆','★'], NAMES=['','circle','triangle','square','diamond','star'];
+const mounted=new WeakMap();
+function el(tag,attrs={},...children){
+ const node=document.createElement(tag);
+ for(const [name,value] of Object.entries(attrs)){
+  if(name==='class')node.className=value;
+  else if(name.startsWith('on'))node.addEventListener(name.slice(2).toLowerCase(),value);
+  else if(name.startsWith('aria-')&&value!==undefined&&value!==null)node.setAttribute(name,String(value));
+  else if(value!==false&&value!==undefined&&value!==null)node.setAttribute(name,value===true?'':String(value));
+ }
+ for(const child of children.flat(Infinity)){
+  if(child!==null&&child!==undefined&&child!==false)node.append(child instanceof Node?child:document.createTextNode(String(child)));
+ }
+ return node;
+}
+const actionText=a=>a.type==='advance'?'Advance '+a.steps+' '+(a.steps===1?'space':'spaces'):'Commit card '+a.card;
+const labelFor=mode=>PACKS[mode]?.title||mode;
+function download(name,text){
+ const url=URL.createObjectURL(new Blob([text],{type:'application/json'})),link=el('a',{href:url,download:name});
+ document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+/** Trusted-device local prototype. initialState is an authored receiving fixture input,
+ * never read from URL, storage, a model proposal, or an imported adaptation pack. */
+export function mountApp(root,{gameId='beacon-steps',initialState}={}){
+ mounted.get(root)?.();
+ let selectedGame=gameId,state=initialState?structuredClone(initialState):fresh(gameId);
+ if(state.game!==gameId)throw new Error('Fixture game mismatch');
+ outcome(state);
+ let screen='play',mode='shape-text',seat=null,status='',statusError=false;
+ let scanIndex=0,scanTimer=null,scanDelay=1400,labMode=null,labResult=null,proposalText='',proposal=null,proposalError='';
+ const checks=new Map(),content=el('div'),live=el('div',{class:'visually-hidden',role:'status','aria-live':'polite','aria-atomic':'true','data-testid':'public-live'});
+ root.replaceChildren(content,live);
+ function fresh(id){const roots=initialStates(id);return roots[Math.floor(Math.random()*roots.length)];}
+ function stopScan(){if(scanTimer!==null)clearInterval(scanTimer);scanTimer=null;}
+ function announce(text){live.textContent=text;}
+ function notify(text,error=false){status=text;statusError=error;}
+ function publicView(){
+  const v=observe(state,0);
+  return v.game==='beacon-steps'?v:{game:v.game,round:v.round,turn:v.turn,history:v.history,scores:v.scores,outcome:v.outcome};
+ }
+ function checkedMode(id,pack){
+  const key=id+':'+pack;if(!checks.has(key))checks.set(key,checkAdaptation(id,pack));
+  const check=checks.get(key);
+  if(!check.ok||!check.complete||check.verdict!=='equivalent')throw new Error('This adaptation has not passed the complete rule check.');
+  return check;
+ }
+ function cover(){stopScan();seat=null;scanIndex=0;}
+ function reset(id=selectedGame){
+  cover();selectedGame=id;state=fresh(id);labMode=null;labResult=null;proposal=null;proposalError='';proposalText='';
+  notify('New game ready.');render(id==='pocket-signals'?'reveal-hand':'table-title');announce('New '+GAMES[id].title+' game ready.');
+ }
+ function changeScreen(next){
+  cover();screen=next;render(next==='play'?(selectedGame==='pocket-signals'?'reveal-hand':'table-title'):'workshop-title');
+  announce(next==='play'?'Back at the table. Private cards are covered.':'Adaptation workshop. All failure examples are synthetic.');
+ }
+ function perform(choiceId){
+  const p=publicView(),actor=selectedGame==='pocket-signals'?seat:p.turn;
+  if(p.outcome.terminal||actor===null||actor!==p.turn)return;
+  checkedMode(selectedGame,mode);
+  const previousRounds=p.history?.length||0;
+  const next=createAdapter(mode).step(state,actor,choiceId);
+  cover();state=next;const after=publicView();
+  const message=after.outcome.terminal?(after.outcome.winner===null?'Game complete. It is a draw.':'Game complete. Player '+(after.outcome.winner+1)+' wins.')
+   :selectedGame==='beacon-steps'?'Marker at '+after.position+'. Player '+(after.turn+1)+' to move.'
+   :(after.history.length>previousRounds?'Both cards revealed. Round '+(previousRounds+1)+' is complete. ':'Choice committed privately. ')+
+    'Pass to Player '+(after.turn+1)+'.';
+  render(selectedGame==='pocket-signals'&&!after.outcome.terminal?'reveal-hand':after.outcome.terminal?'new-game':'table-title');
+  announce(message);
+ }
+ function activatePack(pack){
+  checkedMode(selectedGame,pack);cover();mode=pack;
+  notify(labelFor(pack)+' is ready. Rules and player information are preserved in the complete finite-game check.');
+  render(selectedGame==='pocket-signals'?'reveal-hand':'table-title');announce('Access pack changed. Private cards are covered.');
+ }
+ function gamePicker(){return el('div',{class:'game-picker','aria-label':'Choose an original game'},Object.entries(GAMES).map(([id,g])=>
+  el('button',{'aria-pressed':selectedGame===id,'data-game':id,onClick:()=>reset(id)},el('span',{class:'game-symbol','aria-hidden':'true'},g.symbol),
+   el('span',{},g.title,el('span',{class:'game-caption'},g.caption)))));}
+ function statusNode(){return el('p',{class:'status'+(statusError?' error':''),'data-testid':'pack-status'},status);}
+ function packPanel(){
+  const input=el('input',{type:'file',accept:'.json,application/json',class:'visually-hidden',id:'pack-file','aria-label':'Open an adaptation pack'});
+  input.addEventListener('change',async()=>{
+   const file=input.files?.[0];if(!file)return;
+   try{
+    if(file.size>65536)throw new Error('Pack is too large.');
+    const received=importPack(await file.text());
+    cover();if(received.gameId!==selectedGame){selectedGame=received.gameId;state=fresh(selectedGame);}
+    mode=received.adapter;checks.set(selectedGame+':'+mode,received.check);
+    notify('Pack reopened and checked again against the current rules.');
+    render(selectedGame==='pocket-signals'?'reveal-hand':'table-title');announce('Adaptation pack reopened. Private cards are covered.');
+   }catch(error){notify('Could not open pack: '+error.message,true);render('open-pack');}
+  });
+  return el('section',{class:'pack-panel','aria-labelledby':'pack-title'},
+   el('p',{class:'eyebrow'},'MAKE ROOM AT THE TABLE'),el('h3',{id:'pack-title'},'Your access pack'),
+   el('p',{},'Choose a presentation that works for your table. The legal choices stay the same.'),
+   el('div',{class:'pack-options'},Object.entries(PACKS).map(([id,p])=>el('button',{'aria-pressed':mode===id,'data-pack':id,onClick:()=>activatePack(id)},p.title,el('span',{},p.description)))),
+   el('div',{class:'pack-tools'},el('button',{id:'save-pack',onClick:()=>{
+    try{const pack=createPack(selectedGame,mode);download(selectedGame+'-'+mode+'.open-table.json',typeof pack==='string'?pack:JSON.stringify(pack,null,2));
+     notify('Pack saved with its rule pin. Private cards and play history are not included.');render('save-pack');announce('Adaptation pack saved.');
+    }catch(e){notify(e.message,true);render('save-pack');}
+   }},'Save pack ↓'),el('button',{id:'open-pack',onClick:()=>input.click()},'Open pack ↑')),input,statusNode());
+ }
+ function rulesPanel(){return el('section',{class:'rules-panel'},el('h3',{},'How to play'),
+  el('ol',{},GAMES[selectedGame].rules.map(text=>el('li',{},text))),
+  el('p',{class:'aside-note'},selectedGame==='pocket-signals'?'A cooperative, shared-device prototype. Look away during the other player’s private turn; this is not secure remote multiplayer.':'A small original game with no timing, memory, or dexterity requirement in its rules.'),
+  el('button',{class:'text-button small',onClick:()=>changeScreen('workshop')},'See what the checker preserves ↗'));}
+ function playerTag(turn){return el('span',{class:'player-tag'},el('span',{class:'player-dot'+(turn===1?' two':''),'aria-hidden':'true'}),'Player '+(turn+1)+' to move');}
+ function board(v){
+  const title=el('div',{class:'turn-line'},v.outcome.terminal?el('span',{class:'player-tag'},'Game complete'):playerTag(v.turn),
+   selectedGame==='beacon-steps'?el('span',{},'Exact arrival · 7'):el('span',{class:'scoreline'},'P1 '+v.scores[0]+' points',' · ','P2 '+v.scores[1]+' points'));
+  if(selectedGame==='beacon-steps'){
+   const track=el('div',{class:'track','aria-label':'Shared path, marker at '+v.position},
+    Array.from({length:8},(_,n)=>el('div',{class:'station'+(v.position===n?' active':'')+(n===7?' target':''),'aria-label':'Space '+n+(v.position===n?', marker here':'')+(n===7?', goal':'')},
+     el('span',{class:'station-num'},n),v.position===n?el('span',{class:'marker','aria-hidden':'true'}):el('span',{class:'station-mark'},n===7?'Goal':n===0?'Start':'·'))));
+   return el('div',{class:'table-surface','data-testid':'board'},title,track,el('p',{class:'track-note'},'One marker, shared by both players. The player who reaches seven wins.'));
+  }
+  const rounds=el('div',{class:'rounds'},v.history.map((r,i)=>el('span',{class:'round-chip'},'Round '+(i+1)+': P1 played '+r.cards[0]+' · P2 played '+r.cards[1])));
+  if(v.outcome.terminal)return el('div',{class:'table-surface','data-testid':'board'},title,rounds,endResult(v));
+  if(seat!==v.turn)return el('div',{class:'table-surface','data-testid':'board'},title,rounds,
+   el('div',{class:'curtain','data-testid':'handoff'},el('div',{class:'curtain-mark','aria-hidden':'true'},'◇ ◇'),
+    el('h3',{},'Over to Player '+(v.turn+1)),el('p',{},'Pass the device. When the other player has looked away, uncover your own cards.'),
+    el('button',{id:'reveal-hand',onKeyDown:e=>{if(e.repeat&&(e.key==='Enter'||e.key===' '))e.preventDefault();},onClick:()=>{seat=v.turn;scanIndex=0;render('private-title');}},'I’m Player '+(v.turn+1)+' — show my hand')));
+  const ownView=createAdapter(mode).observe(state,seat);
+  return el('div',{class:'table-surface','data-testid':'board'},title,rounds,
+   el('p',{class:'private-label',id:'private-title',tabindex:'-1'},'Player '+(seat+1)+' · your private hand · round '+ownView.round),
+   el('div',{class:'hand','data-testid':'private-hand'},ownView.hand.map(card=>el('div',{class:'playing-card','aria-label':'Card '+card+', '+NAMES[card]},
+    el('span',{class:'card-number','aria-hidden':'true'},card),el('span',{class:'card-shape','aria-hidden':'true'},SHAPES[card]),el('span',{class:'card-name','aria-hidden':'true'},NAMES[card])))),
+   el('p',{class:'private-label'},'Only your cards are shown. Choose below; both cards reveal together.'),
+   el('button',{class:'text-button small',id:'cover-hand',onClick:()=>{cover();render('reveal-hand');announce('Private cards covered.');}},'Cover my hand'));
+ }
+ function endResult(v){return el('div',{class:'end-result'},el('h3',{},v.outcome.winner===null?'A well-matched draw.':'Player '+(v.outcome.winner+1)+' takes it.'),
+  el('p',{},selectedGame==='beacon-steps'?'The marker reached the seventh light.':'Two rounds, one point each. The table is open for another game.'),
+  el('button',{class:'primary',id:'new-game',onClick:()=>reset()},'Play again ↗'));}
+ function scanActions(choices){
+  scanIndex=Math.min(scanIndex,choices.length-1);
+  const list=el('ol',{class:'scan-choices','aria-label':'Available choices'},choices.map((c,i)=>el('li',{class:i===scanIndex?'selected':'','data-scan-index':i},c.label)));
+  const choose=el('button',{class:'primary',id:'confirm-choice',onClick:()=>perform(choices[scanIndex].id)},'Confirm: '+choices[scanIndex].label);
+  const paint=()=>{
+   list.querySelectorAll('li').forEach((n,i)=>{n.classList.toggle('selected',i===scanIndex);if(i===scanIndex)n.setAttribute('aria-current','true');else n.removeAttribute('aria-current');});
+   choose.textContent='Confirm: '+choices[scanIndex].label;
+  };
+  const next=()=>{scanIndex=(scanIndex+1)%choices.length;paint();};
+  const toggle=el('button',{id:'toggle-scan',onClick:()=>{
+   if(scanTimer!==null){stopScan();toggle.textContent='Start auto scan';}
+   else{scanTimer=setInterval(next,scanDelay);toggle.textContent='Pause auto scan';choose.focus();}
+  }},'Start auto scan');
+  const speed=el('select',{id:'scan-speed','aria-label':'Scan interval',onChange:e=>{
+   scanDelay=Number(e.target.value);if(scanTimer!==null){stopScan();scanTimer=setInterval(next,scanDelay);}
+  }},[1400,2400,4000].map(ms=>el('option',{value:ms,selected:ms===scanDelay},ms/1000+' seconds')));
+  paint();
+  return el('div',{},list,el('div',{class:'scan-controls'},el('button',{id:'next-choice',onClick:next},'Next choice'),choose),
+   el('div',{class:'scan-controls'},toggle,speed),
+   el('p',{class:'scan-hint'},'Scan automatically, then press Enter or Space on Confirm. You can also step through choices manually. No move happens until you confirm.'));
+ }
+ function comparison(v){
+  if(v.outcome.terminal)return selectedGame==='beacon-steps'?endResult(v):null;
+  if(selectedGame==='pocket-signals'&&seat!==v.turn)return el('div',{class:'checked-note'},el('span',{class:'check-glyph'},'✓'),'Private choices are cleared from both views between turns.');
+  const p=v.turn,adapter=createAdapter(mode),choices=adapter.actions(state,p),original=legalActions(state,p);
+  return el('div',{class:'comparison','data-testid':'choice-comparison'},
+   el('section',{'aria-label':'Original choices'},el('h3',{class:'column-title'},'01 / Original choices'),
+    el('ul',{class:'original-actions'},original.map(a=>el('li',{},actionText(a))))),
+   el('section',{'aria-label':'Adapted choices'},el('h3',{class:'column-title'},'02 / '+labelFor(mode)),
+    mode==='switch-select'?scanActions(choices):el('div',{class:'choice-buttons'},choices.map(c=>el('button',{'data-choice':c.id,onClick:()=>perform(c.id)},c.label,el('span',{class:'action-arrow','aria-hidden':'true'},'↗'))))));
+ }
+ function play(){
+  const v=publicView(),check=checkedMode(selectedGame,mode);
+  return el('div',{class:'workspace'},
+   el('section',{class:'table-panel','aria-labelledby':'table-title'},el('div',{class:'table-heading'},
+    el('div',{},el('h2',{id:'table-title',tabindex:'-1'},GAMES[selectedGame].title),el('p',{},GAMES[selectedGame].description)),
+    el('span',{class:'game-number'},selectedGame==='beacon-steps'?'GAME / 01':'GAME / 02')),
+    board(v),comparison(v),el('div',{class:'checked-note'},el('span',{class:'check-glyph','aria-hidden':'true'},'✓'),
+     el('span',{},'Same legal choices. Same outcomes. Same player information. ',el('span',{},'Checked across all '+check.states+' reachable states of this original game.')))),
+   el('aside',{class:'sidebar'},packPanel(),rulesPanel()));
+ }
+ function runLab(pack){cover();labMode=pack;labResult=checkAdaptation(selectedGame,pack);render('lab-result');}
+ function labEvidence(){
+  if(!labResult)return el('div',{class:'lab-result'},el('h3',{},'Try a change. Keep the game.'),el('p',{},'Choose an adaptation to compare every reachable state, action, outcome, and player view.'));
+  const r=labResult,passed=r.ok&&r.complete;
+  const box=el('div',{class:'lab-result'+(passed?'':' rejected'),id:'lab-result',tabindex:'-1','data-testid':'lab-result'},
+   el('h3',{},passed?'The game is preserved.':'This change breaks the promise.'),
+   el('p',{},passed?'This fixed adaptation preserves the complete finite game. It still needs playtesting with the people who will use it.':'The independent checker rejected this synthetic adaptation: '+r.reason.replaceAll('-',' ')+'.'));
+  if(passed){
+   box.append(el('ul',{class:'checks'},['✓ Every legal choice has exactly one adapted choice.','✓ Every move and terminal outcome matches.','✓ Both players retain exactly the same information.'].map(t=>el('li',{},t))),
+    el('p',{class:'receipt-line'},r.states+' states · '+r.transitions+' transitions · '+r.initialStates+' initial states. No sampling.'));
+   if(PACKS[labMode])box.append(el('button',{class:'primary',id:'use-checked-pack',onClick:()=>{mode=labMode;changeScreen('play');}},'Use this pack at the table ↗'));
+   else box.append(el('p',{},'This negative control has no hidden cards to expose in Beacon Steps. Try the Pocket Signals leakage case.'));
+  }else{
+   const c=r.counterexample;
+   box.append(el('p',{},'Designer example only. These are synthetic states, separate from your game.'));
+   if(c.left&&c.right){
+    box.append(el('div',{class:'witness-pair'},[c.left,c.right].map((side,i)=>{
+     const base=side.baseView.observation,adapted=side.adaptedView.observation;
+     return el('div',{class:'witness'},el('strong',{},'Synthetic state '+(i===0?'A':'B')),
+      el('div',{},'Observer: Player '+(c.player+1)),
+      el('div',{},'Own hand: '+(base.hand||[]).join(', ')),
+      el('div',{},'Original observation: the same in both states.'),
+      el('div',{},'Leaked opponent cards: '+(adapted.opponentPrivate?.hand||[]).join(', ')));
+    })));
+   }else if(c.expected&&c.choices)box.append(el('p',{},'Original legal choices: '+c.expected.map(actionText).join(' / ')+'. Offered after adaptation: '+c.choices.map(x=>x.label).join(' / ')+'.'));
+  }
+  return box;
+ }
+ function exampleProposal(){
+  const c=getCatalog(selectedGame),adapter='shape-text';
+  return {schema:'open-table.proposal.v1',gameId:selectedGame,rulesetPin:c.rulesetPin,classification:'equivalence-candidate',
+   summary:'An authored example: make the existing choices explicit with named shapes and words.',
+   changes:[{adapter,componentRef:c.adapters[adapter][0],sourceRefs:c.sourceRefs.slice(0,2),rationale:'Retain the existing component meaning while adding an explicit textual label.'}],witnessCandidates:[]};
+ }
+ function proposalPanel(){
+  const catalog=getCatalog(selectedGame);
+  const text=el('textarea',{id:'proposal-json',spellcheck:'false','aria-label':'Staged proposal JSON'});
+  text.value=proposalText;text.addEventListener('input',()=>{proposalText=text.value;proposal=null;proposalError='';preview.replaceChildren();});
+  const preview=el('div',{class:'proposal-preview'});
+  if(proposalError)preview.append(el('p',{class:'status error'},proposalError));
+  if(proposal){
+   preview.append(el('h4',{},proposal.classification==='variant'?'Variant idea — author review required':'Candidate — awaiting author review'),el('p',{},proposal.summary));
+   for(const change of proposal.changes){
+    preview.append(el('p',{},labelFor(change.adapter)+': '+change.rationale));
+    for(const ref of change.sourceRefs){
+     const rule=catalog.rules.find(r=>r.ref===ref);preview.append(el('blockquote',{},rule?.text||ref));
+    }
+   }
+   if(proposal.classification==='equivalence-candidate'){
+    preview.append(el('p',{},'Review each mode as a separate pack. Combined modes are not certified here.'),
+     el('div',{class:'proposal-buttons'},[...new Set(proposal.changes.map(c=>c.adapter))].map(pack=>el('button',{onClick:()=>runLab(pack)},'Approve & check '+labelFor(pack)))));
+   }else preview.append(el('p',{},'A variant cannot activate as a preserving access pack.'));
+  }
+  return el('section',{class:'proposal-panel'},el('p',{class:'eyebrow'},'AUTHORING, WITH A HUMAN IN THE LOOP'),el('h3',{},'Ground each proposal.'),
+   el('p',{},'Review suggested changes beside the approved rule phrases. A proposal cannot change the rules, expose a private hand, or certify itself.'),
+   el('label',{class:'input-label',for:'proposal-json'},'Staged proposal'),text,
+   el('div',{class:'proposal-buttons'},el('button',{id:'load-example',onClick:()=>{proposalText=JSON.stringify(exampleProposal(),null,2);proposal=null;proposalError='';render('proposal-json');}},'Load authored example'),
+    el('button',{class:'primary',id:'validate-proposal',onClick:()=>{
+     try{proposal=parseModelProposal(proposalText,catalog);proposalError='';}
+     catch(error){proposal=null;proposalError=error.message;}
+     render('validate-proposal');
+    }},'Review proposal')),
+   el('p',{class:'aside-note'},'The example is authored test data. No NVIDIA/Nebius inference has run in this prototype yet.'),preview,
+   el('details',{},el('summary',{},'Approved rules & current pin'),el('div',{class:'pin'},catalog.rulesetPin),
+    el('ol',{},catalog.rules.map(rule=>el('li',{},rule.text)))));
+ }
+ function workshop(){return el('section',{class:'workshop','aria-labelledby':'workshop-title'},
+  el('p',{class:'eyebrow'},'THE ADAPTATION WORKSHOP'),el('h2',{id:'workshop-title',tabindex:'-1'},'Change the presentation. Check the promise.'),
+  el('p',{class:'workshop-intro'},'Explore what an access pack preserves, and inspect a concrete failure when it does not. All negative controls use synthetic designer fixtures; your live hand stays covered.'),
+  el('div',{class:'workshop-grid'},el('div',{},
+   el('div',{class:'lab-options'},el('button',{onClick:()=>runLab('shape-text'),'data-lab':'shape-text'},'Check shapes + words ↗'),
+    el('button',{onClick:()=>runLab('switch-select'),'data-lab':'switch-select'},'Check scan + select ↗'),
+    el('button',{class:'negative',onClick:()=>runLab('drop-action'),'data-lab':'drop-action'},'Negative control: remove a legal choice'),
+    el('button',{class:'negative',onClick:()=>{if(selectedGame!=='pocket-signals'){selectedGame='pocket-signals';state=fresh(selectedGame);proposal=null;proposalText='';}runLab('reveal-opponent');},'data-lab':'reveal-opponent'},'Negative control: leak a Pocket Signals hand')),
+   labEvidence()),proposalPanel()));}
+ function render(focusId){
+  stopScan();
+  const page=el('div',{class:'shell'},el('header',{class:'topbar'},el('div',{class:'brand'},el('span',{class:'brand-mark','aria-hidden':'true'}),'OPEN TABLE'),
+   el('span',{class:'top-note'},'Original games. Thoughtful adaptations.'),
+   el('nav',{class:'tabs','aria-label':'Workspace'},el('button',{'aria-pressed':screen==='play',id:'play-tab',onClick:()=>changeScreen('play')},'At the table'),
+    el('button',{'aria-pressed':screen==='workshop',id:'workshop-tab',onClick:()=>changeScreen('workshop')},'Adaptation workshop'))),
+   el('main',{id:'main'},el('section',{class:'hero'},el('div',{},el('p',{class:'eyebrow'},'EVERYONE HAS A SEAT.'),
+    el('h1',{},'Same game. ',el('br'),el('em',{},'New ways to play.')),
+    el('p',{class:'intro'},'Make room for different ways of seeing, choosing, and taking a turn. Keep the choices that make the game yours.')),
+    el('div',{class:'hero-art','aria-hidden':'true'},el('div',{class:'hero-disc'}),el('div',{class:'hero-card'},'◇'),el('div',{class:'hero-token'},'7'))),
+    gamePicker(),screen==='play'?play():workshop()),
+   el('footer',{class:'footer'},el('p',{},'OPEN TABLE / An original, private prototype. Rule equivalence is checked for these finite games; accessibility and enjoyment need playtesting with people.'),
+    el('p',{},'A place for every player.')));
+  content.replaceChildren(page);
+  if(focusId)content.querySelector('#'+focusId)?.focus({preventScroll:true});
+ }
+ mounted.set(root,stopScan);render();
+ return {destroy(){stopScan();mounted.delete(root);root.replaceChildren();}};
+}
+if(document.getElementById('app'))mountApp(document.getElementById('app'));
