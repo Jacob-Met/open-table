@@ -81,7 +81,9 @@ The initial runtime snapshot `af04f2b1213784b48422cb9fcd8f26aa86dcdbff` passed 4
 
 [PR #1](https://github.com/Jacob-Met/open-table/pull/1) merged the hidden-dependent choice-meaning correction at commit `ec2a618ad2e3a83a69c2777dfff2af4df61cde82`, with tree `1c190a5821fa5f8bcf8cea6364af588461149a9b`. Its recorded qualification covers 48 native/HTTP checks and 15 actual Chrome scenarios for that exact tree. See [the correction evidence and scope](docs/RECEIVING.md#merged-choice-meaning-correction); this documentation update records existing execution.
 
-See [receiving evidence](docs/RECEIVING.md), [research and model-route limits](docs/RESEARCH.md), and [recovery state](docs/RECOVERY.json). The separate initial clean archive also passed all 42 native/HTTP and 15 browser scenarios through its own npm start. Its private remote source/tree identity was verified. The [qualified initial private archive](release-artifacts/open-table-0.1.0-af04f2b.tgz) is retained as a historical snapshot; it does not contain the merged correction. Adoption of the separately qualified corrected package as the maintained release artifact is not established here.
+Download the [current private integrated 0.2 package](release-artifacts/open-table-0.2.0-integrated-bb3d8e.tgz), extract it, and run `npm start` from its `package` directory with Node.js 22 or later. See [continuous-scan integration and receiving scope](docs/CONTINUOUS_INTEGRATION.md) for the preserved corrections, qualification boundaries, and remaining project requirements.
+
+See [receiving evidence](docs/RECEIVING.md), [research and model-route limits](docs/RESEARCH.md), and [recovery state](docs/RECOVERY.json). The separate initial clean archive also passed all 42 native/HTTP and 15 browser scenarios through its own npm start. Its private remote source/tree identity was verified. The [qualified initial private archive](release-artifacts/open-table-0.1.0-af04f2b.tgz) is retained as a historical snapshot; it does not contain the merged correction.
 
 The [private submission draft](docs/SUBMISSION_DRAFT.md) separates proposed entry text from its evidence and unresolved project requirements.
 
