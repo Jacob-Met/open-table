@@ -1,6 +1,6 @@
 # Play Open Table offline
 
-Download the standalone `open-table-0.5.1.html` file from the private release and open it in your browser. No Node.js, local server, account, or network connection is required to play.
+Download the standalone `open-table-0.5.3.html` file from the private release and open it in your browser. No Node.js, local server, account, or network connection is required to play.
 
 Choose a game and play with its existing controls. **Play with one key** starts the focus-scanning session. Opening the same file with `#one-key` appended to its address enters that mode directly. Space and Enter have the same behavior as in the regular application.
 
@@ -46,20 +46,20 @@ Two clean output directories can be compared to establish reproducibility for th
 From an extracted package or checkout containing the matching sources:
 
 ```sh
-OPEN_TABLE_RECEIVING_FILE="$PWD/dist/offline/open-table-0.5.1.html" \
+OPEN_TABLE_RECEIVING_FILE="$PWD/dist/offline/open-table-0.5.3.html" \
 OPEN_TABLE_OFFLINE_MANIFEST="$PWD/dist/offline/manifest.json" \
 OPEN_TABLE_OFFLINE_DIR="$PWD/receiving/offline" npm run receive:offline
 
-OPEN_TABLE_RECEIVING_FILE="$PWD/dist/offline/open-table-0.5.1.html" \
+OPEN_TABLE_RECEIVING_FILE="$PWD/dist/offline/open-table-0.5.3.html" \
 OPEN_TABLE_OFFLINE_MANIFEST="$PWD/dist/offline/manifest.json" \
 OPEN_TABLE_ONE_KEY_DIR="$PWD/receiving/one-key-file" npm run receive:one-key
 
 npm run receive:one-key-layout -- \
-  --file "$PWD/dist/offline/open-table-0.5.1.html" \
+  --file "$PWD/dist/offline/open-table-0.5.3.html" \
   --output "$PWD/receiving/one-key-layout-file"
 
 npm run receive:workshop -- \
-  --file "$PWD/dist/offline/open-table-0.5.1.html" \
+  --file "$PWD/dist/offline/open-table-0.5.3.html" \
   --output "$PWD/receiving/workshop-file"
 ```
 

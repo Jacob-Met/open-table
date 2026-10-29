@@ -1,12 +1,12 @@
 {
   "name": "open-table",
-  "version": "0.5.1",
+  "version": "0.5.3",
   "lockfileVersion": 3,
   "requires": true,
   "packages": {
     "": {
       "name": "open-table",
-      "version": "0.5.1",
+      "version": "0.5.3",
       "license": "UNLICENSED",
       "devDependencies": {
         "esbuild": "0.28.2"

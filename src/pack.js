@@ -25,6 +25,6 @@ export function importPack(jsonText){
  for(const field of FIELDS)if(!Object.prototype.hasOwnProperty.call(pack,field))throw new Error('Missing pack field: '+field+'.');
  if(pack.schema!==SCHEMA||pack.classification!=='equivalence-candidate')throw new Error('Unsupported pack schema or unapproved variant. Variants require a separately approved game and source binding.');
  const catalog=candidate(pack.gameId,pack.adapter);
- if(pack.rulesetPin!==catalog.rulesetPin)throw new Error('This pack targets stale or different approved rules/adapters. Nothing was activated.');
+ if(pack.rulesetPin!==catalog.rulesetPin)throw new Error('This pack targets stale or different approved rules/adapters. Nothing was activated. To make a new pack, keep your current game selected, choose the presentation under Your access pack, then select Save pack. For a different game, choose it first; choosing a game starts a new match.');
  return {gameId:pack.gameId,adapter:pack.adapter,check:currentCheck(pack.gameId,pack.adapter)};
 }
