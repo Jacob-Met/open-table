@@ -3,3 +3,5 @@ receiving/
 *.tgz
 .env
 !release-artifacts/*.tgz
+
+dist/

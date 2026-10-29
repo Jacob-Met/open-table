@@ -1,6 +1,6 @@
 {
   "name": "open-table",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -17,7 +17,9 @@
     "experiment:development": "node scripts/model-development.mjs",
     "receive:continuous": "node scripts/continuous-receive.mjs",
     "receive:space": "node scripts/space-confirm-receive.mjs",
-    "receive:one-key": "node scripts/one-key-receive.mjs"
+    "receive:one-key": "node scripts/one-key-receive.mjs",
+    "build:offline": "node scripts/build-offline.mjs",
+    "receive:offline": "node scripts/offline-receive.mjs"
   },
   "files": [
     "index.html",
@@ -27,7 +29,11 @@
     "scripts",
     "tests",
     "README.md",
-    "docs"
+    "docs",
+    "npm-shrinkwrap.json"
   ],
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
 }

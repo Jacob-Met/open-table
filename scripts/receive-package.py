@@ -37,7 +37,7 @@ try:
     target.parent.mkdir(parents=True,exist_ok=True)
     with tar.extractfile(member) as stream:target.write_bytes(stream.read())
  package=dest/'package'
- required=['index.html','styles.css','server.mjs','src/app.js','src/one-key.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/browser-focus.mjs','scripts/pack-import-browser.mjs','scripts/continuous-receive.mjs','scripts/continuous-boundary-receive.mjs','scripts/space-confirm-receive.mjs','scripts/one-key-receive.mjs','docs/ONE_KEY_PLAY.md','tests/server.test.mjs']
+ required=['index.html','styles.css','server.mjs','src/app.js','src/one-key.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/browser-focus.mjs','scripts/pack-import-browser.mjs','scripts/continuous-receive.mjs','scripts/continuous-boundary-receive.mjs','scripts/space-confirm-receive.mjs','scripts/one-key-receive.mjs','docs/ONE_KEY_PLAY.md','docs/OFFLINE_PLAY.md','scripts/build-offline.mjs','scripts/offline-receive.mjs','npm-shrinkwrap.json','tests/server.test.mjs']
  for path in required:assert (package/path).is_file(),path
  for forbidden in ['receiving','node_modules','.env','.git']:assert not (package/forbidden).exists(),forbidden
  test=run(['npm','test'],cwd=package)
@@ -117,6 +117,31 @@ try:
   assert one_key_receipt['hashes'][name]['source']==one_key_receipt['hashes'][name]['served']==one_key_receipt['hashes'][name]['pin']==expected,'One-key source/served/pin differs from extracted package'
  receipt['one_key']={'exit_code':one_key.returncode,'schema':one_key_receipt['schema'],'ok':True,'checks':one_key_receipt['checks'],'hashes':one_key_receipt['hashes'],'errors':one_key_receipt['browserErrors'],'source_hash_agreement':True}
  os.killpg(server.pid,signal.SIGTERM);server.wait(timeout=10);server=None
+ install=run(['npm','ci','--include=dev','--ignore-scripts','--no-audit','--no-fund'],cwd=package,timeout=120)
+ (out/'offline-build-install.log').write_text(install.stdout+install.stderr)
+ assert install.returncode==0,install.stdout+install.stderr
+ offline_directory=out/'offline-built'
+ offline_build=run(['npm','run','build:offline','--','--out-dir',str(offline_directory)],cwd=package,timeout=60)
+ (out/'offline-build.log').write_text(offline_build.stdout+offline_build.stderr)
+ assert offline_build.returncode==0,offline_build.stdout+offline_build.stderr
+ offline_manifest=json.loads((offline_directory/'manifest.json').read_text())
+ assert offline_manifest['format']=='open-table.offline-build.v1'
+ offline_file=offline_directory/offline_manifest['output']['file']
+ assert offline_file.stat().st_size==offline_manifest['output']['bytes']
+ assert hashlib.sha256(offline_file.read_bytes()).hexdigest()==offline_manifest['output']['sha256']
+ for path,expected in offline_manifest['inputs'].items():
+  assert (package/path).read_bytes()==(root/path).read_bytes(),'Packaged build input differs from committed source: '+path
+  assert hashlib.sha256((package/path).read_bytes()).hexdigest()==expected['sha256']
+ offline_env=dict(os.environ,OPEN_TABLE_RECEIVING_FILE=str(offline_file),OPEN_TABLE_OFFLINE_MANIFEST=str(offline_directory/'manifest.json'),OPEN_TABLE_OFFLINE_DIR=str(out/'offline-file'))
+ offline_env.pop('OPEN_TABLE_RECEIVING_URL',None)
+ offline=run(['node','scripts/offline-receive.mjs'],cwd=package,env=offline_env,timeout=90)
+ (out/'offline-file.log').write_text(offline.stdout+offline.stderr)
+ assert offline.returncode==0,offline.stdout+offline.stderr
+ offline_receipt=json.loads((out/'offline-file/receipt.json').read_text())
+ assert offline_receipt['ok'] is True and len(offline_receipt['checks'])==11
+ assert offline_receipt['browserErrors']==[] and all(not item['forbidden'] for item in offline_receipt['browserRuns'])
+ receipt['offline_build']={'install_exit_code':install.returncode,'build_exit_code':offline_build.returncode,'manifest':offline_manifest,'source_input_agreement':True}
+ receipt['offline']={'exit_code':offline.returncode,'ok':True,'checks':offline_receipt['checks'],'artifact':offline_receipt['artifact'],'errors':offline_receipt['browserErrors'],'browser_runs':offline_receipt['browserRuns']}
  game=package/'src/games.js';original=game.read_bytes()
  try:
   game.write_bytes(original+b'\n// Receiving-only stale source negative control.\n')
