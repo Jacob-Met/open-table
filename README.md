@@ -67,6 +67,8 @@ Two intentionally bad designer controls illustrate failure:
 
 These examples are separate from the live game. Negative controls cannot activate as access packs. The no-hidden-information Beacon game is not falsely rejected merely because a control is named “reveal opponent.”
 
+Selecting the already-current game in the workshop keeps your staged proposal, review evidence, and match progress. Selecting it at the table still starts a new game; choosing a different game in the workshop clears the old game's draft and evidence.
+
 Inspecting a negative control does not replace or restart the game at the table. The result names the game being checked; the Pocket Signals leakage example can be inspected while a Beacon Steps match is in progress. The live match and staged proposal are retained. Private cards stay covered and require the usual handoff before they can be revealed again.
 
 A finite equivalence result establishes preservation for these games and fixed, deterministic adapters. It does not establish universal accessibility, enjoyment, usability with a screen reader or physical switch, or equivalence for arbitrary tabletop games. Human access playtests remain necessary.
@@ -99,6 +101,7 @@ node scripts/browser-receive.mjs
 npm run receive:space
 npm run receive:one-key
 npm run receive:workshop
+node scripts/workshop-reselect-receive.mjs --source . --output /absolute/path/fresh-reselect-receiving
 npm run receive:one-key-layout -- --output /absolute/path/fresh-layout-receiving
 python3 scripts/receive-package.py
 npm pack
