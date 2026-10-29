@@ -154,7 +154,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
   oneKeyController.update({enabled:true,paused:oneKeyPaused,buttons:[...primary,...controls],resumeButton:content.querySelector('#one-key-pause'),preferred});
  }
  function gamePicker(){return el('div',{class:'game-picker','aria-label':'Choose an original game'},Object.entries(GAMES).map(([id,g])=>
-  el('button',{'aria-pressed':selectedGame===id,'data-game':id,onClick:()=>reset(id)},el('span',{class:'game-symbol','aria-hidden':'true'},g.symbol),
+  el('button',{'aria-pressed':selectedGame===id,'data-game':id,onClick:()=>{if(id===selectedGame&&screen==='workshop'&&!oneKeyEnabled)return;reset(id);}},el('span',{class:'game-symbol','aria-hidden':'true'},g.symbol),
    el('span',{},g.title,el('span',{class:'game-caption'},g.caption)))));}
  function statusNode(){return el('p',{class:'status'+(statusError?' error':''),'data-testid':'pack-status'},status);}
  function packPanel(){
