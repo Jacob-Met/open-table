@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {resolve,dirname} from 'node:path';
 
 const root=dirname(fileURLToPath(import.meta.url));
-const paths=new Set(['/index.html','/styles.css','/src/app.js','/src/one-key.js','/src/games.js','/src/adaptations.js','/src/model-proposal.js','/src/catalog.js','/src/catalog-data.js','/src/ruleset-pins.js','/src/pack.js','/src/designer-fixtures.js']);
+const paths=new Set(['/index.html','/styles.css','/src/app.js','/src/one-key.js','/src/saved-match.js','/src/games.js','/src/adaptations.js','/src/model-proposal.js','/src/catalog.js','/src/catalog-data.js','/src/ruleset-pins.js','/src/pack.js','/src/designer-fixtures.js']);
 export function createAppServer() {
  return createServer(async(req,res)=>{
   res.setHeader('X-Content-Type-Options','nosniff');

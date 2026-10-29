@@ -125,7 +125,7 @@ function publicSnapshot(){
   ].filter(Boolean);
  }
  const controls=[
-  'one-key-pause','one-key-pace','one-key-menu','one-key-exit'
+  'one-key-pause','one-key-pace','one-key-menu','match-menu','one-key-exit'
  ].map(id=>document.getElementById(id)).filter(Boolean);
  const nodes=[...primary,...controls].filter(shown);
 
@@ -245,7 +245,7 @@ async function cycle(enlarged=false){
  const initial=await layout();
  assert(initial.handVisible);
  assert.equal(initial.choices.length,2);
- assert.equal(initial.targets.length,7);
+ assert.equal(initial.targets.length,8);
 
  const expected=[
   ...initial.choices.map(c=>'choice:'+c.id),
@@ -253,6 +253,7 @@ async function cycle(enlarged=false){
   'one-key-pause',
   'one-key-pace',
   'one-key-menu',
+  'match-menu',
   'one-key-exit'
  ];
 
@@ -320,7 +321,7 @@ async function cycle(enlarged=false){
  }
 
  throw new Error(
-  'Incomplete seven-target wraparound: '+JSON.stringify(sequence)
+  'Incomplete eight-target wraparound: '+JSON.stringify(sequence)
  );
 }
 
@@ -488,7 +489,7 @@ try{
   await focused('[data-game="beacon-steps"]');
 
   const setup=await layout();
-  assert.equal(setup.targets.length,5);
+  assert.equal(setup.targets.length,6);
   allVisible(setup);
   const headings=(await browser.axTree()).filter(n=>!n.ignored&&n.role?.value==='heading').map(n=>({name:n.name?.value,level:n.properties?.find(p=>p.name==='level')?.value?.value}));
   assert(headings.some(h=>h.name==='One-key play'&&h.level===1),'Accessible One-key page heading');
@@ -498,14 +499,14 @@ try{
 
   await activate('[data-game="pocket-signals"]');
   const curtain=await covered();
-  assert.equal(curtain.targets.length,5);
+  assert.equal(curtain.targets.length,6);
   allVisible(curtain);
   receipt.observations.curtain=curtain;
   await shot('320-private-curtain.png');
  });
 
  await check(
-  '320-seven-target-cycle-zero-scroll-and-stable-private-view',
+  '320-eight-target-cycle-zero-scroll-and-stable-private-view',
   async()=>{
    await activate('#reveal-hand');
    await visible('[data-testid="private-hand"]');
@@ -594,29 +595,36 @@ try{
    await shot('desktop-one-key.png');
 
    await activate('#one-key-exit');
-   await visible('.hero');
+   await visible('.play-shell');
    await visible('[data-testid="choice-comparison"]');
    await visible('.rules-panel');
-
-   const ordinary=await ev(
-    '({'+
-    'compactShell:Boolean(document.querySelector(".one-key-shell")),'+
-    'originalChoices:Boolean(document.querySelector(\'[aria-label="Original choices"]\')),'+
-    'adaptedChoices:Boolean(document.querySelector(\'[aria-label="Adapted choices"]\')),'+
-    'ruleItems:document.querySelectorAll(".rules-panel ol li").length,'+
-    'rulesHeading:document.querySelector(".rules-panel h3")?.textContent,'+
-    'heroText:document.querySelector(".hero h1")?.innerText'+
-    '})'
-   );
-
-   assert(
-    !ordinary.compactShell&&
-    ordinary.originalChoices&&ordinary.adaptedChoices
-   );
+   const ordinary=await ev("(()=>{const shown=n=>Boolean(n&&n.getClientRects().length);const rect=n=>{if(!n)return null;const r=n.getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width,height:r.height,shown:shown(n)};};const explanation=document.querySelector('.choice-explanation');return {compactShell:Boolean(document.querySelector('.one-key-shell')),playShell:Boolean(document.querySelector('.play-shell')),heroShown:shown(document.querySelector('.hero')),title:document.querySelector('#table-title')?.textContent,goal:document.querySelector('.table-heading p')?.textContent,goalRect:rect(document.querySelector('.table-heading p')),boardLabel:document.querySelector('.track')?.getAttribute('aria-label'),turn:document.querySelector('.player-tag')?.textContent,choices:[...document.querySelectorAll('button[data-choice]')].map(n=>({label:n.textContent,rect:rect(n)})),explanation:{open:explanation?.open,summary:explanation?.querySelector('summary')?.textContent,rect:rect(explanation?.querySelector('summary')),originalChoices:[...document.querySelectorAll('.original-actions li')].map(n=>({text:n.textContent,shown:shown(n)})),controls:explanation?.querySelectorAll('button,[role=button],input,select,textarea').length},ruleItems:document.querySelectorAll('.rules-panel ol li').length,rulesHeading:document.querySelector('.rules-panel h3')?.textContent,viewport:{width:innerWidth,height:innerHeight}}})()");
+   assert(!ordinary.compactShell&&ordinary.playShell&&!ordinary.heroShown);
+   assert.equal(ordinary.title,'Beacon Steps');
+   assert.match(ordinary.goal,/Reach the seventh light/);
+   assert(ordinary.goalRect.shown&&inside(ordinary.goalRect,ordinary.viewport),'Ordinary goal visible after exit');
+   assert.match(ordinary.boardLabel,/marker at 0$/);
+   assert.match(ordinary.turn,/Player 1 to move/);
+   assert.equal(ordinary.choices.length,2);
+   for(const choice of ordinary.choices)assert(choice.rect.shown&&inside(choice.rect,ordinary.viewport),'Ordinary action visible after exit');
+   assert.equal(ordinary.explanation.open,false);
+   assert.equal(ordinary.explanation.controls,0);
+   assert(ordinary.explanation.rect.shown&&inside(ordinary.explanation.rect,ordinary.viewport),'Explanation disclosure visible after exit');
+   assert.equal(ordinary.explanation.summary,'How these choices match the original game');
    assert.equal(ordinary.ruleItems,3);
    assert.equal(ordinary.rulesHeading,'How to play');
-   assert(ordinary.heroText?.trim());
+
+   await browser.click('.choice-explanation > summary');
+   const explained=await ev("(()=>{const shown=n=>Boolean(n&&n.getClientRects().length);const rect=n=>{if(!n)return null;const r=n.getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width,height:r.height,shown:shown(n)};};const explanation=document.querySelector('.choice-explanation');return {compactShell:Boolean(document.querySelector('.one-key-shell')),playShell:Boolean(document.querySelector('.play-shell')),heroShown:shown(document.querySelector('.hero')),title:document.querySelector('#table-title')?.textContent,goal:document.querySelector('.table-heading p')?.textContent,goalRect:rect(document.querySelector('.table-heading p')),boardLabel:document.querySelector('.track')?.getAttribute('aria-label'),turn:document.querySelector('.player-tag')?.textContent,choices:[...document.querySelectorAll('button[data-choice]')].map(n=>({label:n.textContent,rect:rect(n)})),explanation:{open:explanation?.open,summary:explanation?.querySelector('summary')?.textContent,rect:rect(explanation?.querySelector('summary')),originalChoices:[...document.querySelectorAll('.original-actions li')].map(n=>({text:n.textContent,shown:shown(n)})),controls:explanation?.querySelectorAll('button,[role=button],input,select,textarea').length},ruleItems:document.querySelectorAll('.rules-panel ol li').length,rulesHeading:document.querySelector('.rules-panel h3')?.textContent,viewport:{width:innerWidth,height:innerHeight}}})()");
+   assert.equal(explained.explanation.open,true);
+   assert.equal(explained.explanation.controls,0);
+   assert.equal(explained.explanation.originalChoices.length,2);
+   assert(explained.explanation.originalChoices.every(c=>c.shown&&c.text.trim()),'Original legal choices actually visible in explanation');
+   assert.equal(explained.boardLabel,ordinary.boardLabel,'Opening explanation must not make a move');
+   assert.equal(explained.turn,ordinary.turn);
+   assert.deepEqual(explained.choices.map(c=>c.label),ordinary.choices.map(c=>c.label));
    receipt.observations.ordinary=ordinary;
+   receipt.observations.ordinaryExplained=explained;
    await shot('desktop-ordinary-comparison.png');
   }
  );

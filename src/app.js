@@ -4,6 +4,7 @@ import {parseModelProposal} from './model-proposal.js';
 import {getCatalog} from './catalog.js';
 import {createPack,importPack} from './pack.js';
 import {createOneKeyController} from './one-key.js';
+import {inspectSavedMatch,saveStoredMatch,clearStoredMatch} from './saved-match.js';
 
 const GAMES={
  'beacon-steps':{title:'Beacon Steps',symbol:'↗',caption:'A shared path · open information',description:'One shared marker. One or two steps. Reach the seventh light.',rules:['Take turns moving the shared marker one or two spaces.','Land exactly on seven to win. You cannot move beyond it.','The whole board is public. There are no hidden cards or timers.']},
@@ -36,7 +37,8 @@ function download(name,text){
 }
 
 /** Trusted-device local prototype. initialState is an authored receiving fixture input,
- * never read from URL, storage, a model proposal, or an imported adaptation pack. */
+ * never read from URL, a model proposal, or an imported adaptation pack.
+ * Explicit saved-match resume uses a separately validated, build-pinned snapshot. */
 export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}={}){
  mounted.get(root)?.();
  let selectedGame=gameId,state=initialState?structuredClone(initialState):fresh(gameId);
@@ -44,20 +46,29 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
  outcome(state);
  let screen='play',mode='shape-text',seat=null,status='',statusError=false;
  let alive=true,importGeneration=0,heldSpace=false;
- const appWindow=root.ownerDocument.defaultView;
+ const appDocument=root.ownerDocument,appWindow=appDocument.defaultView;
+ // Access the localStorage getter inside the guarded storage operations.
+ const matchStorage={getItem:key=>appWindow.localStorage.getItem(key),setItem:(key,value)=>appWindow.localStorage.setItem(key,value),removeItem:key=>appWindow.localStorage.removeItem(key)};
+ let savedMatch=inspectSavedMatch(matchStorage),matchPrompt=null,matchMenu=false,matchStatus='',matchError=false,matchReturn='save-match';
  let oneKeyEnabled=Boolean(oneKey),oneKeyPaused=false,oneKeyPhase='setup',oneKeyPace=1400,previousMode='shape-text';
  const oneKeyController=createOneKeyController({root});
  const modeAddressChanged=()=>{if(appWindow.location.hash==='#one-key'){if(!oneKeyEnabled)startOneKey();}else if(oneKeyEnabled)leaveOneKey();};
  appWindow?.addEventListener('hashchange',modeAddressChanged);
  const releaseSpace=()=>{heldSpace=false;};
  appWindow?.addEventListener('blur',releaseSpace);
- let scanIndex=0,scanTimer=null,scanDelay=1400,scanEpoch=0,continuousScan=false,labMode=null,labResult=null,proposalText='',proposal=null,proposalError='';
+ const matchEscape=event=>{if(event.key==='Escape'&&matchPrompt){event.preventDefault();cancelMatchAction();}};
+ root.addEventListener('keydown',matchEscape);
+ let scanIndex=0,scanTimer=null,scanDelay=1400,scanEpoch=0,continuousScan=false,resumeScan=null,labMode=null,labResult=null,proposalText='',proposal=null,proposalError='';
  const checks=new Map(),content=el('div'),live=el('div',{class:'visually-hidden',role:'status','aria-live':'polite','aria-atomic':'true','data-testid':'public-live'});
  root.replaceChildren(content,live);
  function fresh(id){const roots=initialStates(id);return roots[Math.floor(Math.random()*roots.length)];}
  function stopScan(){releaseSpace();if(scanTimer!==null)clearInterval(scanTimer);scanTimer=null;scanEpoch++;}
+ const scanVisibilityChanged=()=>{
+  if(appDocument.hidden)stopScan();else if(alive&&continuousScan)resumeScan?.();
+ };
+ appDocument.addEventListener('visibilitychange',scanVisibilityChanged);
  function announce(text){live.textContent=text;}
- function notify(text,error=false){status=text;statusError=error;}
+ function notify(text,error=false){status=text;statusError=error;if(error)announce(text);}
  function publicView(){
   const v=observe(state,0);
   return v.game==='beacon-steps'?v:{game:v.game,round:v.round,turn:v.turn,history:v.history,scores:v.scores,outcome:v.outcome};
@@ -73,12 +84,14 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
   stopScan();seat=null;scanIndex=0;
  }
  function reset(id=selectedGame){
+  matchPrompt=null;matchMenu=false;
   if(oneKeyEnabled){oneKeyPhase='play';oneKeyPaused=false;mode='shape-text';continuousScan=false;}
   if(id!==selectedGame)continuousScan=false;
   cover();selectedGame=id;state=fresh(id);labMode=null;labResult=null;proposal=null;proposalError='';proposalText='';
   notify('New game ready.');render(id==='pocket-signals'?'reveal-hand':'table-title');announce('New '+GAMES[id].title+' game ready.');
  }
  function changeScreen(next){
+  matchPrompt=null;matchMenu=false;
   if(oneKeyEnabled)endOneKey();
   continuousScan=false;cover();screen=next;render(next==='play'?(selectedGame==='pocket-signals'?'reveal-hand':'table-title'):'workshop-title');
   announce(next==='play'?'Back at the table. Private cards are covered.':'Adaptation workshop. All failure examples are synthetic.');
@@ -94,7 +107,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
    :selectedGame==='beacon-steps'?'Marker at '+after.position+'. Player '+(after.turn+1)+' to move.'
    :(after.history.length>previousRounds?'Both cards revealed. Round '+(previousRounds+1)+' is complete. ':'Choice committed privately. ')+
     'Pass to Player '+(after.turn+1)+'.';
-  render(selectedGame==='pocket-signals'&&!after.outcome.terminal?'reveal-hand':after.outcome.terminal?'new-game':'table-title');
+  render(selectedGame==='pocket-signals'&&!after.outcome.terminal?'reveal-hand':after.outcome.terminal?'new-game':'current-play-choice');
   announce(message);
  }
  function activatePack(pack){
@@ -110,11 +123,12 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
  }
  function startOneKey(){
   if(oneKeyEnabled)return;
-  previousMode=mode;continuousScan=false;cover();mode='shape-text';screen='play';
+  matchPrompt=null;matchMenu=false;previousMode=mode;continuousScan=false;cover();mode='shape-text';screen='play';
   oneKeyEnabled=true;oneKeyPaused=false;oneKeyPhase='setup';oneKeyAddress(true);
   render();announce('One-key play. Wait for a highlighted game, then press and release Space or Enter.');
  }
  function endOneKey(){
+  matchPrompt=null;matchMenu=false;
   continuousScan=false;cover();oneKeyEnabled=false;oneKeyPaused=false;oneKeyPhase='setup';mode=previousMode;oneKeyAddress(false);
  }
  function leaveOneKey(){
@@ -126,6 +140,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
    el('button',{id:'one-key-pause',onClick:()=>{cover();oneKeyPaused=!oneKeyPaused;render();announce(oneKeyPaused?'One-key play paused. Private cards are covered.':'One-key play resumed.');}},oneKeyPaused?'Resume one-key play':'Pause one-key play'),
    el('button',{id:'one-key-pace',onClick:()=>{const paces=[1400,2400,4000];oneKeyPace=paces[(paces.indexOf(oneKeyPace)+1)%paces.length];oneKeyController.setInterval(oneKeyPace);render('one-key-pace');announce('One-key pace: '+oneKeyPace/1000+' seconds.');}},'Pace: '+oneKeyPace/1000+' seconds'),
    oneKeyPhase==='play'?el('button',{id:'one-key-menu',onClick:()=>{cover();oneKeyPhase='setup';oneKeyPaused=false;render();announce('Choose a game. Private cards are covered.');}},'Choose a game'):null,
+   el('button',{id:'match-menu',onKeyDown:freshActivation,onClick:()=>{continuousScan=false;cover();matchMenu=true;render('match-back');announce('Saved match menu. Private cards are covered.');}},'Save / resume match'),
    el('button',{id:'one-key-exit',onClick:leaveOneKey},'Exit one-key play'));
   return el('section',{class:'pack-panel one-key-panel','aria-labelledby':'one-key-title','data-one-key-state':phase},
    el('h3',{id:'one-key-title'},'Play controls'),controls,
@@ -140,17 +155,106 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
  }
  function updateOneKey(focusId){
   if(!oneKeyEnabled){oneKeyController.update({enabled:false,buttons:[content.querySelector('#one-key-entry')]});return;}
+  if(matchPrompt){
+   const buttons=['match-cancel','match-confirm'].map(id=>content.querySelector('#'+id));
+   oneKeyController.update({enabled:true,paused:false,buttons,preferred:buttons[0]});return;
+  }
+  if(matchMenu){
+   const buttons=['match-back','save-match','resume-match','forget-match'].map(id=>content.querySelector('#'+id)).filter(button=>button&&!button.disabled);
+   const preferred=buttons.find(button=>button.id===focusId)||buttons[0];
+   oneKeyController.update({enabled:true,paused:false,buttons,preferred});return;
+  }
   let primary;
   if(oneKeyPhase==='setup')primary=[...content.querySelectorAll('[data-game]')];
   else if(content.querySelector('#new-game'))primary=[content.querySelector('#new-game')];
   else if(content.querySelector('#reveal-hand'))primary=[content.querySelector('#reveal-hand')];
   else primary=[...content.querySelectorAll('[data-choice]'),content.querySelector('#cover-hand')].filter(Boolean);
-  const controls=['one-key-pause','one-key-pace','one-key-menu','one-key-exit'].map(id=>content.querySelector('#'+id)).filter(Boolean);
+  const controls=['one-key-pause','one-key-pace','one-key-menu','match-menu','one-key-exit'].map(id=>content.querySelector('#'+id)).filter(Boolean);
   const preferred=focusId==='one-key-pace'?content.querySelector('#one-key-pace'):primary[0];
   oneKeyController.update({enabled:true,paused:oneKeyPaused,buttons:[...primary,...controls],resumeButton:content.querySelector('#one-key-pause'),preferred});
  }
+ function savedSummary(slot){
+  return slot.status==='ready'?GAMES[slot.record.gameId].title+' · Saved '+new Date(slot.record.savedAt).toLocaleString():
+   slot.status==='empty'?'No saved match yet.':slot.status==='invalid'?'A saved match is present but cannot be resumed here.':'Saved-match storage is unavailable.';
+ }
+ function matchMessage(text,error=false){matchStatus=text;matchError=error;announce(text);}
+ function beginMatchAction(kind){
+  if(matchPrompt)return;
+  continuousScan=false;cover();savedMatch=inspectSavedMatch(matchStorage);matchReturn=kind+'-match';
+  if(savedMatch.status==='unavailable'||kind==='resume'&&savedMatch.status!=='ready'||kind==='forget'&&savedMatch.raw===null){
+   matchMessage(savedMatch.message||'There is no saved match to '+kind+'.',true);render(matchReturn);return;
+  }
+  matchPrompt={kind,expectedRaw:savedMatch.raw,summary:savedSummary(savedMatch)};
+  render('match-cancel');announce('Review '+kind+' match. Cancel is selected first.');
+ }
+ function cancelMatchAction(){
+  matchPrompt=null;matchMessage('Cancelled.');render(matchReturn);
+ }
+ function confirmMatchAction(){
+  if(!matchPrompt)return;
+  const pending=matchPrompt;matchPrompt=null;continuousScan=false;cover();
+  let resumed=false;
+  try{
+   if(pending.kind==='save'){
+    saveStoredMatch(matchStorage,{gameId:selectedGame,state,adapter:mode},pending.expectedRaw);
+    matchMessage('Snapshot saved. Later moves will not update it.');
+   }else if(pending.kind==='forget'){
+    clearStoredMatch(matchStorage,pending.expectedRaw);
+    matchMessage('Saved snapshot forgotten. Your current match is still here.');
+   }else{
+    const current=inspectSavedMatch(matchStorage);
+    if(current.status==='unavailable')throw new Error(current.message);
+    if(current.raw!==pending.expectedRaw)throw new Error('The saved match changed. Review the current save before trying again.');
+    if(current.status!=='ready')throw new Error(current.message||'There is no saved match to resume.');
+    const record=current.record,nextMode=oneKeyEnabled?'shape-text':record.adapter;
+    checkedMode(record.gameId,nextMode);
+    // Every validation happens before live game state changes. The viewer stays covered.
+    selectedGame=record.gameId;state=record.state;mode=nextMode;screen='play';
+    labMode=null;labResult=null;proposal=null;proposalError='';proposalText='';
+    if(oneKeyEnabled){previousMode=record.adapter;oneKeyPhase='play';oneKeyPaused=false;}
+    matchMenu=false;resumed=true;notify('');
+    matchMessage('Saved match resumed. Private cards stay covered until a fresh reveal.');
+   }
+  }catch(error){matchMessage(error.message,true);}
+  savedMatch=inspectSavedMatch(matchStorage);
+  render(resumed?(outcome(state).terminal?'new-game':selectedGame==='pocket-signals'?'reveal-hand':'table-title'):matchReturn);
+ }
+ function savedMatchPanel(){
+  const current=inspectSavedMatch(matchStorage);
+  if(!matchError&&(current.raw!==savedMatch.raw||current.status!==savedMatch.status))matchStatus='';
+  savedMatch=current;
+  const available=savedMatch.status!=='unavailable',ready=savedMatch.status==='ready';
+  return el('section',{class:'saved-match-panel',id:'saved-match-panel','aria-labelledby':'saved-match-title'},
+   el('p',{class:'eyebrow'},'PICK UP WHERE YOU LEFT OFF'),el('h3',{id:'saved-match-title'},'Keep this match'),
+   el('p',{},'One snapshot in this browser. Playing or starting a new game does not update it.'),
+   el('p',{id:'saved-match-summary',class:'saved-match-summary'},savedSummary(savedMatch)),
+   el('div',{class:'saved-match-tools'},
+    oneKeyEnabled&&oneKeyPhase==='setup'?null:el('button',{id:'save-match',disabled:!available,onKeyDown:freshActivation,onClick:()=>beginMatchAction('save')},savedMatch.raw!==null?'Replace snapshot':'Save snapshot'),
+    el('button',{id:'resume-match',disabled:!ready,onKeyDown:freshActivation,onClick:()=>beginMatchAction('resume')},'Resume'),
+    el('button',{id:'forget-match',disabled:!available||savedMatch.raw===null,onKeyDown:freshActivation,onClick:()=>beginMatchAction('forget')},'Forget')),
+   el('p',{class:'status'+(matchError||savedMatch.status==='invalid'||!available?' error':''),'data-testid':'saved-match-status'},
+    [...new Set([savedMatch.message||'',matchStatus].filter(Boolean))].join(' ')),
+   el('p',{class:'aside-note'},'Snapshots include private cards. Anyone using this browser profile can resume them. Use the same copy and browser to return; clearing browser data may remove the save.'));
+ }
+ function savedMatchMenu(){
+  return el('section',{class:'match-menu table-panel','aria-labelledby':'saved-match-title'},
+   el('button',{id:'match-back',onKeyDown:freshActivation,onClick:()=>{matchMenu=false;cover();render(oneKeyPhase==='setup'?undefined:selectedGame==='pocket-signals'?'reveal-hand':'table-title');announce('Back to play. Private cards are covered.');}},'Back to play'),
+   savedMatchPanel());
+ }
+ function matchConfirmation(){
+  const pending=matchPrompt,replacing=pending.expectedRaw!==null;
+  const title=pending.kind==='save'?(replacing?'Replace saved snapshot?':'Save this match?'):pending.kind==='resume'?'Resume saved snapshot?':'Forget saved snapshot?';
+  const explanation=pending.kind==='save'?'Keep '+GAMES[selectedGame].title+' at this moment. '+(replacing?'The previous snapshot will be replaced. ':'')+'Private cards are included in this browser.':
+   pending.kind==='resume'?'This replaces the match currently at the table. The saved snapshot stays available, and private cards start covered.':
+   'This removes the saved snapshot from this browser. Your current match stays intact.';
+  return el('section',{class:'match-confirmation table-panel',id:'match-confirmation','aria-labelledby':'match-confirm-title'},
+   el('p',{class:'eyebrow'},'YOUR SAVED MATCH'),el('h2',{id:'match-confirm-title'},title),
+   el('p',{class:'saved-match-summary'},pending.summary),el('p',{},explanation),
+   el('div',{class:'saved-match-tools'},el('button',{id:'match-cancel',onKeyDown:freshActivation,onClick:cancelMatchAction},'Cancel'),
+    el('button',{id:'match-confirm',class:'primary',onKeyDown:freshActivation,onClick:confirmMatchAction},pending.kind==='save'?(replacing?'Replace snapshot':'Save snapshot'):pending.kind==='resume'?'Resume saved match':'Forget snapshot')));
+ }
  function gamePicker(){return el('div',{class:'game-picker','aria-label':'Choose an original game'},Object.entries(GAMES).map(([id,g])=>
-  el('button',{'aria-pressed':selectedGame===id,'data-game':id,onClick:()=>reset(id)},el('span',{class:'game-symbol','aria-hidden':'true'},g.symbol),
+  el('button',{'aria-pressed':selectedGame===id,'data-game':id,onClick:()=>{if(id===selectedGame&&screen==='workshop'&&!oneKeyEnabled)return;reset(id);}},el('span',{class:'game-symbol','aria-hidden':'true'},g.symbol),
    el('span',{},g.title,el('span',{class:'game-caption'},g.caption)))));}
  function statusNode(){return el('p',{class:'status'+(statusError?' error':''),'data-testid':'pack-status'},status);}
  function packPanel(){
@@ -173,7 +277,12 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
     mode=received.adapter;checks.set(selectedGame+':'+mode,received.check);
     notify('Pack reopened and checked again against the current rules.');
     render(selectedGame==='pocket-signals'?'reveal-hand':'table-title');announce('Adaptation pack reopened. Private cards are covered.');
-   }catch(error){if(!isCurrent())return;notify('Could not open pack: '+error.message,true);render('open-pack');}
+   }catch(error){
+    if(!isCurrent())return;
+    const recovery=error.message==='This pack targets stale or different approved rules/adapters. Nothing was activated.'?
+     ' To recreate it, keep this game selected, choose Shapes + words or Scan + select under Your access pack, then Save pack. Your current match is unchanged.':'';
+    notify('Could not open pack: '+error.message+recovery,true);render('open-pack');
+   }
   });
   return el('section',{class:'pack-panel','aria-labelledby':'pack-title'},
    el('p',{class:'eyebrow'},'MAKE ROOM AT THE TABLE'),el('h3',{id:'pack-title'},'Your access pack'),
@@ -231,8 +340,8 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
   };
   const next=()=>{scanIndex=(scanIndex+1)%choices.length;paint();};
   const begin=()=>{
-   stopScan();const epoch=scanEpoch;
-   scanTimer=setInterval(()=>{if(epoch===scanEpoch&&continuousScan&&!heldSpace)next();},scanDelay);
+   stopScan();if(!alive||appDocument.hidden||!continuousScan)return;const epoch=scanEpoch;
+   scanTimer=setInterval(()=>{if(epoch===scanEpoch&&continuousScan&&!heldSpace&&!appDocument.hidden)next();},scanDelay);
   };
   const toggle=el('button',{id:'toggle-scan','aria-pressed':continuousScan,onKeyDown:freshActivation,onClick:()=>{
    continuousScan=!continuousScan;
@@ -243,10 +352,10 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
   const speed=el('select',{id:'scan-speed','aria-label':'Scan interval',onChange:e=>{
    scanDelay=Number(e.target.value);if(scanTimer!==null)begin();
   }},[1400,2400,4000].map(ms=>el('option',{value:ms,selected:ms===scanDelay},ms/1000+' seconds')));
-  paint();if(continuousScan)begin();
+  resumeScan=begin;paint();if(continuousScan)begin();
   return el('div',{},list,el('div',{class:'scan-controls'},el('button',{id:'next-choice',onClick:next},'Next choice'),choose),
    el('div',{class:'scan-controls'},toggle,speed),
-   el('p',{class:'scan-hint'},'Start auto scan once to continue across turns. Press Enter on Confirm to make one move, or hold Space to keep the choice fixed and release to confirm. Private hands wait for a fresh press on Show my hand. Pause at any time, or use Next choice manually.'));
+   el('p',{class:'scan-hint'},'Start auto scan once to continue across turns. Press Enter on Confirm to make one move, or hold Space to keep the choice fixed and release to confirm. Private hands wait for a fresh press on Show my hand. Leaving the tab pauses scanning; returning keeps the choice and starts a full interval. Pause at any time, or use Next choice manually.'));
  }
  function comparison(v){
   if(v.outcome.terminal)return selectedGame==='beacon-steps'?endResult(v):null;
@@ -254,12 +363,13 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
   const p=v.turn,adapter=createAdapter(mode),choices=adapter.actions(state,p),original=legalActions(state,p);
   if(oneKeyEnabled)return el('section',{class:'one-key-actions','aria-label':'Available choices'},
    el('h3',{class:'column-title'},'Your choices'),
-   el('div',{class:'choice-buttons'},choices.map(c=>el('button',{'data-choice':c.id,onClick:()=>perform(c.id)},c.label,el('span',{class:'action-arrow','aria-hidden':'true'},'↗')))));
+   el('div',{class:'choice-buttons'},choices.map(c=>el('button',{'data-choice':c.id,onKeyDown:freshActivation,onClick:()=>perform(c.id)},c.label,el('span',{class:'action-arrow','aria-hidden':'true'},'↗')))));
   return el('div',{class:'comparison','data-testid':'choice-comparison'},
-   el('section',{'aria-label':'Original choices'},el('h3',{class:'column-title'},'01 / Original choices'),
-    el('ul',{class:'original-actions'},original.map(a=>el('li',{},actionText(a))))),
-   el('section',{'aria-label':'Adapted choices'},el('h3',{class:'column-title'},'02 / '+labelFor(mode)),
-    mode==='switch-select'?scanActions(choices):el('div',{class:'choice-buttons'},choices.map(c=>el('button',{'data-choice':c.id,onClick:()=>perform(c.id)},c.label,el('span',{class:'action-arrow','aria-hidden':'true'},'↗'))))));
+   el('section',{'aria-label':'Adapted choices'},el('h3',{class:'column-title'},'Player '+(p+1)+' · '+labelFor(mode)),
+    mode==='switch-select'?scanActions(choices):el('div',{class:'choice-buttons'},choices.map(c=>el('button',{'data-choice':c.id,onKeyDown:freshActivation,onClick:()=>perform(c.id)},c.label,el('span',{class:'action-arrow','aria-hidden':'true'},'↗'))))),
+   el('details',{class:'choice-explanation'},el('summary',{},'How these choices match the original game'),
+    el('p',{},'These are the original rules’ choices, shown for explanation—not extra controls. Use the play buttons above to take your turn.'),
+    el('ul',{class:'original-actions','aria-label':'Original choices'},original.map(a=>el('li',{},actionText(a))))));
  }
  function play(){
   const v=publicView(),check=checkedMode(selectedGame,mode);
@@ -271,7 +381,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
     board(v),comparison(v),
     oneKeyEnabled?oneKeyPanel():el('div',{class:'checked-note'},el('span',{class:'check-glyph','aria-hidden':'true'},'✓'),
      el('span',{},'Same legal choices. Same outcomes. Same player information. ',el('span',{},'Checked across all '+check.states+' reachable states of this original game.')))),
-   el('aside',{class:'sidebar'},oneKeyEnabled?null:packPanel(),rulesPanel()));
+   el('aside',{class:'sidebar'},oneKeyEnabled?null:packPanel(),oneKeyEnabled?null:savedMatchPanel(),rulesPanel()));
  }
  function runLab(pack,checkedGame=selectedGame){cover();labMode=pack;labResult=checkAdaptation(checkedGame,pack);render('lab-result');}
  function labEvidence(){
@@ -313,10 +423,10 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
  }
  function proposalPanel(){
   const catalog=getCatalog(selectedGame);
-  const text=el('textarea',{id:'proposal-json',spellcheck:'false','aria-label':'Staged proposal JSON'});
-  text.value=proposalText;text.addEventListener('input',()=>{proposalText=text.value;proposal=null;proposalError='';preview.replaceChildren();});
+  const text=el('textarea',{id:'proposal-json',spellcheck:'false','aria-label':'Staged proposal JSON','aria-invalid':proposalError?'true':undefined,'aria-describedby':proposalError?'proposal-error':undefined});
+  text.value=proposalText;text.addEventListener('input',()=>{proposalText=text.value;proposal=null;proposalError='';text.removeAttribute('aria-invalid');text.removeAttribute('aria-describedby');preview.replaceChildren();});
   const preview=el('div',{class:'proposal-preview'});
-  if(proposalError)preview.append(el('p',{class:'status error'},proposalError));
+  if(proposalError)preview.append(el('p',{class:'status error',id:'proposal-error'},proposalError));
   if(proposal){
    preview.append(el('h4',{},proposal.classification==='variant'?'Variant idea — author review required':'Candidate — awaiting author review'),el('p',{},proposal.summary));
    for(const change of proposal.changes){
@@ -333,11 +443,12 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
   return el('section',{class:'proposal-panel'},el('p',{class:'eyebrow'},'AUTHORING, WITH A HUMAN IN THE LOOP'),el('h3',{},'Ground each proposal.'),
    el('p',{},'Review suggested changes beside the approved rule phrases. A proposal cannot change the rules, expose a private hand, or certify itself.'),
    el('label',{class:'input-label',for:'proposal-json'},'Staged proposal'),text,
-   el('div',{class:'proposal-buttons'},el('button',{id:'load-example',onClick:()=>{proposalText=JSON.stringify(exampleProposal(),null,2);proposal=null;proposalError='';render('proposal-json');}},'Load authored example'),
+   el('div',{class:'proposal-buttons'},el('button',{id:'load-example',onClick:()=>{proposalText=JSON.stringify(exampleProposal(),null,2);proposal=null;proposalError='';render('proposal-json');announce('Authored example loaded. Review it before approving.');}},'Load authored example'),
     el('button',{class:'primary',id:'validate-proposal',onClick:()=>{
      try{proposal=parseModelProposal(proposalText,catalog);proposalError='';}
      catch(error){proposal=null;proposalError=error.message;}
      render('validate-proposal');
+     announce(proposalError?'Proposal not ready. '+proposalError:proposal.classification==='variant'?'Variant idea reviewed. It cannot activate as a preserving access pack.':'Candidate ready for author review. Approve a mode to run its independent check.');
     }},'Review proposal')),
    el('p',{class:'aside-note'},'The example is authored test data. No NVIDIA/Nebius inference has run in this prototype yet.'),preview,
    el('details',{},el('summary',{},'Approved rules & current pin'),el('div',{class:'pin'},catalog.rulesetPin),
@@ -354,26 +465,34 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
    labEvidence()),proposalPanel()));}
  function render(focusId){
   if(!alive)return;
-  stopScan();
-  const page=el('div',{class:oneKeyEnabled?'shell one-key-shell':'shell'},el('header',{class:'topbar'},el('div',{class:'brand'},el('span',{class:'brand-mark','aria-hidden':'true'}),'OPEN TABLE'),
+  resumeScan=null;stopScan();
+  const page=el('div',{class:oneKeyEnabled?'shell one-key-shell':screen==='play'?'shell play-shell':'shell'},el('header',{class:'topbar'},el('div',{class:'brand'},el('span',{class:'brand-mark','aria-hidden':'true'}),'OPEN TABLE'),
    el('span',{class:'top-note'},'Original games. Thoughtful adaptations.'),
-   oneKeyEnabled?el('span',{class:'one-key-badge'},'ONE-KEY PLAY'):el('nav',{class:'tabs','aria-label':'Workspace'},el('button',{'aria-pressed':screen==='play',id:'play-tab',onClick:()=>changeScreen('play')},'At the table'),
+   oneKeyEnabled?el('span',{class:'one-key-badge'},'ONE-KEY PLAY'):matchPrompt?null:el('nav',{class:'tabs','aria-label':'Workspace'},el('button',{'aria-pressed':screen==='play',id:'play-tab',onClick:()=>changeScreen('play')},'At the table'),
     el('button',{'aria-pressed':screen==='workshop',id:'workshop-tab',onClick:()=>changeScreen('workshop')},'Adaptation workshop'))),
-   el('main',{id:'main'},oneKeyEnabled?el('h1',{class:'visually-hidden'},'One-key play'):el('section',{class:'hero'},el('div',{},el('p',{class:'eyebrow'},'EVERYONE HAS A SEAT.'),
+   el('main',{id:'main'},oneKeyEnabled?el('h1',{class:'visually-hidden'},'One-key play'):screen==='play'?el('h1',{class:'visually-hidden'},'Open Table — choose a game and play'):el('section',{class:'hero'},el('div',{},el('p',{class:'eyebrow'},'EVERYONE HAS A SEAT.'),
     el('h1',{},'Same game. ',el('br'),el('em',{},'New ways to play.')),
     el('p',{class:'intro'},'Make room for different ways of seeing, choosing, and taking a turn. Keep the choices that make the game yours.')),
     el('div',{class:'hero-art','aria-hidden':'true'},el('div',{class:'hero-disc'}),el('div',{class:'hero-card'},'◇'),el('div',{class:'hero-token'},'7'))),
-    !oneKeyEnabled?gamePicker():null,oneKeyEnabled&&oneKeyPhase==='setup'?oneKeySetup():screen==='play'?play():workshop()),
+    !oneKeyEnabled&&!matchPrompt?gamePicker():null,matchPrompt?matchConfirmation():matchMenu?savedMatchMenu():oneKeyEnabled&&oneKeyPhase==='setup'?oneKeySetup():screen==='play'?play():workshop(),
+    !oneKeyEnabled&&!matchPrompt&&!matchMenu&&screen==='play'?el('details',{class:'about-table'},el('summary',{},'About Open Table and these adaptations'),
+     el('h2',{},'Same game. New ways to play.'),
+     el('p',{},'Make room for different ways of seeing, choosing, and taking a turn. Choose a presentation in Your access pack. The choices, outcomes and player information stay the same for these two original games.'),
+     el('p',{},'Explore the Adaptation workshop to inspect the finite-game checks and synthetic examples. Accessibility and enjoyment still need playtesting with people.')):null),
    el('footer',{class:'footer'},el('p',{},'OPEN TABLE / An original, private prototype. Rule equivalence is checked for these finite games; accessibility and enjoyment need playtesting with people.'),
     el('p',{},'A place for every player.')));
   content.replaceChildren(page);
   updateOneKey(focusId);
   const target=continuousScan&&scanTimer!==null?'confirm-choice':focusId;
-  if(!oneKeyEnabled&&target)content.querySelector('#'+target)?.focus();
+  if(!oneKeyEnabled&&target){
+   const next=target==='current-play-choice'?(content.querySelector('[data-choice]')||content.querySelector('#confirm-choice')):content.querySelector('#'+target);
+   next?.focus();
+   if(next?.matches('[data-choice],#confirm-choice'))next.scrollIntoView({block:'nearest',inline:'nearest'});
+  }
  }
  function dispose(){
   if(!alive)return;
-  alive=false;importGeneration++;stopScan();oneKeyController.dispose();appWindow?.removeEventListener('hashchange',modeAddressChanged);appWindow?.removeEventListener('blur',releaseSpace);
+  alive=false;importGeneration++;resumeScan=null;stopScan();oneKeyController.dispose();appWindow?.removeEventListener('hashchange',modeAddressChanged);appWindow?.removeEventListener('blur',releaseSpace);appDocument.removeEventListener('visibilitychange',scanVisibilityChanged);root.removeEventListener('keydown',matchEscape);
   if(mounted.get(root)===dispose){mounted.delete(root);root.replaceChildren();}
  }
  if(oneKeyEnabled)oneKeyAddress(true);

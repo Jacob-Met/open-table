@@ -63,3 +63,71 @@ button.one-key-current{outline:3px solid var(--rust);outline-offset:4px;box-shad
  .one-key-shell .track{grid-template-columns:repeat(2,minmax(0,1fr))}
  .one-key-shell .rounds{flex-direction:column}
 }
+
+/* A deliberately saved match is separate from presentation packs. */
+.saved-match-panel{padding:24px;background:var(--white);border:1px solid var(--line);border-radius:9px;min-width:0}
+.saved-match-panel h3{font-family:var(--serif);font-size:27px;font-weight:400;margin:0 0 12px}
+.saved-match-panel p,.match-confirmation p{font-size:13px;line-height:1.65;overflow-wrap:anywhere}
+.saved-match-panel .aside-note{font-size:11px;line-height:1.6;color:var(--muted)}
+.saved-match-summary{padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-weight:600}
+.saved-match-tools{display:flex;gap:8px;flex-wrap:wrap}
+.saved-match-tools button{min-height:44px;flex:1;min-width:90px;white-space:normal;overflow-wrap:anywhere}
+.saved-match-panel .status:empty{display:none}
+.match-confirmation{max-width:680px;padding:28px;margin:0 auto 32px}
+.match-confirmation h2{font-family:var(--serif);font-size:32px;font-weight:400;line-height:1.15;margin:0 0 18px}
+.match-menu{max-width:680px;margin:0 auto 32px}
+.one-key-shell .match-menu,.one-key-shell .match-confirmation{padding:22px}
+.one-key-shell .match-menu .saved-match-panel{border:0;padding:20px 0 0;background:transparent}
+.one-key-shell .saved-match-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.one-key-shell .saved-match-tools button{min-width:0}
+@media(max-width:540px){.saved-match-panel{padding:20px}.match-confirmation{padding:22px 18px}.match-confirmation h2{font-size:28px}.one-key-shell .match-menu,.one-key-shell .match-confirmation{padding:18px}}
+@container(max-width:240px){.one-key-shell .saved-match-tools{grid-template-columns:minmax(0,1fr)}}
+
+/* Keep all play utilities in view beside the private choices at 320px. */
+.one-key-shell .one-key-controls>button{font-size:14px;line-height:1.4;padding:8px;min-height:44px}
+
+/* Play is the primary ordinary journey; evidence is an optional explanation. */
+.play-shell .topbar{padding-top:16px;padding-bottom:16px}
+.play-shell .game-picker{margin:16px 0}
+.play-shell .table-heading{padding:18px 22px 14px}
+.play-shell .table-surface{min-height:0;padding:18px 22px}
+.play-shell .turn-line{margin-bottom:12px}
+.play-shell .comparison{display:block;padding:18px 22px 12px}
+.play-shell .column-title{margin-bottom:10px}
+.play-shell .choice-buttons{grid-template-columns:repeat(2,minmax(0,1fr))}
+.play-shell .choice-buttons button{min-width:0;overflow-wrap:anywhere}
+.choice-explanation{margin-top:14px;border-top:1px solid var(--line);padding-top:5px;color:var(--muted)}
+.choice-explanation summary{min-height:44px;display:list-item;padding:12px 0;font-size:11px}
+.choice-explanation p{font-size:12px;line-height:1.6;margin:6px 0 10px}
+.choice-explanation .original-actions{display:block;list-style:disc;padding-left:20px}
+.choice-explanation .original-actions li{border:0;border-radius:0;padding:3px 0;font-size:12px}
+.about-table{margin:0 0 26px;max-width:760px;color:var(--muted)}
+.about-table summary{min-height:44px;padding:12px 0}
+.about-table h2{font-family:var(--serif);font-weight:400;color:var(--ink)}
+.about-table p{max-width:670px;line-height:1.7}
+@media(max-width:540px){
+ .play-shell .topbar{padding-top:12px;padding-bottom:12px}
+ .play-shell .game-picker{margin:12px 0}
+ .play-shell .game-picker button{padding-top:10px;padding-bottom:10px}
+ .play-shell .table-heading{padding:15px 16px 12px}
+ .play-shell .table-surface{padding:14px 16px}
+ .play-shell .turn-line{margin-bottom:10px}
+ .play-shell .player-tag{padding:7px 10px}
+ .play-shell .track{grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;margin:8px 0}
+ .play-shell .station{min-width:0;min-height:61px;gap:4px}
+ .play-shell .station-num{font-size:19px}
+ .play-shell .station-mark{font-size:7px;letter-spacing:0}
+ .play-shell .marker{width:16px;height:16px}
+ .play-shell .track-note{margin-top:12px}
+ .play-shell .comparison{padding:15px 16px 8px}
+ .play-shell .choice-buttons button{padding:11px 12px}
+ .play-shell .action-arrow{display:none}
+}
+@media(max-width:280px){
+ .play-shell .game-picker,.play-shell .choice-buttons{grid-template-columns:minmax(0,1fr)}
+ .play-shell .track{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .play-shell .turn-line,.play-shell .scoreline{flex-wrap:wrap}
+}
+
+/* Keep the ordinary action and its focus outline clear of viewport edges. */
+.play-shell .comparison button{scroll-margin-block:8px}

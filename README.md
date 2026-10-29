@@ -8,9 +8,9 @@ This is selected concept 14 in [the estate product workstream](https://github.co
 
 ## Play offline
 
-Download `open-table-0.5.0.html` from the [private 0.5.0 release](https://github.com/Jacob-Met/open-table/releases/tag/v0.5.0) and open it in your browser. The single file contains the game, checker, styles and one-key controls. Playing does not require Node.js, a local server, an account, or a network connection. Use **Play with one key** or append `#one-key` to the file address for direct entry.
+Download `open-table-0.6.0.html` from the [private 0.6.0 release](https://github.com/Jacob-Met/open-table/releases/tag/v0.6.0) and open it in your browser. The single file contains the game, checker, styles and one-key controls. Playing does not require Node.js, a local server, an account, or a network connection. Use **Play with one key** or append `#one-key` to the file address for direct entry.
 
-Packs remain separate JSON files that you can save and reopen. Closing or reloading the HTML starts a new session. See [offline play, building, and receiving scope](docs/OFFLINE_PLAY.md).
+Use **Keep this match** to save an explicit snapshot, then **Resume** after reopening the same copy in the same browser. Playing does not autosave. Snapshots include private cards and remain local to this browser profile. Packs remain separate JSON files containing presentation choices. See [saved matches](docs/SAVED_MATCHES.md) and [offline play, building, and receiving scope](docs/OFFLINE_PLAY.md).
 
 ## Run with Node.js
 
@@ -22,7 +22,7 @@ npm start
 
 Open the printed loopback URL, normally `http://127.0.0.1:4287/`. Set `PORT=0` to choose an available port. The server binds only to 127.0.0.1.
 
-The normal start, test, and package commands verify the generated source pins. After deliberately editing the game, adapter, renderer, one-key controller, pack boundary, fixture definitions, or authored catalog, regenerate the pins with `npm run pins`, review the changed binding, and rerun the affected receiving course.
+The normal start, test, and package commands verify the generated source pins. After deliberately editing the game, adapter, renderer, one-key controller, pack or saved-match boundary, fixture definitions, or authored catalog, regenerate the pins with `npm run pins`, review the changed binding, and rerun the affected receiving course.
 
 ## At the table
 
@@ -34,11 +34,11 @@ The rules use public labels Player 1 and Player 2; engine observer IDs are 0 and
 
 Choose **Shapes + words** for explicit numbered, named-shape controls, or **Scan + select** for manual cycling or timed scanning followed by explicit confirmation. Scanning alone does not make a move. Automatic scan intervals are 1.4, 2.4, or 4 seconds. Scan + select handles choices within a game. For game selection and the rest of a play session, use **Play with one key** below.
 
-In **Scan + select**, start automatic scanning once to continue across successive turns. The highlight changes without making a move; each confirmation requires a deliberate activation. On **Confirm**, Enter acts on the current choice. Holding Space keeps that choice fixed; releasing Space confirms it once. Moving focus away cancels that Space press and lets automatic scanning continue. See [Space confirmation and receiving scope](docs/SPACE_CONFIRMATION.md). Pocket Signals pauses behind the private handoff curtain. After looking away and passing the device, a fresh press on **Show my hand** reveals the next player’s cards and resumes scanning. Release the key before confirming a choice. **Pause auto scan** stops automatic selection; **Next choice** remains available for manual stepping. See [continuous-scan integration and receiving scope](docs/CONTINUOUS_INTEGRATION.md).
+In **Scan + select**, start automatic scanning once to continue across successive turns. The highlight changes without making a move; each confirmation requires a deliberate activation. On **Confirm**, Enter acts on the current choice. Holding Space keeps that choice fixed; releasing Space confirms it once. Moving focus away cancels that Space press; automatic scanning continues while the page is visible. See [Space confirmation and receiving scope](docs/SPACE_CONFIRMATION.md). Automatic scanning pauses while the page is hidden. Returning keeps the selected choice and starts a full interval; a deliberate pause stays paused. Pocket Signals pauses behind the private handoff curtain. After looking away and passing the device, a fresh press on **Show my hand** reveals the next player’s cards and resumes scanning. Release the key before confirming a choice. **Pause auto scan** stops automatic selection; **Next choice** remains available for manual stepping. See [continuous-scan integration and receiving scope](docs/CONTINUOUS_INTEGRATION.md).
 
 In ordinary play, both original and adapted choices appear for the same acting player. Pocket Signals clears private cards and both choice panels before handing the device over. A repeated held Enter cannot activate the next player's reveal control; a fresh press still works.
 
-This is cooperative **local pass-and-play on a trusted device**. It is not secure remote multiplayer. Full game truth exists in the local application memory; anyone controlling the device or developer tools can inspect it. Players should look away for the other person's private turn.
+This is cooperative **local pass-and-play on a trusted device**. It is not secure remote multiplayer. Full game truth exists in local application memory and, only after an explicit save, this browser profile's storage; anyone controlling the device or developer tools can inspect it. Players should look away for the other person's private turn.
 
 ## Play with one key
 
@@ -46,7 +46,7 @@ Choose **Play with one key** in the access panel, or open the printed address wi
 
 After entry, wait for the outlined button and use **Space or Enter** throughout the play session. Space activates on release; Enter activates on press. Release before making the next choice. Holding either key pauses focus movement, and repeat events cannot activate the next screen. Scanning only changes focus; it never chooses a game, moves a piece, or uncovers a hand.
 
-The focus visits the two games at setup, then the current legal actions or private-hand control, followed by **Pause**, **Pace**, **Choose a game**, and **Exit** as applicable. Both games support completion and **Play again**. **Pace** cycles through 1.4, 2.4, and 4 seconds; it keeps focus so another fresh press can choose a different interval. **Pause** covers a private hand and holds focus on **Resume**. Resume starts a full interval and requires a fresh press to uncover the hand. To reach Pace or Exit with the same key, resume first; the cards stay covered while the focus moves to those controls. **Cover my hand**, **Choose a game**, and **Exit** also cover private cards.
+The focus visits the two games at setup, then the current legal actions or private-hand control, followed by **Pause**, **Pace**, **Choose a game**, **Save / resume match**, and **Exit** as applicable. Both games support completion and **Play again**. **Pace** cycles through 1.4, 2.4, and 4 seconds; it keeps focus so another fresh press can choose a different interval. **Pause** covers a private hand and holds focus on **Resume**. Resume starts a full interval and requires a fresh press to uncover the hand. To reach Pace or Exit with the same key, resume first; the cards stay covered while the focus moves to those controls. **Cover my hand**, **Choose a game**, and **Exit** also cover private cards.
 
 The one-key table puts legal choices and session controls together in a compact column, with the rules below. It shows the choices you can activate; the ordinary interface retains its original/adapted comparison. At narrower effective widths, controls reflow into one column and the page can scroll to the focused button.
 
@@ -58,12 +58,16 @@ The maintained browser receiving course checks both games with each key and the 
 
 The independent checker enumerates every reachable state of each original game. It compares legal-action bijections, successor states, outcomes, and both directions of each player's information partition. Action labels are part of the observed information, so a label that gives away a hidden card fails. Each visible choice ID must also decode to the same original action across states the player cannot distinguish. A hidden hand or pending move cannot silently change a button's meaning; a rejection retains the conflicting choice and two replayable synthetic worlds in designer diagnostics. Authored candidate functions receive detached inputs and outputs, protecting the reference state and retained witnesses from mutation.
 
+Authored adapter functions must return JSON value trees: null, booleans, strings, finite numbers other than negative zero, dense ordinary arrays, and plain or null-prototype records with enumerable string-keyed data properties. Records are compared by value, regardless of key order, plain versus null prototype, or writable/configurable attributes; detached outputs normalize these representation details. Cycles, repeated object identities, accessors, symbols, sparse or decorated arrays, class instances, collections, dates, typed arrays, undefined and nonfinite numbers are unsupported and rejected before cloning or comparison. Convert collections explicitly to records or arrays and copy repeated objects before returning them. A rejected representation is not itself evidence of an information leak. Authored functions remain trusted, deterministic code; this data contract does not sandbox JavaScript or establish purity of arbitrary proxies.
+
 Two intentionally bad designer controls illustrate failure:
 
 - Removing a legal choice is rejected with a concrete action mismatch.
 - Revealing the opponent's hand is rejected with two synthetic worlds that look identical in the original game and different in the adaptation.
 
 These examples are separate from the live game. Negative controls cannot activate as access packs. The no-hidden-information Beacon game is not falsely rejected merely because a control is named “reveal opponent.”
+
+Selecting the already-current game in the workshop keeps your staged proposal, review evidence, and match progress. Selecting it at the table still starts a new game; choosing a different game in the workshop clears the old game's draft and evidence.
 
 Inspecting a negative control does not replace or restart the game at the table. The result names the game being checked; the Pocket Signals leakage example can be inspected while a Beacon Steps match is in progress. The live match and staged proposal are retained. Private cards stay covered and require the usual handoff before they can be revealed again.
 
@@ -97,6 +101,7 @@ node scripts/browser-receive.mjs
 npm run receive:space
 npm run receive:one-key
 npm run receive:workshop
+node scripts/workshop-reselect-receive.mjs --source . --output /absolute/path/fresh-reselect-receiving
 npm run receive:one-key-layout -- --output /absolute/path/fresh-layout-receiving
 python3 scripts/receive-package.py
 npm pack
@@ -104,7 +109,7 @@ npm pack
 
 The browser course uses the installed Chrome at `/usr/local/bin/google-chrome` and Node's built-in CDP transport. It starts its own loopback server and browser profile, blocks non-loopback page traffic, and closes only the process it launched. Set `OPEN_TABLE_RECEIVING_URL` to receive an already-running copy, or `OPEN_TABLE_RECEIVING_DIR` to retain a separate run. The scripts do not inspect signed-in browser profiles.
 
-The focused workshop course uses ordinary mouse and keyboard play to check match and proposal continuity, private handoffs, and checked-game activation after a cross-game pack import. Run it as a non-root user with `npm run receive:workshop`; it starts its own loopback server. To receive a standalone downloaded build, use `node scripts/workshop-receive.mjs --file /absolute/path/open-table-0.5.0.html --output /absolute/path/fresh-receiving-directory`. File receiving disables networking before navigation and verifies the HTML remains unchanged. `--url http://127.0.0.1:PORT/` receives an existing local server without stopping it. Each run needs a fresh output directory and records the observed browser, checks, screenshots, errors, requests, and cleanup.
+The focused workshop course uses ordinary mouse and keyboard play to check match and proposal continuity, private handoffs, and checked-game activation after a cross-game pack import. Run it as a non-root user with `npm run receive:workshop`; it starts its own loopback server. To receive a standalone downloaded build, use `node scripts/workshop-receive.mjs --file /absolute/path/open-table-0.6.0.html --output /absolute/path/fresh-receiving-directory`. File receiving disables networking before navigation and verifies the HTML remains unchanged. `--url http://127.0.0.1:PORT/` receives an existing local server without stopping it. Each run needs a fresh output directory and records the observed browser, checks, screenshots, errors, requests, and cleanup.
 
 The layout course checks setup, private handoff, every target through a complete revealed-hand focus cycle at 320 × 844, pause/resume, terminal/replay, desktop return to ordinary play, and an explicit 2× CSS-zoom reflow fixture. It records actual focus, target geometry, scroll movement, source hashes and screenshots. The enlarged fixture allows vertical scrolling and is not a native browser-zoom or human accessibility qualification. See [one-key layout receiving](docs/ONE_KEY_PLAY.md#compact-layout-and-receiving).
 
@@ -112,7 +117,7 @@ The initial runtime snapshot `af04f2b1213784b48422cb9fcd8f26aa86dcdbff` passed 4
 
 [PR #1](https://github.com/Jacob-Met/open-table/pull/1) merged the hidden-dependent choice-meaning correction at commit `ec2a618ad2e3a83a69c2777dfff2af4df61cde82`, with tree `1c190a5821fa5f8bcf8cea6364af588461149a9b`. Its recorded qualification covers 48 native/HTTP checks and 15 actual Chrome scenarios for that exact tree. See [the correction evidence and scope](docs/RECEIVING.md#merged-choice-meaning-correction); this documentation update records existing execution.
 
-For the optional Node.js version, download `open-table-0.5.0.tgz` from the [private 0.5.0 release](https://github.com/Jacob-Met/open-table/releases/tag/v0.5.0), extract it, and run `npm start` from its `package` directory with Node.js 22 or later. The [integrated 0.2.0 package](release-artifacts/open-table-0.2.0-integrated-bb3d8e.tgz) remains a historical snapshot. See [continuous-scan integration and receiving scope](docs/CONTINUOUS_INTEGRATION.md) for the preserved corrections, qualification boundaries, and remaining project requirements.
+For the optional Node.js version, download `open-table-0.6.0.tgz` from the [private 0.6.0 release](https://github.com/Jacob-Met/open-table/releases/tag/v0.6.0), extract it, and run `npm start` from its `package` directory with Node.js 22 or later. The [integrated 0.2.0 package](release-artifacts/open-table-0.2.0-integrated-bb3d8e.tgz) remains a historical snapshot. See [continuous-scan integration and receiving scope](docs/CONTINUOUS_INTEGRATION.md) for the preserved corrections, qualification boundaries, and remaining project requirements.
 
 See [receiving evidence](docs/RECEIVING.md), [research and model-route limits](docs/RESEARCH.md), and [recovery state](docs/RECOVERY.json). The separate initial clean archive also passed all 42 native/HTTP and 15 browser scenarios through its own npm start. Its private remote source/tree identity was verified. The [qualified initial private archive](release-artifacts/open-table-0.1.0-af04f2b.tgz) is retained as a historical snapshot; it does not contain the merged correction.
 
