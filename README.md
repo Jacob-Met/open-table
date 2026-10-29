@@ -1,5 +1,9 @@
 # OPEN TABLE
 
+## Private experimental visibility preview
+
+This archive is OPEN TABLE 0.5.1-visibility.1, a separate experimental download derived from integrated main d5fcb837fd30f908f957e648c2737cab55b89020. Stable 0.5.1 remains a separate release. See [preview launch instructions](docs/VISIBILITY_PREVIEW.md) for the standalone HTML and Node launch paths, changed tab behavior, source-bound packs and receiving limits.
+
 **Same game. New ways to play.** A private, working prototype for designers and mixed-access play groups: try two original games, choose a presentation, inspect exactly what it preserves, and save a reusable access pack.
 
 This is selected concept 14 in [the estate product workstream](https://github.com/Jacob-Met/hamon/issues/1631#issuecomment-6431153046). It is an original implementation of OPEN TABLE. The earlier TRACEWALK candidate is stopped and checkpointed separately.
