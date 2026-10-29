@@ -10,6 +10,8 @@ The focus ring uses an outline and a contrasting outer band; it does not rely on
 
 **Pause** covers any private hand and pins focus on **Resume**. Resume starts with the appropriate first control and a full interval. Pocket Signals still requires a fresh press on **Show my hand**. To reach Pace or Exit using the same key, resume first and wait for that control; private cards stay covered. **Cover my hand** returns to that same private gate. **Choose a game** covers the hand and returns to game selection. Choosing a game starts a fresh game. **Exit** covers the hand, restores the previous presentation, removes the mode fragment, and focuses the game heading. Automatic Scan + select remains paused on return.
 
+**Save / resume match** opens a covered menu for the explicit browser snapshot. **Back to play** starts focused. Save, Replace, Resume and Forget each require a confirmation; Cancel starts focused and the confirmation has only two scan targets. A resumed private match returns to a fresh handoff. See [saved matches](SAVED_MATCHES.md) for browser storage and privacy limits.
+
 One-key play uses existing Shapes + words legal actions. No game rules, finite checker, hidden-state model, or authored outcomes are changed. The older Scan + select interface remains available in ordinary play; the two automatic scanners do not run together.
 
 ## What the receiving course establishes
@@ -42,9 +44,9 @@ The release evidence records the exact integrated source version, archive hash, 
 
 ## Compact layout and receiving
 
-One-key play places the board, legal choices and session controls in one table column. The rules remain below the table. The ordinary interface keeps its original/adapted choice comparison. Compact spacing does not reduce the existing text or card sizes.
+One-key play places the board, legal choices and session controls in one table column. The rules remain below the table. The ordinary interface keeps its original/adapted choice comparison. Primary game text and card sizes remain unchanged. Utility buttons use 14px labels, flexible wrapping and a minimum 44px target height.
 
-At the recorded 320 × 844 viewport, the layout course requires all seven revealed Pocket Signals targets to remain visible throughout a complete focus cycle, including the wrap back to the first choice, with no scan-induced vertical movement. That requirement is bounded to the tested viewport and rendered state. Enlarged content and shorter viewports can require vertical scrolling; controls reflow into one column at narrow effective widths.
+At the recorded 320 × 844 viewport, the layout course requires all eight revealed Pocket Signals targets to remain visible throughout a complete focus cycle, including the wrap back to the first choice, with no scan-induced vertical movement. That requirement is bounded to the tested viewport and rendered state. Enlarged content and shorter viewports can require vertical scrolling; controls reflow into one column at narrow effective widths.
 
 Run the maintained layout course as a non-root user:
 
@@ -52,13 +54,13 @@ Run the maintained layout course as a non-root user:
 npm run receive:one-key-layout -- --output /absolute/path/fresh-layout-receiving
 ```
 
-The course starts and closes its own loopback server by default. Use `--url http://127.0.0.1:PORT/` to receive an existing local server without stopping it, or `--file /absolute/path/open-table-0.5.0.html` to open the standalone artifact offline. Each run needs a fresh output directory.
+The course starts and closes its own loopback server by default. Use `--url http://127.0.0.1:PORT/` to receive an existing local server without stopping it, or `--file /absolute/path/open-table-0.6.0.html` to open the standalone artifact offline. Each run needs a fresh output directory.
 
 The seven required cases cover:
 
 1. Exact source or embedded build-input binding.
 2. Setup and private-curtain target visibility at 320 × 844.
-3. A complete seven-target revealed-hand cycle, including wraparound, with actual focus, no overlapping targets, no horizontal overflow, no vertical movement, and unchanged deliberately revealed cards and legal choices.
+3. A complete eight-target revealed-hand cycle, including wraparound, with actual focus, no overlapping targets, no horizontal overflow, no vertical movement, and unchanged deliberately revealed cards and legal choices.
 4. Pause covering the hand, focus remaining on Resume, and a fresh private gate after resuming.
 5. Beacon Steps completion, terminal actions and replay.
 6. Desktop layout and return to the ordinary hero, choice comparison and rules.

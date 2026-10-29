@@ -125,7 +125,7 @@ function publicSnapshot(){
   ].filter(Boolean);
  }
  const controls=[
-  'one-key-pause','one-key-pace','one-key-menu','one-key-exit'
+  'one-key-pause','one-key-pace','one-key-menu','match-menu','one-key-exit'
  ].map(id=>document.getElementById(id)).filter(Boolean);
  const nodes=[...primary,...controls].filter(shown);
 
@@ -245,7 +245,7 @@ async function cycle(enlarged=false){
  const initial=await layout();
  assert(initial.handVisible);
  assert.equal(initial.choices.length,2);
- assert.equal(initial.targets.length,7);
+ assert.equal(initial.targets.length,8);
 
  const expected=[
   ...initial.choices.map(c=>'choice:'+c.id),
@@ -253,6 +253,7 @@ async function cycle(enlarged=false){
   'one-key-pause',
   'one-key-pace',
   'one-key-menu',
+  'match-menu',
   'one-key-exit'
  ];
 
@@ -320,7 +321,7 @@ async function cycle(enlarged=false){
  }
 
  throw new Error(
-  'Incomplete seven-target wraparound: '+JSON.stringify(sequence)
+  'Incomplete eight-target wraparound: '+JSON.stringify(sequence)
  );
 }
 
@@ -488,7 +489,7 @@ try{
   await focused('[data-game="beacon-steps"]');
 
   const setup=await layout();
-  assert.equal(setup.targets.length,5);
+  assert.equal(setup.targets.length,6);
   allVisible(setup);
   const headings=(await browser.axTree()).filter(n=>!n.ignored&&n.role?.value==='heading').map(n=>({name:n.name?.value,level:n.properties?.find(p=>p.name==='level')?.value?.value}));
   assert(headings.some(h=>h.name==='One-key play'&&h.level===1),'Accessible One-key page heading');
@@ -498,14 +499,14 @@ try{
 
   await activate('[data-game="pocket-signals"]');
   const curtain=await covered();
-  assert.equal(curtain.targets.length,5);
+  assert.equal(curtain.targets.length,6);
   allVisible(curtain);
   receipt.observations.curtain=curtain;
   await shot('320-private-curtain.png');
  });
 
  await check(
-  '320-seven-target-cycle-zero-scroll-and-stable-private-view',
+  '320-eight-target-cycle-zero-scroll-and-stable-private-view',
   async()=>{
    await activate('#reveal-hand');
    await visible('[data-testid="private-hand"]');

@@ -54,7 +54,7 @@ try:
     target.parent.mkdir(parents=True,exist_ok=True)
     with tar.extractfile(member) as stream:target.write_bytes(stream.read())
  package=dest/'package'
- required=['index.html','styles.css','server.mjs','src/app.js','src/one-key.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/browser-focus.mjs','scripts/pack-import-browser.mjs','scripts/continuous-receive.mjs','scripts/continuous-boundary-receive.mjs','scripts/space-confirm-receive.mjs','scripts/visibility-receive.mjs','scripts/visibility-lifecycle-receive.mjs','docs/HIDDEN_SCANNING.md','scripts/one-key-receive.mjs','scripts/one-key-layout-receive.mjs','scripts/workshop-receive.mjs','scripts/workshop-reselect-receive.mjs','docs/ONE_KEY_PLAY.md','docs/OFFLINE_PLAY.md','scripts/build-offline.mjs','scripts/offline-receive.mjs','npm-shrinkwrap.json','tests/server.test.mjs']
+ required=['index.html','styles.css','server.mjs','src/app.js','src/one-key.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/browser-focus.mjs','scripts/pack-import-browser.mjs','scripts/continuous-receive.mjs','scripts/continuous-boundary-receive.mjs','scripts/space-confirm-receive.mjs','scripts/visibility-receive.mjs','scripts/visibility-lifecycle-receive.mjs','docs/HIDDEN_SCANNING.md','scripts/one-key-receive.mjs','scripts/one-key-layout-receive.mjs','scripts/workshop-receive.mjs','scripts/workshop-reselect-receive.mjs','docs/ONE_KEY_PLAY.md','docs/OFFLINE_PLAY.md','scripts/build-offline.mjs','scripts/offline-receive.mjs','npm-shrinkwrap.json','tests/server.test.mjs','src/saved-match.js','tests/saved-match.test.mjs','scripts/saved-match-receive.mjs','scripts/saved-match-boundaries.mjs','docs/SAVED_MATCHES.md']
  for path in required:assert (package/path).is_file(),path
  for forbidden in ['receiving','node_modules','.env','.git']:assert not (package/forbidden).exists(),forbidden
  test=run(['npm','test'],cwd=package)
@@ -169,6 +169,14 @@ try:
  assert len(layout_receipt['checks'])==7 and all(case['status']=='passed' for case in layout_receipt['checks'])
  assert layout_receipt['errors']==[]
  receipt['one_key_layout']={'exit_code':layout.returncode,'format':layout_receipt['format'],'status':'passed','checks':layout_receipt['checks'],'errors':layout_receipt['errors'],'localInputs':layout_receipt['localInputs'],'observations':layout_receipt['observations']}
+ for course,script,schema in [('saved_match','saved-match-receive.mjs','open-table.saved-match-receiving.v1'),('saved_boundaries','saved-match-boundaries.mjs','open-table.saved-match-boundaries.v1')]:
+  received=run(['node','scripts/'+script,'--url',url,'--output',str(out/course)],cwd=package,timeout=120)
+  (out/(course+'.log')).write_text(received.stdout+received.stderr)
+  assert received.returncode==0,received.stdout+received.stderr
+  details=json.loads((out/course/'receipt.json').read_text())
+  assert details['schema']==schema and details['ok'] is True and details['browserClosed'] is True
+  assert details.get('browserErrors',details.get('errors',[]))==[]
+  receipt[course]={'exit_code':received.returncode,'schema':schema,'ok':True,'checks':details['checks'],'browser':details['browser']}
  os.killpg(server.pid,signal.SIGTERM);server.wait(timeout=10);server=None
  install=run(['npm','ci','--include=dev','--ignore-scripts','--no-audit','--no-fund'],cwd=package,timeout=120)
  (out/'offline-build-install.log').write_text(install.stdout+install.stderr)
@@ -207,6 +215,15 @@ try:
  offline_visibility_forbidden=[r for r in offline_visibility_receipt['requests'] if not r['url'].startswith(('data:','blob:','about:')) and r['url'].split('#')[0].split('?')[0]!=offline_file.as_uri()]
  assert offline_visibility_forbidden==[],'Unexpected offline visibility dependency'
  receipt['offline_visibility']={'exit_code':offline_visibility.returncode,'status':'passed','checks':[g['name'] for g in offline_visibility_receipt['groups']],'source':offline_visibility_receipt['source'],'artifact_hash_agreement':True,'errors':offline_visibility_receipt['browserErrors'],'forbidden_requests':offline_visibility_forbidden}
+ for course,script,schema in [('saved_match_file','saved-match-receive.mjs','open-table.saved-match-receiving.v1'),('saved_boundaries_file','saved-match-boundaries.mjs','open-table.saved-match-boundaries.v1')]:
+  received=run(['node','scripts/'+script,'--file',str(offline_file),'--output',str(out/course)],cwd=package,timeout=120)
+  (out/(course+'.log')).write_text(received.stdout+received.stderr)
+  assert received.returncode==0,received.stdout+received.stderr
+  details=json.loads((out/course/'receipt.json').read_text())
+  assert details['schema']==schema and details['ok'] is True and details['browserClosed'] is True
+  assert details.get('browserErrors',details.get('errors',[]))==[]
+  assert hashlib.sha256(offline_file.read_bytes()).hexdigest()==offline_manifest['output']['sha256'],'Receiving changed offline artifact'
+  receipt[course]={'exit_code':received.returncode,'schema':schema,'ok':True,'checks':details['checks'],'browser':details['browser']}
  game=package/'src/games.js';original=game.read_bytes()
  try:
   game.write_bytes(original+b'\n// Receiving-only stale source negative control.\n')
@@ -236,4 +253,3 @@ finally:
  receipt['finished_at']=time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())
  (out/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
  print(json.dumps(receipt))
-
