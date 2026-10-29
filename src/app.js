@@ -165,7 +165,11 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
     const text=await file.text();
     if(!isCurrent())return;
     const received=importPack(text);
-    continuousScan=false;cover({invalidatePendingImport:false});if(received.gameId!==selectedGame){selectedGame=received.gameId;state=fresh(selectedGame);}
+    continuousScan=false;cover({invalidatePendingImport:false});
+    if(received.gameId!==selectedGame){
+     selectedGame=received.gameId;state=fresh(selectedGame);proposal=null;
+     proposalError=proposalText.trim()?'The game changed. Review the staged proposal against the current game before approving it.':'';
+    }
     mode=received.adapter;checks.set(selectedGame+':'+mode,received.check);
     notify('Pack reopened and checked again against the current rules.');
     render(selectedGame==='pocket-signals'?'reveal-hand':'table-title');announce('Adaptation pack reopened. Private cards are covered.');
