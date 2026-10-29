@@ -1,7 +1,7 @@
 import {createHash} from 'node:crypto';
 import {readFile,writeFile,rename,rm} from 'node:fs/promises';
 import {GAME_IDS,catalogDefinition,canonicalJSON} from '../src/catalog-data.js';
-const FORMAT='open-table.ruleset-binding.v1',files=['src/adaptations.js','src/app.js','src/designer-fixtures.js','src/games.js','src/pack.js'];
+const FORMAT='open-table.ruleset-binding.v1',files=['src/adaptations.js','src/app.js','src/designer-fixtures.js','src/games.js','src/one-key.js','src/pack.js'];
 const sha256=bytes=>createHash('sha256').update(bytes).digest('hex'),sourceDigests={};
 for(const path of files)sourceDigests[path]=sha256(await readFile(new URL('../'+path,import.meta.url)));
 const pins={};

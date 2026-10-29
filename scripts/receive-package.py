@@ -37,7 +37,7 @@ try:
     target.parent.mkdir(parents=True,exist_ok=True)
     with tar.extractfile(member) as stream:target.write_bytes(stream.read())
  package=dest/'package'
- required=['index.html','styles.css','server.mjs','src/app.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/browser-focus.mjs','scripts/pack-import-browser.mjs','scripts/continuous-receive.mjs','scripts/continuous-boundary-receive.mjs','scripts/space-confirm-receive.mjs','tests/server.test.mjs']
+ required=['index.html','styles.css','server.mjs','src/app.js','src/one-key.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/browser-focus.mjs','scripts/pack-import-browser.mjs','scripts/continuous-receive.mjs','scripts/continuous-boundary-receive.mjs','scripts/space-confirm-receive.mjs','scripts/one-key-receive.mjs','docs/ONE_KEY_PLAY.md','tests/server.test.mjs']
  for path in required:assert (package/path).is_file(),path
  for forbidden in ['receiving','node_modules','.env','.git']:assert not (package/forbidden).exists(),forbidden
  test=run(['npm','test'],cwd=package)
@@ -105,6 +105,17 @@ try:
  assert len(space_receipt['checks'])==9 and space_receipt['browserErrors']==[]
  assert space_receipt['appSHA256']==space_receipt['servedAppSHA256']==app_sha256,'Space course or served source differs from extracted app'
  receipt['space_confirm']={'exit_code':space.returncode,'schema':space_receipt['schema'],'ok':True,'checks':space_receipt['checks'],'errors':space_receipt['browserErrors'],'appSHA256':space_receipt['appSHA256'],'servedAppSHA256':space_receipt['servedAppSHA256'],'packageAppSha256':app_sha256,'source_hash_agreement':True}
+ one_key=run(['node','scripts/one-key-receive.mjs'],cwd=package,env=dict(os.environ,OPEN_TABLE_RECEIVING_URL=url,OPEN_TABLE_ONE_KEY_DIR=str(out/'one-key')),timeout=420)
+ (out/'package-one-key.log').write_text(one_key.stdout+one_key.stderr)
+ assert one_key.returncode==0,one_key.stdout+one_key.stderr
+ one_key_receipt=json.loads((out/'one-key/receipt.json').read_text())
+ assert one_key_receipt['schema']=='open-table.one-key-receiving.v1' and one_key_receipt['ok'] is True
+ assert len(one_key_receipt['checks'])==16 and len(one_key_receipt['observations'])==16
+ assert all(case['passed'] is True for case in one_key_receipt['observations']) and one_key_receipt['browserErrors']==[]
+ for name,path in [('app','src/app.js'),('controller','src/one-key.js')]:
+  expected=hashlib.sha256((package/path).read_bytes()).hexdigest()
+  assert one_key_receipt['hashes'][name]['source']==one_key_receipt['hashes'][name]['served']==one_key_receipt['hashes'][name]['pin']==expected,'One-key source/served/pin differs from extracted package'
+ receipt['one_key']={'exit_code':one_key.returncode,'schema':one_key_receipt['schema'],'ok':True,'checks':one_key_receipt['checks'],'hashes':one_key_receipt['hashes'],'errors':one_key_receipt['browserErrors'],'source_hash_agreement':True}
  os.killpg(server.pid,signal.SIGTERM);server.wait(timeout=10);server=None
  game=package/'src/games.js';original=game.read_bytes()
  try:
@@ -115,6 +126,15 @@ try:
   assert 'OPEN TABLE at' not in stale.stdout
   receipt['stale_source_gate']={'exit_code':stale.returncode,'server_started':False}
  finally:game.write_bytes(original)
+ controller=package/'src/one-key.js';original_controller=controller.read_bytes()
+ try:
+  controller.write_bytes(original_controller+b'\n// Receiving-only stale controller negative control.\n')
+  stale_controller=run(['npm','start'],cwd=package,env=dict(os.environ,PORT='0'),timeout=10)
+  (out/'stale-controller-start.txt').write_text(stale_controller.stdout+stale_controller.stderr)
+  assert stale_controller.returncode!=0 and 'Ruleset pins are missing or stale' in stale_controller.stdout+stale_controller.stderr
+  assert 'OPEN TABLE at' not in stale_controller.stdout
+  receipt['stale_controller_gate']={'exit_code':stale_controller.returncode,'server_started':False}
+ finally:controller.write_bytes(original_controller)
  receipt['ok']=True
 except Exception as error:
  receipt['ok']=False;receipt['failure']=str(error)
