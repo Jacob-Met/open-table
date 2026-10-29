@@ -1,10 +1,10 @@
 # Play Open Table offline
 
-Download the standalone `open-table-0.5.3.html` file from the private release and open it in your browser. No Node.js, local server, account, or network connection is required to play.
+Download the standalone `open-table-0.6.1.html` file from the private release and open it in your browser. No Node.js, local server, account, or network connection is required to play.
 
 Choose a game and play with its existing controls. **Play with one key** starts the focus-scanning session. Opening the same file with `#one-key` appended to its address enters that mode directly. Space and Enter have the same behavior as in the regular application.
 
-Opening or reloading the HTML starts a new session. The application does not save a game in browser storage.
+Opening or reloading starts a fresh live session. **Keep this match** lets you explicitly save one snapshot and **Resume** it after returning to the same file in the same browser profile. Play does not autosave. Snapshots include private cards; anyone using that browser profile can resume them. Local-file storage can vary between browsers and file locations. See [saved matches and their limits](SAVED_MATCHES.md).
 
 ## Packs and private hands
 
@@ -23,6 +23,8 @@ The one-key file course runs 15 behavioral cases covering both complete games wi
 The separate seven-case one-key layout course checks compact focus geometry, terminal/replay, ordinary-layout restoration and an explicitly labeled 2× CSS-zoom stress fixture. The five-case workshop course checks match and proposal preservation, deliberate private handoffs and checked-game activation after cross-game pack import. These are separate receiving courses; their results must be recorded for the actual downloaded file.
 
 Qualification is bounded to the browser, operating system, source hashes and results recorded in the accompanying receipt. Other browser and operating-system combinations, physical switches and human usability remain outside that evidence.
+
+The saved-match courses separately verify explicit save/reload/resume, covered private handoffs, terminal snapshots, retained invalid saves, storage failures and fresh one-key presses. They run against the actual standalone file with networking disabled. See [saved-match receiving](SAVED_MATCHES.md#receiving-checks).
 
 ## Build the file
 
@@ -46,20 +48,20 @@ Two clean output directories can be compared to establish reproducibility for th
 From an extracted package or checkout containing the matching sources:
 
 ```sh
-OPEN_TABLE_RECEIVING_FILE="$PWD/dist/offline/open-table-0.5.3.html" \
+OPEN_TABLE_RECEIVING_FILE="$PWD/dist/offline/open-table-0.6.1.html" \
 OPEN_TABLE_OFFLINE_MANIFEST="$PWD/dist/offline/manifest.json" \
 OPEN_TABLE_OFFLINE_DIR="$PWD/receiving/offline" npm run receive:offline
 
-OPEN_TABLE_RECEIVING_FILE="$PWD/dist/offline/open-table-0.5.3.html" \
+OPEN_TABLE_RECEIVING_FILE="$PWD/dist/offline/open-table-0.6.1.html" \
 OPEN_TABLE_OFFLINE_MANIFEST="$PWD/dist/offline/manifest.json" \
 OPEN_TABLE_ONE_KEY_DIR="$PWD/receiving/one-key-file" npm run receive:one-key
 
 npm run receive:one-key-layout -- \
-  --file "$PWD/dist/offline/open-table-0.5.3.html" \
+  --file "$PWD/dist/offline/open-table-0.6.1.html" \
   --output "$PWD/receiving/one-key-layout-file"
 
 npm run receive:workshop -- \
-  --file "$PWD/dist/offline/open-table-0.5.3.html" \
+  --file "$PWD/dist/offline/open-table-0.6.1.html" \
   --output "$PWD/receiving/workshop-file"
 ```
 

@@ -63,3 +63,25 @@ button.one-key-current{outline:3px solid var(--rust);outline-offset:4px;box-shad
  .one-key-shell .track{grid-template-columns:repeat(2,minmax(0,1fr))}
  .one-key-shell .rounds{flex-direction:column}
 }
+
+/* A deliberately saved match is separate from presentation packs. */
+.saved-match-panel{padding:24px;background:var(--white);border:1px solid var(--line);border-radius:9px;min-width:0}
+.saved-match-panel h3{font-family:var(--serif);font-size:27px;font-weight:400;margin:0 0 12px}
+.saved-match-panel p,.match-confirmation p{font-size:13px;line-height:1.65;overflow-wrap:anywhere}
+.saved-match-panel .aside-note{font-size:11px;line-height:1.6;color:var(--muted)}
+.saved-match-summary{padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-weight:600}
+.saved-match-tools{display:flex;gap:8px;flex-wrap:wrap}
+.saved-match-tools button{min-height:44px;flex:1;min-width:90px;white-space:normal;overflow-wrap:anywhere}
+.saved-match-panel .status:empty{display:none}
+.match-confirmation{max-width:680px;padding:28px;margin:0 auto 32px}
+.match-confirmation h2{font-family:var(--serif);font-size:32px;font-weight:400;line-height:1.15;margin:0 0 18px}
+.match-menu{max-width:680px;margin:0 auto 32px}
+.one-key-shell .match-menu,.one-key-shell .match-confirmation{padding:22px}
+.one-key-shell .match-menu .saved-match-panel{border:0;padding:20px 0 0;background:transparent}
+.one-key-shell .saved-match-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.one-key-shell .saved-match-tools button{min-width:0}
+@media(max-width:540px){.saved-match-panel{padding:20px}.match-confirmation{padding:22px 18px}.match-confirmation h2{font-size:28px}.one-key-shell .match-menu,.one-key-shell .match-confirmation{padding:18px}}
+@container(max-width:240px){.one-key-shell .saved-match-tools{grid-template-columns:minmax(0,1fr)}}
+
+/* Keep all play utilities in view beside the private choices at 320px. */
+.one-key-shell .one-key-controls>button{font-size:14px;line-height:1.4;padding:8px;min-height:44px}
