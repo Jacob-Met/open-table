@@ -1,6 +1,6 @@
 {
   "name": "open-table",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "engines": {
@@ -15,7 +15,8 @@
     "prepack": "node scripts/write-ruleset-pins.mjs --check",
     "receive:browser": "node scripts/browser-receive.mjs",
     "experiment:development": "node scripts/model-development.mjs",
-    "receive:continuous": "node scripts/continuous-receive.mjs"
+    "receive:continuous": "node scripts/continuous-receive.mjs",
+    "receive:space": "node scripts/space-confirm-receive.mjs"
   },
   "files": [
     "index.html",
