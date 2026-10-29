@@ -265,21 +265,25 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
      el('span',{},'Same legal choices. Same outcomes. Same player information. ',el('span',{},'Checked across all '+check.states+' reachable states of this original game.')))),
    el('aside',{class:'sidebar'},oneKeyEnabled?oneKeyPanel():packPanel(),rulesPanel()));
  }
- function runLab(pack){cover();labMode=pack;labResult=checkAdaptation(selectedGame,pack);render('lab-result');}
+ function runLab(pack,checkedGame=selectedGame){cover();labMode=pack;labResult=checkAdaptation(checkedGame,pack);render('lab-result');}
  function labEvidence(){
   if(!labResult)return el('div',{class:'lab-result'},el('h3',{},'Try a change. Keep the game.'),el('p',{},'Choose an adaptation to compare every reachable state, action, outcome, and player view.'));
   const r=labResult,passed=r.ok&&r.complete;
   const box=el('div',{class:'lab-result'+(passed?'':' rejected'),id:'lab-result',tabindex:'-1','data-testid':'lab-result'},
    el('h3',{},passed?'The game is preserved.':'This change breaks the promise.'),
+   el('p',{'data-testid':'checked-game'},'Checked game: '+GAMES[r.gameId].title),
    el('p',{},passed?'This fixed adaptation preserves the complete finite game. It still needs playtesting with the people who will use it.':'The independent checker rejected this synthetic adaptation: '+r.reason.replaceAll('-',' ')+'.'));
   if(passed){
    box.append(el('ul',{class:'checks'},['✓ Every legal choice has exactly one adapted choice.','✓ Every move and terminal outcome matches.','✓ Both players retain exactly the same information.'].map(t=>el('li',{},t))),
     el('p',{class:'receipt-line'},r.states+' states · '+r.transitions+' transitions · '+r.initialStates+' initial states. No sampling.'));
-   if(PACKS[labMode])box.append(el('button',{class:'primary',id:'use-checked-pack',onClick:()=>{mode=labMode;changeScreen('play');}},'Use this pack at the table ↗'));
+   if(PACKS[labMode]){
+    if(r.gameId===selectedGame)box.append(el('button',{class:'primary',id:'use-checked-pack',onClick:()=>{mode=labMode;changeScreen('play');}},'Use this pack at the table ↗'));
+    else box.append(el('p',{},'Check an adaptation for '+GAMES[selectedGame].title+' before using it at the table.'));
+   }
    else box.append(el('p',{},'This negative control has no hidden cards to expose in Beacon Steps. Try the Pocket Signals leakage case.'));
   }else{
    const c=r.counterexample;
-   box.append(el('p',{},'Designer example only. These are synthetic states, separate from your game.'));
+   box.append(el('p',{},'Designer example only. These are synthetic states, separate from your game. Your current game’s progress is preserved.'));
    if(c.left&&c.right){
     box.append(el('div',{class:'witness-pair'},[c.left,c.right].map((side,i)=>{
      const base=side.baseView.observation,adapted=side.adaptedView.observation;
@@ -333,12 +337,12 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
  }
  function workshop(){return el('section',{class:'workshop','aria-labelledby':'workshop-title'},
   el('p',{class:'eyebrow'},'THE ADAPTATION WORKSHOP'),el('h2',{id:'workshop-title',tabindex:'-1'},'Change the presentation. Check the promise.'),
-  el('p',{class:'workshop-intro'},'Explore what an access pack preserves, and inspect a concrete failure when it does not. All negative controls use synthetic designer fixtures; your live hand stays covered.'),
+  el('p',{class:'workshop-intro'},'Explore what an access pack preserves, and inspect a concrete failure when it does not. Negative controls use synthetic examples and preserve your current game’s progress. Private cards stay covered.'),
   el('div',{class:'workshop-grid'},el('div',{},
    el('div',{class:'lab-options'},el('button',{onClick:()=>runLab('shape-text'),'data-lab':'shape-text'},'Check shapes + words ↗'),
     el('button',{onClick:()=>runLab('switch-select'),'data-lab':'switch-select'},'Check scan + select ↗'),
     el('button',{class:'negative',onClick:()=>runLab('drop-action'),'data-lab':'drop-action'},'Negative control: remove a legal choice'),
-    el('button',{class:'negative',onClick:()=>{if(selectedGame!=='pocket-signals'){selectedGame='pocket-signals';state=fresh(selectedGame);proposal=null;proposalText='';}runLab('reveal-opponent');},'data-lab':'reveal-opponent'},'Negative control: leak a Pocket Signals hand')),
+    el('button',{class:'negative',onClick:()=>runLab('reveal-opponent','pocket-signals'),'data-lab':'reveal-opponent'},'Negative control: leak a Pocket Signals hand')),
    labEvidence()),proposalPanel()));}
  function render(focusId){
   if(!alive)return;

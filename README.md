@@ -8,7 +8,7 @@ This is selected concept 14 in [the estate product workstream](https://github.co
 
 ## Play offline
 
-Download `open-table-0.4.0.html` from the private versioned release and open it in your browser. The single file contains the game, checker, styles and one-key controls. Playing does not require Node.js, a local server, an account, or a network connection. Use **Play with one key** or append `#one-key` to the file address for direct entry.
+Download `open-table-0.4.1.html` from the [private 0.4.1 release](https://github.com/Jacob-Met/open-table/releases/tag/v0.4.1) and open it in your browser. The single file contains the game, checker, styles and one-key controls. Playing does not require Node.js, a local server, an account, or a network connection. Use **Play with one key** or append `#one-key` to the file address for direct entry.
 
 Packs remain separate JSON files that you can save and reopen. Closing or reloading the HTML starts a new session. See [offline play, building, and receiving scope](docs/OFFLINE_PLAY.md).
 
@@ -63,6 +63,8 @@ Two intentionally bad designer controls illustrate failure:
 
 These examples are separate from the live game. Negative controls cannot activate as access packs. The no-hidden-information Beacon game is not falsely rejected merely because a control is named “reveal opponent.”
 
+Inspecting a negative control does not replace or restart the game at the table. The result names the game being checked; the Pocket Signals leakage example can be inspected while a Beacon Steps match is in progress. The live match and staged proposal are retained. Private cards stay covered and require the usual handoff before they can be revealed again.
+
 A finite equivalence result establishes preservation for these games and fixed, deterministic adapters. It does not establish universal accessibility, enjoyment, usability with a screen reader or physical switch, or equivalence for arbitrary tabletop games. Human access playtests remain necessary.
 
 ## Save and reopen
@@ -92,17 +94,20 @@ npm test
 node scripts/browser-receive.mjs
 npm run receive:space
 npm run receive:one-key
+npm run receive:workshop
 python3 scripts/receive-package.py
 npm pack
 ```
 
 The browser course uses the installed Chrome at `/usr/local/bin/google-chrome` and Node's built-in CDP transport. It starts its own loopback server and browser profile, blocks non-loopback page traffic, and closes only the process it launched. Set `OPEN_TABLE_RECEIVING_URL` to receive an already-running copy, or `OPEN_TABLE_RECEIVING_DIR` to retain a separate run. The scripts do not inspect signed-in browser profiles.
 
+The focused workshop course uses ordinary mouse and keyboard play to check match and proposal continuity, private handoffs, and checked-game activation after a cross-game pack import. Run it as a non-root user with `npm run receive:workshop`; it starts its own loopback server. To receive a standalone downloaded build, use `node scripts/workshop-receive.mjs --file /absolute/path/open-table-0.4.1.html --output /absolute/path/fresh-receiving-directory`. File receiving disables networking before navigation and verifies the HTML remains unchanged. `--url http://127.0.0.1:PORT/` receives an existing local server without stopping it. Each run needs a fresh output directory and records the observed browser, checks, screenshots, errors, requests, and cleanup.
+
 The initial runtime snapshot `af04f2b1213784b48422cb9fcd8f26aa86dcdbff` passed 42 native/HTTP tests and 15 actual-browser scenarios on Node 22.23.4 / Chrome 156.0.8078.47. Browser evidence covers complete game outcomes, scan/confirm behavior, private handoffs and a repeated-key regression, indistinguishable private states, actual downloads/file-input reopening, rejected imports, proposal boundaries, designer separation, and 1440/390/320-pixel layouts. Desktop and narrow screenshots were visually reviewed.
 
 [PR #1](https://github.com/Jacob-Met/open-table/pull/1) merged the hidden-dependent choice-meaning correction at commit `ec2a618ad2e3a83a69c2777dfff2af4df61cde82`, with tree `1c190a5821fa5f8bcf8cea6364af588461149a9b`. Its recorded qualification covers 48 native/HTTP checks and 15 actual Chrome scenarios for that exact tree. See [the correction evidence and scope](docs/RECEIVING.md#merged-choice-meaning-correction); this documentation update records existing execution.
 
-Download `open-table-0.3.0.tgz` from the [private 0.3.0 release](https://github.com/Jacob-Met/open-table/releases/tag/v0.3.0), extract it, and run `npm start` from its `package` directory with Node.js 22 or later. The [integrated 0.2.0 package](release-artifacts/open-table-0.2.0-integrated-bb3d8e.tgz) remains a historical snapshot. See [continuous-scan integration and receiving scope](docs/CONTINUOUS_INTEGRATION.md) for the preserved corrections, qualification boundaries, and remaining project requirements.
+For the optional Node.js version, download `open-table-0.4.1.tgz` from the [private 0.4.1 release](https://github.com/Jacob-Met/open-table/releases/tag/v0.4.1), extract it, and run `npm start` from its `package` directory with Node.js 22 or later. The [integrated 0.2.0 package](release-artifacts/open-table-0.2.0-integrated-bb3d8e.tgz) remains a historical snapshot. See [continuous-scan integration and receiving scope](docs/CONTINUOUS_INTEGRATION.md) for the preserved corrections, qualification boundaries, and remaining project requirements.
 
 See [receiving evidence](docs/RECEIVING.md), [research and model-route limits](docs/RESEARCH.md), and [recovery state](docs/RECOVERY.json). The separate initial clean archive also passed all 42 native/HTTP and 15 browser scenarios through its own npm start. Its private remote source/tree identity was verified. The [qualified initial private archive](release-artifacts/open-table-0.1.0-af04f2b.tgz) is retained as a historical snapshot; it does not contain the merged correction.
 
