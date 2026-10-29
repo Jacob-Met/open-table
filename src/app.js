@@ -42,12 +42,15 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
  if(state.game!==gameId)throw new Error('Fixture game mismatch');
  outcome(state);
  let screen='play',mode='shape-text',seat=null,status='',statusError=false;
- let alive=true,importGeneration=0;
+ let alive=true,importGeneration=0,heldSpace=false;
+ const appWindow=root.ownerDocument.defaultView;
+ const releaseSpace=()=>{heldSpace=false;};
+ appWindow?.addEventListener('blur',releaseSpace);
  let scanIndex=0,scanTimer=null,scanDelay=1400,scanEpoch=0,continuousScan=false,labMode=null,labResult=null,proposalText='',proposal=null,proposalError='';
  const checks=new Map(),content=el('div'),live=el('div',{class:'visually-hidden',role:'status','aria-live':'polite','aria-atomic':'true','data-testid':'public-live'});
  root.replaceChildren(content,live);
  function fresh(id){const roots=initialStates(id);return roots[Math.floor(Math.random()*roots.length)];}
- function stopScan(){if(scanTimer!==null)clearInterval(scanTimer);scanTimer=null;scanEpoch++;}
+ function stopScan(){releaseSpace();if(scanTimer!==null)clearInterval(scanTimer);scanTimer=null;scanEpoch++;}
  function announce(text){live.textContent=text;}
  function notify(text,error=false){status=text;statusError=error;}
  function publicView(){
@@ -158,7 +161,11 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
  function scanActions(choices){
   scanIndex=Math.min(scanIndex,choices.length-1);
   const list=el('ol',{class:'scan-choices','aria-label':'Available choices'},choices.map((c,i)=>el('li',{class:i===scanIndex?'selected':'','data-scan-index':i},c.label)));
-  const choose=el('button',{class:'primary',id:'confirm-choice',onKeyDown:freshActivation,onClick:()=>perform(choices[scanIndex].id)},'Confirm: '+choices[scanIndex].label);
+  const choose=el('button',{class:'primary',id:'confirm-choice',onKeyDown:event=>{
+   freshActivation(event);
+   if(event.key===' '&&!event.repeat)heldSpace=true;
+  },onKeyUp:event=>{if(event.key===' ')releaseSpace();},onBlur:releaseSpace,
+  onClick:()=>{releaseSpace();perform(choices[scanIndex].id);}},'Confirm: '+choices[scanIndex].label);
   const paint=()=>{
    list.querySelectorAll('li').forEach((n,i)=>{n.classList.toggle('selected',i===scanIndex);if(i===scanIndex)n.setAttribute('aria-current','true');else n.removeAttribute('aria-current');});
    choose.textContent='Confirm: '+choices[scanIndex].label;
@@ -166,7 +173,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
   const next=()=>{scanIndex=(scanIndex+1)%choices.length;paint();};
   const begin=()=>{
    stopScan();const epoch=scanEpoch;
-   scanTimer=setInterval(()=>{if(epoch===scanEpoch&&continuousScan)next();},scanDelay);
+   scanTimer=setInterval(()=>{if(epoch===scanEpoch&&continuousScan&&!heldSpace)next();},scanDelay);
   };
   const toggle=el('button',{id:'toggle-scan','aria-pressed':continuousScan,onKeyDown:freshActivation,onClick:()=>{
    continuousScan=!continuousScan;
@@ -180,7 +187,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
   paint();if(continuousScan)begin();
   return el('div',{},list,el('div',{class:'scan-controls'},el('button',{id:'next-choice',onClick:next},'Next choice'),choose),
    el('div',{class:'scan-controls'},toggle,speed),
-   el('p',{class:'scan-hint'},'Start auto scan once to continue across turns. Press Enter or Space on Confirm to make one move. Private hands wait for a fresh press on Show my hand. Pause at any time, or use Next choice manually.'));
+   el('p',{class:'scan-hint'},'Start auto scan once to continue across turns. Press Enter on Confirm to make one move, or hold Space to keep the choice fixed and release to confirm. Private hands wait for a fresh press on Show my hand. Pause at any time, or use Next choice manually.'));
  }
  function comparison(v){
   if(v.outcome.terminal)return selectedGame==='beacon-steps'?endResult(v):null;
@@ -297,7 +304,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState}={}){
  }
  function dispose(){
   if(!alive)return;
-  alive=false;importGeneration++;stopScan();
+  alive=false;importGeneration++;stopScan();appWindow?.removeEventListener('blur',releaseSpace);
   if(mounted.get(root)===dispose){mounted.delete(root);root.replaceChildren();}
  }
  mounted.set(root,dispose);render();

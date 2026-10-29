@@ -28,7 +28,7 @@ The rules use public labels Player 1 and Player 2; engine observer IDs are 0 and
 
 Choose **Shapes + words** for explicit numbered, named-shape controls, or **Scan + select** for manual cycling or timed scanning followed by explicit confirmation. Scanning alone does not make a move. Automatic scan intervals are 1.4, 2.4, or 4 seconds. This qualifies the action-selection mechanism after setup; whole-application single-switch navigation and physical switch hardware have not been evaluated.
 
-In **Scan + select**, start automatic scanning once to continue across successive turns. The highlight changes without making a move; each confirmation requires a deliberate activation. Pocket Signals pauses behind the private handoff curtain. After looking away and passing the device, a fresh press on **Show my hand** reveals the next player’s cards and resumes scanning. Release the key before confirming a choice. **Pause auto scan** stops automatic selection; **Next choice** remains available for manual stepping. See [continuous-scan integration and receiving scope](docs/CONTINUOUS_INTEGRATION.md).
+In **Scan + select**, start automatic scanning once to continue across successive turns. The highlight changes without making a move; each confirmation requires a deliberate activation. On **Confirm**, Enter acts on the current choice. Holding Space keeps that choice fixed; releasing Space confirms it once. Moving focus away cancels that Space press and lets automatic scanning continue. See [Space confirmation and receiving scope](docs/SPACE_CONFIRMATION.md). Pocket Signals pauses behind the private handoff curtain. After looking away and passing the device, a fresh press on **Show my hand** reveals the next player’s cards and resumes scanning. Release the key before confirming a choice. **Pause auto scan** stops automatic selection; **Next choice** remains available for manual stepping. See [continuous-scan integration and receiving scope](docs/CONTINUOUS_INTEGRATION.md).
 
 Both original and adapted choices appear for the same acting player. Pocket Signals clears private cards and both choice panels before handing the device over. A repeated held Enter cannot activate the next player's reveal control; a fresh press still works.
 
@@ -72,6 +72,8 @@ This command makes zero provider requests and does not run the reserved cases. E
 ```sh
 npm test
 node scripts/browser-receive.mjs
+npm run receive:space
+python3 scripts/receive-package.py
 npm pack
 ```
 
@@ -81,7 +83,7 @@ The initial runtime snapshot `af04f2b1213784b48422cb9fcd8f26aa86dcdbff` passed 4
 
 [PR #1](https://github.com/Jacob-Met/open-table/pull/1) merged the hidden-dependent choice-meaning correction at commit `ec2a618ad2e3a83a69c2777dfff2af4df61cde82`, with tree `1c190a5821fa5f8bcf8cea6364af588461149a9b`. Its recorded qualification covers 48 native/HTTP checks and 15 actual Chrome scenarios for that exact tree. See [the correction evidence and scope](docs/RECEIVING.md#merged-choice-meaning-correction); this documentation update records existing execution.
 
-Download the [current private integrated 0.2 package](release-artifacts/open-table-0.2.0-integrated-bb3d8e.tgz), extract it, and run `npm start` from its `package` directory with Node.js 22 or later. See [continuous-scan integration and receiving scope](docs/CONTINUOUS_INTEGRATION.md) for the preserved corrections, qualification boundaries, and remaining project requirements.
+Download `open-table-0.2.1.tgz` from the [private 0.2.1 release](https://github.com/Jacob-Met/open-table/releases/tag/v0.2.1), extract it, and run `npm start` from its `package` directory with Node.js 22 or later. The [integrated 0.2.0 package](release-artifacts/open-table-0.2.0-integrated-bb3d8e.tgz) remains a historical snapshot. See [continuous-scan integration and receiving scope](docs/CONTINUOUS_INTEGRATION.md) for the preserved corrections, qualification boundaries, and remaining project requirements.
 
 See [receiving evidence](docs/RECEIVING.md), [research and model-route limits](docs/RESEARCH.md), and [recovery state](docs/RECOVERY.json). The separate initial clean archive also passed all 42 native/HTTP and 15 browser scenarios through its own npm start. Its private remote source/tree identity was verified. The [qualified initial private archive](release-artifacts/open-table-0.1.0-af04f2b.tgz) is retained as a historical snapshot; it does not contain the merged correction.
 

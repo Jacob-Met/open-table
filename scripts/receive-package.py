@@ -37,7 +37,7 @@ try:
     target.parent.mkdir(parents=True,exist_ok=True)
     with tar.extractfile(member) as stream:target.write_bytes(stream.read())
  package=dest/'package'
- required=['index.html','styles.css','server.mjs','src/app.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/browser-focus.mjs','scripts/pack-import-browser.mjs','scripts/continuous-receive.mjs','scripts/continuous-boundary-receive.mjs','tests/server.test.mjs']
+ required=['index.html','styles.css','server.mjs','src/app.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/browser-focus.mjs','scripts/pack-import-browser.mjs','scripts/continuous-receive.mjs','scripts/continuous-boundary-receive.mjs','scripts/space-confirm-receive.mjs','tests/server.test.mjs']
  for path in required:assert (package/path).is_file(),path
  for forbidden in ['receiving','node_modules','.env','.git']:assert not (package/forbidden).exists(),forbidden
  test=run(['npm','test'],cwd=package)
@@ -97,6 +97,14 @@ try:
  assert all(course['pass'] is True for course in boundary_receipt['courses']) and boundary_receipt['browserErrors']==[]
  assert boundary_receipt['appSHA256']==boundary_receipt['servedAppSHA256']==app_sha256,'Boundary course or served source differs from extracted app'
  receipt['continuous_boundary']={'exit_code':boundary.returncode,'suite':boundary_receipt['suite'],'pass':True,'courses':[course['name'] for course in boundary_receipt['courses']],'errors':boundary_receipt['browserErrors'],'appSHA256':boundary_receipt['appSHA256'],'servedAppSHA256':boundary_receipt['servedAppSHA256'],'packageAppSha256':app_sha256,'source_hash_agreement':True}
+ space=run(['node','scripts/space-confirm-receive.mjs'],cwd=package,env=dict(os.environ,OPEN_TABLE_RECEIVING_URL=url,OPEN_TABLE_SPACE_DIR=str(out/'space-confirm')),timeout=90)
+ (out/'package-space-confirm.log').write_text(space.stdout+space.stderr)
+ assert space.returncode==0,space.stdout+space.stderr
+ space_receipt=json.loads((out/'space-confirm/receipt.json').read_text())
+ assert space_receipt['schema']=='open-table.space-confirm-receiving.v1' and space_receipt['ok'] is True
+ assert len(space_receipt['checks'])==9 and space_receipt['browserErrors']==[]
+ assert space_receipt['appSHA256']==space_receipt['servedAppSHA256']==app_sha256,'Space course or served source differs from extracted app'
+ receipt['space_confirm']={'exit_code':space.returncode,'schema':space_receipt['schema'],'ok':True,'checks':space_receipt['checks'],'errors':space_receipt['browserErrors'],'appSHA256':space_receipt['appSHA256'],'servedAppSHA256':space_receipt['servedAppSHA256'],'packageAppSha256':app_sha256,'source_hash_agreement':True}
  os.killpg(server.pid,signal.SIGTERM);server.wait(timeout=10);server=None
  game=package/'src/games.js';original=game.read_bytes()
  try:
