@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
-import {readFile,mkdir,writeFile,access} from 'node:fs/promises';
+import {readFile,mkdir,writeFile,access,copyFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-import {resolve} from 'node:path';
+import {resolve,basename,dirname} from 'node:path';
+import {pathToFileURL} from 'node:url';
 import {setTimeout as delay} from 'node:timers/promises';
 import {createAppServer} from '../server.mjs';
 import {RULESET_SOURCE_DIGESTS} from '../src/ruleset-pins.js';
@@ -10,10 +11,17 @@ import {launchBrowser} from './browser-driver.mjs';
 const output=resolve(process.env.OPEN_TABLE_ONE_KEY_DIR||'receiving/one-key');
 try{await access(output+'/receipt.json');throw new Error('Use a fresh one-key receiving directory.');}catch(e){if(e.code!=='ENOENT')throw e;}
 await mkdir(output,{recursive:true});
-const externalURL=process.env.OPEN_TABLE_RECEIVING_URL,server=externalURL?null:createAppServer();
+const externalURL=process.env.OPEN_TABLE_RECEIVING_URL,externalFile=process.env.OPEN_TABLE_RECEIVING_FILE,fileMode=Boolean(externalFile);
+if(externalURL&&fileMode)throw new Error('Choose either HTTP or standalone file receiving.');
+const server=externalURL||fileMode?null:createAppServer();
 if(server)await new Promise(r=>server.listen(0,'127.0.0.1',r));
-const base=new URL(externalURL||'http://127.0.0.1:'+server.address().port+'/');
-const receipt={schema:'open-table.one-key-receiving.v1',startedAt:new Date().toISOString(),checks:[],observations:[],events:[],hashes:{},browserErrors:[]};
+let receivingFile;
+if(fileMode){
+ const directory=output+'/isolated-file';await mkdir(directory);
+ receivingFile=directory+'/'+basename(externalFile);await copyFile(resolve(externalFile),receivingFile);
+}
+const base=fileMode?pathToFileURL(receivingFile):new URL(externalURL||'http://127.0.0.1:'+server.address().port+'/');
+const receipt={schema:'open-table.one-key-receiving.v1',entryKind:fileMode?'standalone-file':'http',startedAt:new Date().toISOString(),checks:[],skipped:[],observations:[],events:[],hashes:{},browserErrors:[],requests:[]};
 const sha=x=>createHash('sha256').update(x).digest('hex');
 let b,bootNumber=0;
 const evaluate=s=>b.evaluate(s);
@@ -29,8 +37,10 @@ async function state(){
  return evaluate('({phase:document.querySelector("[data-one-key-state]")?.getAttribute("data-one-key-state"),hand:!!document.querySelector("[data-testid=private-hand]")?.getClientRects().length,handoff:!!document.querySelector("[data-testid=handoff]")?.getClientRects().length,terminal:!!document.querySelector(".end-result")?.getClientRects().length,track:document.querySelector(".track")?.getAttribute("aria-label")||null,hash:location.hash,focus:document.activeElement?.id||"",game:document.querySelector("#table-title")?.textContent||null})');
 }
 async function boot(oneKey=true){
- const address=new URL(base);address.hash=oneKey?'one-key':'';address.searchParams.set('receiving',String(++bootNumber));
+ const address=new URL(base);address.hash=oneKey?'one-key':'';
+ if(fileMode){address.search='';await b.send('Page.navigate',{url:'about:blank'});await until(()=>evaluate('location.href==="about:blank"&&document.readyState==="complete"'),'blank document committed',10000);}else address.searchParams.set('receiving',String(++bootNumber));
  await b.send('Page.navigate',{url:address.href});
+ await until(()=>evaluate('location.href==='+JSON.stringify(address.href)+'&&document.readyState==="complete"'),'entry document committed',10000);
  await until(()=>visible(oneKey?'#one-key-setup-title':'#one-key-entry'),'document entry');
  await b.send('Page.bringToFront');await until(()=>evaluate('document.hasFocus()'),'foreground receiving page',5000);
  if(oneKey)await until(()=>focused('[data-game]'),'initial game focus');
@@ -71,14 +81,31 @@ async function complete(id,key){
  return {game:id,key,turns,completed:true,replayed:true,returnedToMenu:true};
 }
 try{
+ let fileInformation;
+ if(fileMode){
+  assert.ok(process.env.OPEN_TABLE_OFFLINE_MANIFEST,'File receiving needs its external build manifest.');
+  const bytes=await readFile(receivingFile),manifest=JSON.parse(await readFile(resolve(process.env.OPEN_TABLE_OFFLINE_MANIFEST),'utf8'));
+  assert.equal(manifest.output.sha256,sha(bytes));assert.equal(manifest.output.bytes,bytes.length);
+  const matches=[...bytes.toString('utf8').matchAll(/<script type="application\/json" id="open-table-offline-build">\n([\s\S]*?)<\/script>/g)];
+  assert.equal(matches.length,1);fileInformation=JSON.parse(matches[0][1]);
+  const {output:artifact,...information}=manifest;assert.deepEqual(fileInformation,information);assert.equal(fileInformation.format,'open-table.offline-build.v1');
+  receipt.hashes.html={bytes:bytes.length,sha256:sha(bytes)};receipt.networkOfflineBeforeNavigation=true;
+ }
  for(const [name,path] of [['app','src/app.js'],['controller','src/one-key.js']]){
   const local=await readFile(new URL('../'+path,import.meta.url));
-  const response=await fetch(new URL(path,base));assert.equal(response.ok,true,'Served '+path);
-  const bytes=Buffer.from(await response.arrayBuffer());
-  receipt.hashes[name]={source:sha(local),served:sha(bytes),pin:RULESET_SOURCE_DIGESTS[path]};
-  assert.equal(receipt.hashes[name].source,receipt.hashes[name].served);assert.equal(receipt.hashes[name].source,receipt.hashes[name].pin);
+  if(fileMode){
+   receipt.hashes[name]={source:sha(local),embeddedInput:fileInformation.inputs[path].sha256,pin:RULESET_SOURCE_DIGESTS[path]};
+   assert.equal(receipt.hashes[name].source,receipt.hashes[name].embeddedInput);
+  }else{
+   const response=await fetch(new URL(path,base));assert.equal(response.ok,true,'Served '+path);
+   const bytes=Buffer.from(await response.arrayBuffer());
+   receipt.hashes[name]={source:sha(local),served:sha(bytes),pin:RULESET_SOURCE_DIGESTS[path]};
+   assert.equal(receipt.hashes[name].source,receipt.hashes[name].served);
+  }
+  assert.equal(receipt.hashes[name].source,receipt.hashes[name].pin);
  }
- b=await launchBrowser({url:new URL('#one-key',base).href,width:1440,height:1000,screenshotDir:output});
+ b=await launchBrowser({...(fileMode?{filePath:receivingFile,artifactRoot:dirname(receivingFile),offline:true,hash:'one-key'}:{url:new URL('#one-key',base).href}),width:1440,height:1000,screenshotDir:output});
+ receipt.entryURL=b.entryURL;
  receipt.browser=await b.send('Browser.getVersion');
  for(const key of ['Space','Enter'])for(const id of ['beacon-steps','pocket-signals'])await check('complete '+id+' '+key,()=>complete(id,key));
  await check('ordinary entry holds Enter through setup',async()=>{
@@ -182,7 +209,8 @@ try{
   }
   return evidence;
  });
- await check('destroy removes timers and activation-key capture',async()=>{
+ if(fileMode)receipt.skipped.push({name:'destroy removes timers and activation-key capture',reason:'The HTTP receiving fixture imports the maintained mount API. The production standalone IIFE intentionally exposes no mount API; this case remains required in HTTP receiving.'});
+ else await check('destroy removes timers and activation-key capture',async()=>{
   await boot();await until(()=>focused('[data-game]'),'fixture entry');
   await evaluate('(async()=>{const {mountApp}=await import("/src/app.js");window.__oneKeyFixture=mountApp(document.getElementById("app"),{oneKey:true});return true;})()');
   await raw('Enter','keyDown');
@@ -201,11 +229,17 @@ try{
   const narrow=await b.screenshot('one-key-320.png');
   return {desktop,narrow,visualReviewRequired:true};
  });
- assert.equal(receipt.checks.length,16,'All required receiving cases must run');
+ assert.equal(receipt.checks.length,fileMode?15:16,'All required receiving cases must run');
+ assert.equal(receipt.skipped.length,fileMode?1:0,'Only the declared HTTP mount fixture may be skipped');
+ if(fileMode){
+  const identity=new URL(base);identity.hash='';
+  const forbidden=b.requests.filter(r=>{if(/^(?:data|blob):/.test(r.url)||r.url==='about:blank')return false;try{const u=new URL(r.url);u.hash='';return u.protocol!=='file:'||u.href!==identity.href;}catch{return true;}});
+  assert.ok(b.requests.length>0,'File entry requests must be recorded');assert.deepEqual(forbidden,[],'Unexpected file-mode page dependency');
+ }
  assert.equal(receipt.observations.every(o=>o.passed),true);assert.deepEqual(b.errors,[]);receipt.ok=true;
-}catch(error){receipt.ok=false;receipt.failure=error.stack||String(error);process.exitCode=1;}
+}catch(error){receipt.ok=false;receipt.failure=error.stack||String(error);process.exitCode=1;if(b)try{receipt.failureState=await evaluate('({href:location.href,ready:document.readyState,focused:document.hasFocus(),activeId:document.activeElement?.id||null,activeTag:document.activeElement?.tagName||null,marked:!!document.querySelector(".one-key-current"),setup:!!document.querySelector("#one-key-setup-title")})');}catch{}}
 finally{
- if(b){receipt.browserErrors=[...b.errors];await b.close();if(receipt.browserErrors.length){receipt.ok=false;process.exitCode=1;}}
+ if(b){receipt.requests=[...b.requests];receipt.browserErrors=[...b.errors];await b.close();if(receipt.browserErrors.length){receipt.ok=false;process.exitCode=1;}}
  if(server)await new Promise((resolveClose,reject)=>server.close(e=>e?reject(e):resolveClose()));
  receipt.finishedAt=new Date().toISOString();await writeFile(output+'/receipt.json',JSON.stringify(receipt,null,2)+'\n');console.log(JSON.stringify(receipt));
 }

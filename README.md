@@ -6,7 +6,13 @@ This is selected concept 14 in [the estate product workstream](https://github.co
 
 ![The playable table](docs/images/desktop-table.png)
 
-## Run
+## Play offline
+
+Download `open-table-0.4.0.html` from the private versioned release and open it in your browser. The single file contains the game, checker, styles and one-key controls. Playing does not require Node.js, a local server, an account, or a network connection. Use **Play with one key** or append `#one-key` to the file address for direct entry.
+
+Packs remain separate JSON files that you can save and reopen. Closing or reloading the HTML starts a new session. See [offline play, building, and receiving scope](docs/OFFLINE_PLAY.md).
+
+## Run with Node.js
 
 Node.js 22 or later is required. The application has no third-party runtime dependencies and makes no external network requests.
 
