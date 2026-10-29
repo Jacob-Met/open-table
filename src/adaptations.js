@@ -9,6 +9,32 @@ function sort(value) {
   if (value && typeof value === 'object') return Object.fromEntries(Object.keys(value).sort().map(k => [k, sort(value[k])]));
   return value;
 }
+// Authored adapter observations use JSON value semantics. Validate before cloning:
+// structuredClone otherwise erases accessors, symbols and custom prototypes.
+// Shared identities are excluded because JSON cannot retain their distinction.
+function assertValueTree(value) {
+  const seen = new Set();
+  function reject() { throw new TypeError('Adapter return values must be unaliased JSON value trees with plain records, dense arrays and finite numbers (excluding negative zero).'); }
+  function visit(item) {
+    if (item === null || typeof item === 'string' || typeof item === 'boolean') return;
+    if (typeof item === 'number') { if (!Number.isFinite(item) || Object.is(item, -0)) reject(); return; }
+    if (typeof item !== 'object' || seen.has(item)) reject();
+    seen.add(item);
+    const array = Array.isArray(item), prototype = Object.getPrototypeOf(item);
+    if (array ? prototype !== Array.prototype : prototype !== Object.prototype && prototype !== null) reject();
+    const keys = Reflect.ownKeys(item);
+    if (array && (keys.length !== item.length + 1 || !keys.includes('length'))) reject();
+    for (const key of keys) {
+      if (array && key === 'length') continue;
+      if (typeof key !== 'string') reject();
+      if (array && (!/^(0|[1-9][0-9]*)$/.test(key) || Number(key) >= item.length)) reject();
+      const descriptor = Object.getOwnPropertyDescriptor(item, key);
+      if (!descriptor || !Object.prototype.hasOwnProperty.call(descriptor, 'value') || !descriptor.enumerable) reject();
+      visit(descriptor.value);
+    }
+  }
+  visit(value);
+}
 export function createAdapter(mode) {
   if (!ADAPTATION_MODES.includes(mode)) throw new Error('Unknown controlled adaptation mode.');
   const adapter = {
@@ -45,7 +71,11 @@ export function checkAdaptation(gameId, candidate, { maxStates = 10000 } = {}) {
   if (!Number.isInteger(maxStates) || maxStates < 1) throw new Error('Invalid state bound.');
   const adapter = typeof candidate === 'string' ? createAdapter(candidate) : candidate;
   // Isolate reference state and retained evidence from candidate mutation/aliasing.
-  const fromAdapter = (method, state, ...args) => structuredClone(adapter[method](structuredClone(state), ...args));
+  const fromAdapter = (method, state, ...args) => {
+    const value = adapter[method](structuredClone(state), ...args);
+    assertValueTree(value);
+    return structuredClone(value);
+  };
   const roots = game.initialStates(gameId), queue = [], seen = new Set();
   const byBase = players.map(() => new Map()), byAdapted = players.map(() => new Map());
   const counts = { states: 0, transitions: 0 };
