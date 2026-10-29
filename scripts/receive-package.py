@@ -54,7 +54,7 @@ try:
     target.parent.mkdir(parents=True,exist_ok=True)
     with tar.extractfile(member) as stream:target.write_bytes(stream.read())
  package=dest/'package'
- required=['index.html','styles.css','server.mjs','src/app.js','src/one-key.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/browser-focus.mjs','scripts/pack-import-browser.mjs','scripts/continuous-receive.mjs','scripts/continuous-boundary-receive.mjs','scripts/space-confirm-receive.mjs','scripts/one-key-receive.mjs','scripts/one-key-layout-receive.mjs','scripts/workshop-receive.mjs','scripts/workshop-reselect-receive.mjs','docs/ONE_KEY_PLAY.md','docs/OFFLINE_PLAY.md','scripts/build-offline.mjs','scripts/offline-receive.mjs','npm-shrinkwrap.json','tests/server.test.mjs']
+ required=['index.html','styles.css','server.mjs','src/app.js','src/one-key.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/browser-focus.mjs','scripts/pack-import-browser.mjs','scripts/continuous-receive.mjs','scripts/continuous-boundary-receive.mjs','scripts/space-confirm-receive.mjs','scripts/visibility-receive.mjs','scripts/visibility-lifecycle-receive.mjs','docs/HIDDEN_SCANNING.md','scripts/one-key-receive.mjs','scripts/one-key-layout-receive.mjs','scripts/workshop-receive.mjs','scripts/workshop-reselect-receive.mjs','docs/ONE_KEY_PLAY.md','docs/OFFLINE_PLAY.md','scripts/build-offline.mjs','scripts/offline-receive.mjs','npm-shrinkwrap.json','tests/server.test.mjs']
  for path in required:assert (package/path).is_file(),path
  for forbidden in ['receiving','node_modules','.env','.git']:assert not (package/forbidden).exists(),forbidden
  test=run(['npm','test'],cwd=package)
@@ -122,6 +122,24 @@ try:
  assert len(space_receipt['checks'])==9 and space_receipt['browserErrors']==[]
  assert space_receipt['appSHA256']==space_receipt['servedAppSHA256']==app_sha256,'Space course or served source differs from extracted app'
  receipt['space_confirm']={'exit_code':space.returncode,'schema':space_receipt['schema'],'ok':True,'checks':space_receipt['checks'],'errors':space_receipt['browserErrors'],'appSHA256':space_receipt['appSHA256'],'servedAppSHA256':space_receipt['servedAppSHA256'],'packageAppSha256':app_sha256,'source_hash_agreement':True}
+ visibility=run(['node','scripts/visibility-receive.mjs'],cwd=package,env=dict(os.environ,OPEN_TABLE_RECEIVING_URL=url,OPEN_TABLE_VISIBILITY_DIR=str(out/'visibility')),timeout=120)
+ (out/'visibility.log').write_text(visibility.stdout+visibility.stderr)
+ assert visibility.returncode==0,visibility.stdout+visibility.stderr
+ visibility_receipt=json.loads((out/'visibility/receipt.json').read_text())
+ assert visibility_receipt['schema']=='open-table.visibility-receiving.v1' and visibility_receipt['status']=='passed'
+ assert len(visibility_receipt['groups'])==6 and all(g['status']=='passed' for g in visibility_receipt['groups'])
+ assert visibility_receipt['browserErrors']==[]
+ assert visibility_receipt['source']['servedAppSha256']==app_sha256,'Visibility course source differs from extracted app'
+ receipt['visibility']={'exit_code':visibility.returncode,'status':'passed','checks':[g['name'] for g in visibility_receipt['groups']],'source':visibility_receipt['source'],'source_hash_agreement':True,'errors':visibility_receipt['browserErrors']}
+ lifecycle=run(['node','scripts/visibility-lifecycle-receive.mjs'],cwd=package,env=dict(os.environ,OPEN_TABLE_RECEIVING_URL=url,OPEN_TABLE_VISIBILITY_LIFECYCLE_DIR=str(out/'visibility-lifecycle')),timeout=90)
+ (out/'visibility-lifecycle.log').write_text(lifecycle.stdout+lifecycle.stderr)
+ assert lifecycle.returncode==0,lifecycle.stdout+lifecycle.stderr
+ lifecycle_receipt=json.loads((out/'visibility-lifecycle/receipt.json').read_text())
+ assert lifecycle_receipt['schema']=='open-table.visibility-lifecycle-receiving.v1' and lifecycle_receipt['ok'] is True
+ assert len(lifecycle_receipt['checks'])==3 and all(g['ok'] is True for g in lifecycle_receipt['checks'])
+ assert lifecycle_receipt['browserErrors']==[]
+ assert lifecycle_receipt['servedAppSha256']==lifecycle_receipt['sourceAppSha256']==app_sha256,'Lifecycle course source differs from extracted app'
+ receipt['visibility_lifecycle']={'exit_code':lifecycle.returncode,'ok':True,'checks':[g['name'] for g in lifecycle_receipt['checks']],'source_hash_agreement':True,'errors':lifecycle_receipt['browserErrors']}
  one_key=run(['node','scripts/one-key-receive.mjs'],cwd=package,env=dict(os.environ,OPEN_TABLE_RECEIVING_URL=url,OPEN_TABLE_ONE_KEY_DIR=str(out/'one-key')),timeout=420)
  (out/'package-one-key.log').write_text(one_key.stdout+one_key.stderr)
  assert one_key.returncode==0,one_key.stdout+one_key.stderr
@@ -178,6 +196,17 @@ try:
  receipt['offline_build']={'install_exit_code':install.returncode,'build_exit_code':offline_build.returncode,'manifest':offline_manifest,'source_input_agreement':True}
  receipt['offline']={'exit_code':offline.returncode,'ok':True,'checks':offline_receipt['checks'],'artifact':offline_receipt['artifact'],'errors':offline_receipt['browserErrors'],'browser_runs':offline_receipt['browserRuns']}
  receive_reselect('offline-workshop-reselect',['--file',str(offline_file)],21,offline_manifest['output']['sha256'])
+ offline_visibility=run(['node','scripts/visibility-receive.mjs'],cwd=package,env=dict(offline_env,OPEN_TABLE_VISIBILITY_DIR=str(out/'offline-visibility')),timeout=120)
+ (out/'offline-visibility.log').write_text(offline_visibility.stdout+offline_visibility.stderr)
+ assert offline_visibility.returncode==0,offline_visibility.stdout+offline_visibility.stderr
+ offline_visibility_receipt=json.loads((out/'offline-visibility/receipt.json').read_text())
+ assert offline_visibility_receipt['schema']=='open-table.visibility-receiving.v1' and offline_visibility_receipt['status']=='passed'
+ assert len(offline_visibility_receipt['groups'])==6 and all(g['status']=='passed' for g in offline_visibility_receipt['groups'])
+ assert offline_visibility_receipt['browserErrors']==[] and offline_visibility_receipt['offline'] is True
+ assert offline_visibility_receipt['source']['fileSha256']==offline_manifest['output']['sha256']
+ offline_visibility_forbidden=[r for r in offline_visibility_receipt['requests'] if not r['url'].startswith(('data:','blob:','about:')) and r['url'].split('#')[0].split('?')[0]!=offline_file.as_uri()]
+ assert offline_visibility_forbidden==[],'Unexpected offline visibility dependency'
+ receipt['offline_visibility']={'exit_code':offline_visibility.returncode,'status':'passed','checks':[g['name'] for g in offline_visibility_receipt['groups']],'source':offline_visibility_receipt['source'],'artifact_hash_agreement':True,'errors':offline_visibility_receipt['browserErrors'],'forbidden_requests':offline_visibility_forbidden}
  game=package/'src/games.js';original=game.read_bytes()
  try:
   game.write_bytes(original+b'\n// Receiving-only stale source negative control.\n')

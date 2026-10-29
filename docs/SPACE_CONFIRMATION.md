@@ -2,7 +2,7 @@
 
 ## Behavior
 
-In Scan + select, Space follows the browser's native button behavior: pressing it begins a confirmation and releasing it activates the button once. Automatic scanning keeps the choice fixed while Space is held on Confirm. Repeated keydown events neither change that choice nor make a move. Enter still confirms immediately. Moving focus away cancels the press; automatic scanning can continue. A manual pause remains paused.
+In Scan + select, Space follows the browser's native button behavior: pressing it begins a confirmation and releasing it activates the button once. Automatic scanning keeps the choice fixed while Space is held on Confirm. Repeated keydown events neither change that choice nor make a move. Enter still confirms immediately. Moving focus away cancels the press; automatic scanning can continue while the page is visible. Hiding the page suspends scanning, and returning starts a full interval at the same choice. A manual pause remains paused.
 
 The hold belongs to the current app mount. Button blur, window blur, release, confirmation, render and disposal clear it. The timer remains on its existing cadence while held; no extra timer or timeout is introduced. Private handoff continues to remove both private choice panels and waits for a fresh Show my hand activation.
 
@@ -18,7 +18,7 @@ npm run receive:space
 python3 scripts/receive-package.py
 ```
 
-The focused course uses the owned Chrome driver and real keydown/keyup events. It samples a hold across multiple scan ticks, repeated keydowns, private commitment and curtain behavior, Tab cancellation, a prevented native keyup, manual pause, reset during a hold, mixed Enter/Space input and actual focus loss to an owned blank browser tab. It checks the served renderer against the extracted source hash and records a 320-pixel guidance screenshot. The package receiver runs it alongside the existing native, browser, focus, pack-import, continuous and boundary courses through the extracted archive's actual `npm start` entrypoint. Existing source-pin gates remain active.
+The focused course uses the owned Chrome driver and real keydown/keyup events. It samples a hold across multiple scan ticks, repeated keydowns, private commitment and curtain behavior, Tab cancellation, a prevented native keyup, manual pause, reset during a hold, mixed Enter/Space input and actual visibility loss to an owned blank browser tab, followed by a fresh visible dwell and fresh-press confirmation. It checks the served renderer against the extracted source hash and records a 320-pixel guidance screenshot. The package receiver runs it alongside the existing native, browser, focus, pack-import, continuous and boundary courses through the extracted archive's actual `npm start` entrypoint. Existing source-pin gates remain active.
 
 These deterministic browser checks do not establish usability with physical switches, screen readers, or people. Existing human playtesting and bounded model-experiment dependencies remain. The private 0.2.0 archives and their historical receiving documents remain attributable to their original snapshots.
 
