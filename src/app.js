@@ -68,7 +68,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
  };
  appDocument.addEventListener('visibilitychange',scanVisibilityChanged);
  function announce(text){live.textContent=text;}
- function notify(text,error=false){status=text;statusError=error;}
+ function notify(text,error=false){status=text;statusError=error;if(error)announce(text);}
  function publicView(){
   const v=observe(state,0);
   return v.game==='beacon-steps'?v:{game:v.game,round:v.round,turn:v.turn,history:v.history,scores:v.scores,outcome:v.outcome};
@@ -107,7 +107,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
    :selectedGame==='beacon-steps'?'Marker at '+after.position+'. Player '+(after.turn+1)+' to move.'
    :(after.history.length>previousRounds?'Both cards revealed. Round '+(previousRounds+1)+' is complete. ':'Choice committed privately. ')+
     'Pass to Player '+(after.turn+1)+'.';
-  render(selectedGame==='pocket-signals'&&!after.outcome.terminal?'reveal-hand':after.outcome.terminal?'new-game':'table-title');
+  render(selectedGame==='pocket-signals'&&!after.outcome.terminal?'reveal-hand':after.outcome.terminal?'new-game':'current-play-choice');
   announce(message);
  }
  function activatePack(pack){
@@ -269,11 +269,20 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
     const text=await file.text();
     if(!isCurrent())return;
     const received=importPack(text);
-    continuousScan=false;cover({invalidatePendingImport:false});if(received.gameId!==selectedGame){selectedGame=received.gameId;state=fresh(selectedGame);}
+    continuousScan=false;cover({invalidatePendingImport:false});
+    if(received.gameId!==selectedGame){
+     selectedGame=received.gameId;state=fresh(selectedGame);proposal=null;
+     proposalError=proposalText.trim()?'The game changed. Review the staged proposal against the current game before approving it.':'';
+    }
     mode=received.adapter;checks.set(selectedGame+':'+mode,received.check);
     notify('Pack reopened and checked again against the current rules.');
     render(selectedGame==='pocket-signals'?'reveal-hand':'table-title');announce('Adaptation pack reopened. Private cards are covered.');
-   }catch(error){if(!isCurrent())return;notify('Could not open pack: '+error.message,true);render('open-pack');}
+   }catch(error){
+    if(!isCurrent())return;
+    const recovery=error.message==='This pack targets stale or different approved rules/adapters. Nothing was activated.'?
+     ' To recreate it, keep this game selected, choose Shapes + words or Scan + select under Your access pack, then Save pack. Your current match is unchanged.':'';
+    notify('Could not open pack: '+error.message+recovery,true);render('open-pack');
+   }
   });
   return el('section',{class:'pack-panel','aria-labelledby':'pack-title'},
    el('p',{class:'eyebrow'},'MAKE ROOM AT THE TABLE'),el('h3',{id:'pack-title'},'Your access pack'),
@@ -354,12 +363,13 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
   const p=v.turn,adapter=createAdapter(mode),choices=adapter.actions(state,p),original=legalActions(state,p);
   if(oneKeyEnabled)return el('section',{class:'one-key-actions','aria-label':'Available choices'},
    el('h3',{class:'column-title'},'Your choices'),
-   el('div',{class:'choice-buttons'},choices.map(c=>el('button',{'data-choice':c.id,onClick:()=>perform(c.id)},c.label,el('span',{class:'action-arrow','aria-hidden':'true'},'↗')))));
+   el('div',{class:'choice-buttons'},choices.map(c=>el('button',{'data-choice':c.id,onKeyDown:freshActivation,onClick:()=>perform(c.id)},c.label,el('span',{class:'action-arrow','aria-hidden':'true'},'↗')))));
   return el('div',{class:'comparison','data-testid':'choice-comparison'},
-   el('section',{'aria-label':'Original choices'},el('h3',{class:'column-title'},'01 / Original choices'),
-    el('ul',{class:'original-actions'},original.map(a=>el('li',{},actionText(a))))),
-   el('section',{'aria-label':'Adapted choices'},el('h3',{class:'column-title'},'02 / '+labelFor(mode)),
-    mode==='switch-select'?scanActions(choices):el('div',{class:'choice-buttons'},choices.map(c=>el('button',{'data-choice':c.id,onClick:()=>perform(c.id)},c.label,el('span',{class:'action-arrow','aria-hidden':'true'},'↗'))))));
+   el('section',{'aria-label':'Adapted choices'},el('h3',{class:'column-title'},'Player '+(p+1)+' · '+labelFor(mode)),
+    mode==='switch-select'?scanActions(choices):el('div',{class:'choice-buttons'},choices.map(c=>el('button',{'data-choice':c.id,onKeyDown:freshActivation,onClick:()=>perform(c.id)},c.label,el('span',{class:'action-arrow','aria-hidden':'true'},'↗'))))),
+   el('details',{class:'choice-explanation'},el('summary',{},'How these choices match the original game'),
+    el('p',{},'These are the original rules’ choices, shown for explanation—not extra controls. Use the play buttons above to take your turn.'),
+    el('ul',{class:'original-actions','aria-label':'Original choices'},original.map(a=>el('li',{},actionText(a))))));
  }
  function play(){
   const v=publicView(),check=checkedMode(selectedGame,mode);
@@ -413,10 +423,10 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
  }
  function proposalPanel(){
   const catalog=getCatalog(selectedGame);
-  const text=el('textarea',{id:'proposal-json',spellcheck:'false','aria-label':'Staged proposal JSON'});
-  text.value=proposalText;text.addEventListener('input',()=>{proposalText=text.value;proposal=null;proposalError='';preview.replaceChildren();});
+  const text=el('textarea',{id:'proposal-json',spellcheck:'false','aria-label':'Staged proposal JSON','aria-invalid':proposalError?'true':undefined,'aria-describedby':proposalError?'proposal-error':undefined});
+  text.value=proposalText;text.addEventListener('input',()=>{proposalText=text.value;proposal=null;proposalError='';text.removeAttribute('aria-invalid');text.removeAttribute('aria-describedby');preview.replaceChildren();});
   const preview=el('div',{class:'proposal-preview'});
-  if(proposalError)preview.append(el('p',{class:'status error'},proposalError));
+  if(proposalError)preview.append(el('p',{class:'status error',id:'proposal-error'},proposalError));
   if(proposal){
    preview.append(el('h4',{},proposal.classification==='variant'?'Variant idea — author review required':'Candidate — awaiting author review'),el('p',{},proposal.summary));
    for(const change of proposal.changes){
@@ -433,11 +443,12 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
   return el('section',{class:'proposal-panel'},el('p',{class:'eyebrow'},'AUTHORING, WITH A HUMAN IN THE LOOP'),el('h3',{},'Ground each proposal.'),
    el('p',{},'Review suggested changes beside the approved rule phrases. A proposal cannot change the rules, expose a private hand, or certify itself.'),
    el('label',{class:'input-label',for:'proposal-json'},'Staged proposal'),text,
-   el('div',{class:'proposal-buttons'},el('button',{id:'load-example',onClick:()=>{proposalText=JSON.stringify(exampleProposal(),null,2);proposal=null;proposalError='';render('proposal-json');}},'Load authored example'),
+   el('div',{class:'proposal-buttons'},el('button',{id:'load-example',onClick:()=>{proposalText=JSON.stringify(exampleProposal(),null,2);proposal=null;proposalError='';render('proposal-json');announce('Authored example loaded. Review it before approving.');}},'Load authored example'),
     el('button',{class:'primary',id:'validate-proposal',onClick:()=>{
      try{proposal=parseModelProposal(proposalText,catalog);proposalError='';}
      catch(error){proposal=null;proposalError=error.message;}
      render('validate-proposal');
+     announce(proposalError?'Proposal not ready. '+proposalError:proposal.classification==='variant'?'Variant idea reviewed. It cannot activate as a preserving access pack.':'Candidate ready for author review. Approve a mode to run its independent check.');
     }},'Review proposal')),
    el('p',{class:'aside-note'},'The example is authored test data. No NVIDIA/Nebius inference has run in this prototype yet.'),preview,
    el('details',{},el('summary',{},'Approved rules & current pin'),el('div',{class:'pin'},catalog.rulesetPin),
@@ -455,21 +466,29 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
  function render(focusId){
   if(!alive)return;
   resumeScan=null;stopScan();
-  const page=el('div',{class:oneKeyEnabled?'shell one-key-shell':'shell'},el('header',{class:'topbar'},el('div',{class:'brand'},el('span',{class:'brand-mark','aria-hidden':'true'}),'OPEN TABLE'),
+  const page=el('div',{class:oneKeyEnabled?'shell one-key-shell':screen==='play'?'shell play-shell':'shell'},el('header',{class:'topbar'},el('div',{class:'brand'},el('span',{class:'brand-mark','aria-hidden':'true'}),'OPEN TABLE'),
    el('span',{class:'top-note'},'Original games. Thoughtful adaptations.'),
    oneKeyEnabled?el('span',{class:'one-key-badge'},'ONE-KEY PLAY'):matchPrompt?null:el('nav',{class:'tabs','aria-label':'Workspace'},el('button',{'aria-pressed':screen==='play',id:'play-tab',onClick:()=>changeScreen('play')},'At the table'),
     el('button',{'aria-pressed':screen==='workshop',id:'workshop-tab',onClick:()=>changeScreen('workshop')},'Adaptation workshop'))),
-   el('main',{id:'main'},oneKeyEnabled?el('h1',{class:'visually-hidden'},'One-key play'):el('section',{class:'hero'},el('div',{},el('p',{class:'eyebrow'},'EVERYONE HAS A SEAT.'),
+   el('main',{id:'main'},oneKeyEnabled?el('h1',{class:'visually-hidden'},'One-key play'):screen==='play'?el('h1',{class:'visually-hidden'},'Open Table — choose a game and play'):el('section',{class:'hero'},el('div',{},el('p',{class:'eyebrow'},'EVERYONE HAS A SEAT.'),
     el('h1',{},'Same game. ',el('br'),el('em',{},'New ways to play.')),
     el('p',{class:'intro'},'Make room for different ways of seeing, choosing, and taking a turn. Keep the choices that make the game yours.')),
     el('div',{class:'hero-art','aria-hidden':'true'},el('div',{class:'hero-disc'}),el('div',{class:'hero-card'},'◇'),el('div',{class:'hero-token'},'7'))),
-    !oneKeyEnabled&&!matchPrompt?gamePicker():null,matchPrompt?matchConfirmation():matchMenu?savedMatchMenu():oneKeyEnabled&&oneKeyPhase==='setup'?oneKeySetup():screen==='play'?play():workshop()),
+    !oneKeyEnabled&&!matchPrompt?gamePicker():null,matchPrompt?matchConfirmation():matchMenu?savedMatchMenu():oneKeyEnabled&&oneKeyPhase==='setup'?oneKeySetup():screen==='play'?play():workshop(),
+    !oneKeyEnabled&&!matchPrompt&&!matchMenu&&screen==='play'?el('details',{class:'about-table'},el('summary',{},'About Open Table and these adaptations'),
+     el('h2',{},'Same game. New ways to play.'),
+     el('p',{},'Make room for different ways of seeing, choosing, and taking a turn. Choose a presentation in Your access pack. The choices, outcomes and player information stay the same for these two original games.'),
+     el('p',{},'Explore the Adaptation workshop to inspect the finite-game checks and synthetic examples. Accessibility and enjoyment still need playtesting with people.')):null),
    el('footer',{class:'footer'},el('p',{},'OPEN TABLE / An original, private prototype. Rule equivalence is checked for these finite games; accessibility and enjoyment need playtesting with people.'),
     el('p',{},'A place for every player.')));
   content.replaceChildren(page);
   updateOneKey(focusId);
   const target=continuousScan&&scanTimer!==null?'confirm-choice':focusId;
-  if(!oneKeyEnabled&&target)content.querySelector('#'+target)?.focus();
+  if(!oneKeyEnabled&&target){
+   const next=target==='current-play-choice'?(content.querySelector('[data-choice]')||content.querySelector('#confirm-choice')):content.querySelector('#'+target);
+   next?.focus();
+   if(next?.matches('[data-choice],#confirm-choice'))next.scrollIntoView({block:'nearest',inline:'nearest'});
+  }
  }
  function dispose(){
   if(!alive)return;
