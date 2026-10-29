@@ -8,7 +8,7 @@ This is selected concept 14 in [the estate product workstream](https://github.co
 
 ## Play offline
 
-Download `open-table-0.6.0.html` from the [private 0.6.0 release](https://github.com/Jacob-Met/open-table/releases/tag/v0.6.0) and open it in your browser. The single file contains the game, checker, styles and one-key controls. Playing does not require Node.js, a local server, an account, or a network connection. Use **Play with one key** or append `#one-key` to the file address for direct entry.
+Download `open-table-0.7.0.html` from the [private 0.7.0 release](https://github.com/Jacob-Met/open-table/releases/tag/v0.7.0) and open it in your browser. The single file contains the game, checker, styles and one-key controls. Playing does not require Node.js, a local server, an account, or a network connection. Use **Play with one key** or append `#one-key` to the file address for direct entry.
 
 Use **Keep this match** to save an explicit snapshot, then **Resume** after reopening the same copy in the same browser. Playing does not autosave. Snapshots include private cards and remain local to this browser profile. Packs remain separate JSON files containing presentation choices. See [saved matches](docs/SAVED_MATCHES.md) and [offline play, building, and receiving scope](docs/OFFLINE_PLAY.md).
 
@@ -22,7 +22,11 @@ npm start
 
 Open the printed loopback URL, normally `http://127.0.0.1:4287/`. Set `PORT=0` to choose an available port. The server binds only to 127.0.0.1.
 
-The normal start, test, and package commands verify the generated source pins. After deliberately editing the game, adapter, renderer, one-key controller, pack or saved-match boundary, fixture definitions, or authored catalog, regenerate the pins with `npm run pins`, review the changed binding, and rerun the affected receiving course.
+The normal start, test, and package commands verify the generated source pins. After deliberately editing the game, adapter, renderer, one-key controller, pack, request-preparation or saved-match boundary, fixture definitions, or authored catalog, regenerate the pins with `npm run pins`, review the changed binding, and rerun the affected receiving course.
+
+## Prepare a proposal request
+
+In **Adaptation workshop**, describe an access need for the selected game and choose **Prepare request**. Inspect and download the exact request, including your words and the authored catalog. Drafts are kept per game in this open page; editing a need requires preparation again. No model call is made. See [request preparation and its input boundary](docs/AUTHORING_REQUESTS.md). Review any returned JSON separately with the existing staged-proposal controls.
 
 ## At the table
 
@@ -109,7 +113,7 @@ npm pack
 
 The browser course uses the installed Chrome at `/usr/local/bin/google-chrome` and Node's built-in CDP transport. It starts its own loopback server and browser profile, blocks non-loopback page traffic, and closes only the process it launched. Set `OPEN_TABLE_RECEIVING_URL` to receive an already-running copy, or `OPEN_TABLE_RECEIVING_DIR` to retain a separate run. The scripts do not inspect signed-in browser profiles.
 
-The focused workshop course uses ordinary mouse and keyboard play to check match and proposal continuity, private handoffs, and checked-game activation after a cross-game pack import. Run it as a non-root user with `npm run receive:workshop`; it starts its own loopback server. To receive a standalone downloaded build, use `node scripts/workshop-receive.mjs --file /absolute/path/open-table-0.6.0.html --output /absolute/path/fresh-receiving-directory`. File receiving disables networking before navigation and verifies the HTML remains unchanged. `--url http://127.0.0.1:PORT/` receives an existing local server without stopping it. Each run needs a fresh output directory and records the observed browser, checks, screenshots, errors, requests, and cleanup.
+The focused workshop course uses ordinary mouse and keyboard play to check match and proposal continuity, private handoffs, and checked-game activation after a cross-game pack import. Run it as a non-root user with `npm run receive:workshop`; it starts its own loopback server. To receive a standalone downloaded build, use `node scripts/workshop-receive.mjs --file /absolute/path/open-table-0.7.0.html --output /absolute/path/fresh-receiving-directory`. File receiving disables networking before navigation and verifies the HTML remains unchanged. `--url http://127.0.0.1:PORT/` receives an existing local server without stopping it. Each run needs a fresh output directory and records the observed browser, checks, screenshots, errors, requests, and cleanup.
 
 The layout course checks setup, private handoff, every target through a complete revealed-hand focus cycle at 320 × 844, pause/resume, terminal/replay, desktop return to ordinary play, and an explicit 2× CSS-zoom reflow fixture. It records actual focus, target geometry, scroll movement, source hashes and screenshots. The enlarged fixture allows vertical scrolling and is not a native browser-zoom or human accessibility qualification. See [one-key layout receiving](docs/ONE_KEY_PLAY.md#compact-layout-and-receiving).
 
@@ -117,7 +121,7 @@ The initial runtime snapshot `af04f2b1213784b48422cb9fcd8f26aa86dcdbff` passed 4
 
 [PR #1](https://github.com/Jacob-Met/open-table/pull/1) merged the hidden-dependent choice-meaning correction at commit `ec2a618ad2e3a83a69c2777dfff2af4df61cde82`, with tree `1c190a5821fa5f8bcf8cea6364af588461149a9b`. Its recorded qualification covers 48 native/HTTP checks and 15 actual Chrome scenarios for that exact tree. See [the correction evidence and scope](docs/RECEIVING.md#merged-choice-meaning-correction); this documentation update records existing execution.
 
-For the optional Node.js version, download `open-table-0.6.0.tgz` from the [private 0.6.0 release](https://github.com/Jacob-Met/open-table/releases/tag/v0.6.0), extract it, and run `npm start` from its `package` directory with Node.js 22 or later. The [integrated 0.2.0 package](release-artifacts/open-table-0.2.0-integrated-bb3d8e.tgz) remains a historical snapshot. See [continuous-scan integration and receiving scope](docs/CONTINUOUS_INTEGRATION.md) for the preserved corrections, qualification boundaries, and remaining project requirements.
+For the optional Node.js version, download `open-table-0.6.0.tgz` from the [private 0.7.0 release](https://github.com/Jacob-Met/open-table/releases/tag/v0.7.0), extract it, and run `npm start` from its `package` directory with Node.js 22 or later. The [integrated 0.2.0 package](release-artifacts/open-table-0.2.0-integrated-bb3d8e.tgz) remains a historical snapshot. See [continuous-scan integration and receiving scope](docs/CONTINUOUS_INTEGRATION.md) for the preserved corrections, qualification boundaries, and remaining project requirements.
 
 See [receiving evidence](docs/RECEIVING.md), [research and model-route limits](docs/RESEARCH.md), and [recovery state](docs/RECOVERY.json). The separate initial clean archive also passed all 42 native/HTTP and 15 browser scenarios through its own npm start. Its private remote source/tree identity was verified. The [qualified initial private archive](release-artifacts/open-table-0.1.0-af04f2b.tgz) is retained as a historical snapshot; it does not contain the merged correction.
 

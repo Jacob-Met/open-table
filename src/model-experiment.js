@@ -1,4 +1,5 @@
 import {getCatalog} from './catalog.js';
+import {prepareAuthorRequest} from './author-request.js';
 export const EXPERIMENT_VERSION='open-table.authoring-experiment.v1';
 // Authored cases, not a blind user corpus. Reserve the last two from prompt tuning.
 const CASES=[
@@ -130,25 +131,10 @@ const CASES=[
 export const EXPERIMENT_CASE_IDS=Object.freeze(CASES.map(x=>x.id));
 export function getExperimentCase(id){const c=CASES.find(x=>x.id===id);if(!c)throw new Error('Unknown OPEN TABLE authoring experiment case.');return structuredClone(c);}
 
-const INSTRUCTIONS=[
- 'Draft one OPEN TABLE adaptation proposal from the supplied approved catalog and access goal.',
- 'Return JSON only, with exactly schema, gameId, rulesetPin, classification, summary, changes, witnessCandidates.',
- 'schema is open-table.proposal.v1. Echo the supplied gameId and rulesetPin.',
- 'classification is equivalence-candidate or variant. It states intent, not a verified result.',
- 'Each of 1..8 changes has exactly adapter, componentRef, sourceRefs, rationale. Use only supplied adapter/component pairs and authored source references.',
- 'Do not invent or edit game rules, scores, deals, actions, disclosure, player identity, adapters, or approval fields.',
- 'If any requested part changes a mechanic or disclosed information, use variant. Explain that unsupported part and ground it in the approved rules, while proposing only supported access changes.',
- 'witnessCandidates may contain 0..12 objects with exactly fixtureRef, check, viewer. Use only supplied synthetic fixture references; check is legal-actions, outcome, or player-view; viewer is public, 0, or 1.',
- 'Viewer numbers in witness candidates are engine observer IDs, never permission to change a live viewer. Public player labels 1 and 2 correspond to engine observer IDs 0 and 1.',
- 'A witness is a candidate for independent checking, not a certificate. Never claim universal accessibility, human validation, or model-certified equivalence.',
- 'Summaries and rationales are concise plain text, with maximum lengths 1200 and 800 characters respectively.'
-].join('\n');
-// Static authored context only. Does not select a provider, make a request, or spend.
+// Static authored experiment context only. No provider is selected or invoked.
 export function makeModelRequest(caseId){
- const task=getExperimentCase(caseId),c=getCatalog(task.gameId);
- const approvedCatalog={gameId:c.gameId,title:c.title,rulesetPin:c.rulesetPin,rules:c.rules,components:c.components,adapters:c.adapters,sourceRefs:c.sourceRefs,fixtures:c.fixtures};
- return {experimentVersion:EXPERIMENT_VERSION,caseId:task.id,split:task.split,gameId:c.gameId,rulesetPin:c.rulesetPin,
-  messages:[{role:'system',content:INSTRUCTIONS},{role:'user',content:JSON.stringify({accessGoal:task.goal,approvedCatalog})}]};
+ const task=getExperimentCase(caseId),request=prepareAuthorRequest(task.gameId,task.goal);
+ return {experimentVersion:EXPERIMENT_VERSION,caseId:task.id,split:task.split,gameId:request.gameId,rulesetPin:request.rulesetPin,messages:request.messages};
 }
 const STOP=new Set('a an and are as at be by can current each for from game in is it its need of on or player players should the their them they this to use using with'.split(' '));
 function terms(value){return new Set((value.toLowerCase().match(/[a-z0-9]+/g)||[]).map(w=>w.length>3&&w.endsWith('s')?w.slice(0,-1):w).filter(w=>!STOP.has(w)));}
