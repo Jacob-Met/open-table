@@ -1,6 +1,6 @@
 # Play Open Table offline
 
-Download the standalone `open-table-0.6.0.html` file from the private release and open it in your browser. No Node.js, local server, account, or network connection is required to play.
+Download the standalone `open-table-0.7.0.html` file from the private release and open it in your browser. No Node.js, local server, account, or network connection is required to play.
 
 Choose a game and play with its existing controls. **Play with one key** starts the focus-scanning session. Opening the same file with `#one-key` appended to its address enters that mode directly. Space and Enter have the same behavior as in the regular application.
 
@@ -11,6 +11,8 @@ Opening or reloading starts a fresh live session. **Keep this match** lets you e
 **Save pack** downloads a separate JSON file containing the game, adaptation, classification, schema and current rule pin. It contains no private hand or play history. **Open pack** lets you choose a saved pack and checks it against the current rules before activation. File contents stay in the local application.
 
 Pocket Signals retains the shared-device handoff: cover a hand, pass the device, then let the next player reveal their own cards. The file uses the existing trusted-device pass-and-play model. It does not create separate player accounts or encrypted multiplayer state.
+
+The offline Workshop also prepares and downloads an access-need request from the current authored catalog. This is local preparation and performs no model invocation. See [authoring requests](AUTHORING_REQUESTS.md).
 
 ## Receiving scope
 
@@ -48,20 +50,20 @@ Two clean output directories can be compared to establish reproducibility for th
 From an extracted package or checkout containing the matching sources:
 
 ```sh
-OPEN_TABLE_RECEIVING_FILE="$PWD/dist/offline/open-table-0.6.0.html" \
+OPEN_TABLE_RECEIVING_FILE="$PWD/dist/offline/open-table-0.7.0.html" \
 OPEN_TABLE_OFFLINE_MANIFEST="$PWD/dist/offline/manifest.json" \
 OPEN_TABLE_OFFLINE_DIR="$PWD/receiving/offline" npm run receive:offline
 
-OPEN_TABLE_RECEIVING_FILE="$PWD/dist/offline/open-table-0.6.0.html" \
+OPEN_TABLE_RECEIVING_FILE="$PWD/dist/offline/open-table-0.7.0.html" \
 OPEN_TABLE_OFFLINE_MANIFEST="$PWD/dist/offline/manifest.json" \
 OPEN_TABLE_ONE_KEY_DIR="$PWD/receiving/one-key-file" npm run receive:one-key
 
 npm run receive:one-key-layout -- \
-  --file "$PWD/dist/offline/open-table-0.6.0.html" \
+  --file "$PWD/dist/offline/open-table-0.7.0.html" \
   --output "$PWD/receiving/one-key-layout-file"
 
 npm run receive:workshop -- \
-  --file "$PWD/dist/offline/open-table-0.6.0.html" \
+  --file "$PWD/dist/offline/open-table-0.7.0.html" \
   --output "$PWD/receiving/workshop-file"
 ```
 

@@ -1,6 +1,7 @@
 import {initialStates,legalActions,step,observe,outcome} from './games.js';
 import {createAdapter,checkAdaptation} from './adaptations.js';
 import {parseModelProposal} from './model-proposal.js';
+import {prepareAuthorRequest,MAX_AUTHOR_GOAL_LENGTH} from './author-request.js';
 import {getCatalog} from './catalog.js';
 import {createPack,importPack} from './pack.js';
 import {createOneKeyController} from './one-key.js';
@@ -59,6 +60,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
  const matchEscape=event=>{if(event.key==='Escape'&&matchPrompt){event.preventDefault();cancelMatchAction();}};
  root.addEventListener('keydown',matchEscape);
  let scanIndex=0,scanTimer=null,scanDelay=1400,scanEpoch=0,continuousScan=false,resumeScan=null,labMode=null,labResult=null,proposalText='',proposal=null,proposalError='';
+ const authorDrafts=new Map();
  const checks=new Map(),content=el('div'),live=el('div',{class:'visually-hidden',role:'status','aria-live':'polite','aria-atomic':'true','data-testid':'public-live'});
  root.replaceChildren(content,live);
  function fresh(id){const roots=initialStates(id);return roots[Math.floor(Math.random()*roots.length)];}
@@ -411,6 +413,47 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
    summary:'An authored example: make the existing choices explicit with named shapes and words.',
    changes:[{adapter,componentRef:c.adapters[adapter][0],sourceRefs:c.sourceRefs.slice(0,2),rationale:'Retain the existing component meaning while adding an explicit textual label.'}],witnessCandidates:[]};
  }
+ function authorRequestPanel(){
+  const game=selectedGame;
+  if(!authorDrafts.has(game))authorDrafts.set(game,{goal:'',requestText:'',error:''});
+  const draft=authorDrafts.get(game);
+  const goal=el('textarea',{id:'access-goal',rows:4,maxlength:MAX_AUTHOR_GOAL_LENGTH,'aria-describedby':'author-request-notice'});
+  goal.value=draft.goal;
+  const preview=el('div',{class:'author-request-preview'});
+  goal.addEventListener('input',()=>{
+   const wasPrepared=Boolean(draft.requestText);
+   draft.goal=goal.value;draft.requestText='';draft.error='';preview.replaceChildren();
+   if(wasPrepared)announce('Access need changed. Prepare a new request before downloading.');
+  });
+  if(draft.error)preview.append(el('p',{class:'status error',role:'alert'},draft.error));
+  if(draft.requestText){
+   const request=JSON.parse(draft.requestText);
+   const raw=el('textarea',{id:'author-request-json',rows:8,readonly:true,spellcheck:false,'aria-label':'Exact prepared request JSON'});
+   raw.value=draft.requestText;
+   preview.append(el('h4',{},'Prepared locally for '+GAMES[game].title),
+    el('p',{class:'request-state'},'Nothing has been sent to a model.'),
+    el('p',{class:'pin'},'Rule pin: '+request.rulesetPin),
+    el('label',{class:'input-label',for:'author-request-json'},'Exact request to inspect'),raw,
+    el('button',{id:'download-author-request',onClick:()=>{
+     download(game+'-'+request.rulesetPin.slice(7,19)+'.open-table-request.json',draft.requestText);
+     announce('Prepared request downloaded. Nothing has been sent to a model.');
+    }},'Download prepared request'),
+    el('p',{class:'aside-note'},'Review any returned JSON in Staged proposal below. This request does not verify which model or request produced a pasted response.'));
+  }
+  return el('section',{class:'author-request-panel','aria-labelledby':'author-request-title'},
+   el('p',{class:'eyebrow'},'FROM YOUR TABLE'),el('h3',{id:'author-request-title'},'Start with an access need.'),
+   el('p',{},'Describe what a player needs to read or do. Prepare a request grounded in this game’s approved rules, then inspect every part before sharing it.'),
+   el('label',{class:'input-label',for:'access-goal'},'Access need for '+GAMES[game].title+' · up to 2,000 characters'),goal,
+   el('p',{id:'author-request-notice',class:'aside-note'},'Your words are included exactly as written. Leave out private information. Only this game’s authored rules and catalog are added; your match and saved games are not read.'),
+   el('button',{id:'prepare-author-request',class:'primary',onClick:()=>{
+    draft.requestText='';draft.error='';
+    try{draft.requestText=JSON.stringify(prepareAuthorRequest(game,draft.goal),null,2)+'\n';}
+    catch(error){draft.error=error.message;}
+    render(draft.error?'access-goal':'prepare-author-request');
+    if(draft.requestText)announce('Request prepared for '+GAMES[game].title+'. Nothing has been sent to a model.');
+   }},'Prepare request'),
+   el('p',{class:'aside-note'},'Drafts stay in this open page. Preparing or downloading a request makes no model call.'),preview);
+ }
  function proposalPanel(){
   const catalog=getCatalog(selectedGame);
   const text=el('textarea',{id:'proposal-json',spellcheck:'false','aria-label':'Staged proposal JSON'});
@@ -451,7 +494,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
     el('button',{onClick:()=>runLab('switch-select'),'data-lab':'switch-select'},'Check scan + select ↗'),
     el('button',{class:'negative',onClick:()=>runLab('drop-action'),'data-lab':'drop-action'},'Negative control: remove a legal choice'),
     el('button',{class:'negative',onClick:()=>runLab('reveal-opponent','pocket-signals'),'data-lab':'reveal-opponent'},'Negative control: leak a Pocket Signals hand')),
-   labEvidence()),proposalPanel()));}
+   labEvidence()),el('div',{class:'authoring-column'},authorRequestPanel(),proposalPanel())));}
  function render(focusId){
   if(!alive)return;
   resumeScan=null;stopScan();

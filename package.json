@@ -1,6 +1,6 @@
 {
   "name": "open-table",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -25,7 +25,8 @@
     "receive:visibility": "node scripts/visibility-receive.mjs",
     "receive:visibility-lifecycle": "node scripts/visibility-lifecycle-receive.mjs",
     "receive:saved-match": "node scripts/saved-match-receive.mjs",
-    "receive:saved-boundaries": "node scripts/saved-match-boundaries.mjs"
+    "receive:saved-boundaries": "node scripts/saved-match-boundaries.mjs",
+    "receive:author-request": "node scripts/author-request-receive.mjs"
   },
   "files": [
     "index.html",

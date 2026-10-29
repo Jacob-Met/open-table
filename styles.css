@@ -85,3 +85,20 @@ button.one-key-current{outline:3px solid var(--rust);outline-offset:4px;box-shad
 
 /* Keep all play utilities in view beside the private choices at 320px. */
 .one-key-shell .one-key-controls>button{font-size:14px;line-height:1.4;padding:8px;min-height:44px}
+
+/* An author's explicit request is separate from the proposal they later review. */
+.workshop-grid{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
+.authoring-column{min-width:0;border-left:1px solid var(--line);padding-left:28px}
+.authoring-column .proposal-panel{border-left:0;border-top:1px solid var(--line);padding:24px 0 0;margin-top:24px}
+.author-request-panel h3{font-family:var(--serif);font-size:24px;font-weight:400;margin:0 0 10px}
+.author-request-panel p:not(.eyebrow){font-size:13px;line-height:1.7;overflow-wrap:anywhere}
+.author-request-panel .aside-note{color:var(--muted)}
+.author-request-panel button{min-height:44px;font-size:13px;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+#access-goal{font-family:var(--sans);font-size:16px;min-height:112px}
+#author-request-json{min-height:0;height:190px;max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere}
+.author-request-preview{margin-top:18px}
+.author-request-preview h4{font-size:14px;margin:0 0 8px}
+.author-request-preview .request-state{font-weight:700;color:var(--green)}
+.author-request-preview .pin{font-size:11px}
+#download-author-request{margin-top:12px}
+@media(max-width:800px){.workshop-grid{grid-template-columns:minmax(0,1fr)}.authoring-column{border-left:0;border-top:1px solid var(--line);padding:23px 0 0}}
