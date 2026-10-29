@@ -1,6 +1,6 @@
 # Play Open Table offline
 
-Download the standalone `open-table-0.4.0.html` file from the private release and open it in your browser. No Node.js, local server, account, or network connection is required to play.
+Download the standalone `open-table-0.5.0.html` file from the private release and open it in your browser. No Node.js, local server, account, or network connection is required to play.
 
 Choose a game and play with its existing controls. **Play with one key** starts the focus-scanning session. Opening the same file with `#one-key` appended to its address enters that mode directly. Space and Enter have the same behavior as in the regular application.
 
@@ -19,6 +19,8 @@ The offline receiving course opens the actual HTML through a file URL in a fresh
 The ordinary course checks both games, private handoffs, actual pack-download bytes, a real browser file-input reopen, invalid-pack rejection, workshop checks, reload, a renamed filename containing spaces and Unicode, and narrow layout. File input is exercised through the browser automation interface; native operating-system picker interaction is not claimed.
 
 The one-key file course runs 15 behavioral cases covering both complete games with Space and Enter, held/repeated keys, mixed activation keys, privacy, pause, pace, exit, real window blur, focus coverage and viewport layout. The separate disposal fixture imports the maintained module and stays in the 16-case HTTP course; the production standalone file exposes no fixture mount API.
+
+The separate seven-case one-key layout course checks compact focus geometry, terminal/replay, ordinary-layout restoration and an explicitly labeled 2× CSS-zoom stress fixture. The five-case workshop course checks match and proposal preservation, deliberate private handoffs and checked-game activation after cross-game pack import. These are separate receiving courses; their results must be recorded for the actual downloaded file.
 
 Qualification is bounded to the browser, operating system, source hashes and results recorded in the accompanying receipt. Other browser and operating-system combinations, physical switches and human usability remain outside that evidence.
 
@@ -44,13 +46,21 @@ Two clean output directories can be compared to establish reproducibility for th
 From an extracted package or checkout containing the matching sources:
 
 ```sh
-OPEN_TABLE_RECEIVING_FILE="$PWD/dist/offline/open-table-0.4.0.html" \
+OPEN_TABLE_RECEIVING_FILE="$PWD/dist/offline/open-table-0.5.0.html" \
 OPEN_TABLE_OFFLINE_MANIFEST="$PWD/dist/offline/manifest.json" \
 OPEN_TABLE_OFFLINE_DIR="$PWD/receiving/offline" npm run receive:offline
 
-OPEN_TABLE_RECEIVING_FILE="$PWD/dist/offline/open-table-0.4.0.html" \
+OPEN_TABLE_RECEIVING_FILE="$PWD/dist/offline/open-table-0.5.0.html" \
 OPEN_TABLE_OFFLINE_MANIFEST="$PWD/dist/offline/manifest.json" \
 OPEN_TABLE_ONE_KEY_DIR="$PWD/receiving/one-key-file" npm run receive:one-key
+
+npm run receive:one-key-layout -- \
+  --file "$PWD/dist/offline/open-table-0.5.0.html" \
+  --output "$PWD/receiving/one-key-layout-file"
+
+npm run receive:workshop -- \
+  --file "$PWD/dist/offline/open-table-0.5.0.html" \
+  --output "$PWD/receiving/workshop-file"
 ```
 
 Receiving requires Node 22 and the maintained Chrome driver environment. Those are verification tools, not requirements for playing the downloaded file. Each invocation needs a fresh receiving directory.

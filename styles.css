@@ -11,3 +11,55 @@
 button.one-key-current{outline:3px solid var(--rust);outline-offset:4px;box-shadow:0 0 0 7px var(--yellow)}
 @media(max-width:540px){.one-key-welcome{padding:24px 20px}.one-key-welcome h2{font-size:29px}}
 @media(forced-colors:active){button.one-key-current{outline:3px solid Highlight;box-shadow:none}}
+
+/* Compact One-key table. Ordinary play keeps its existing presentation. */
+.one-key-shell{max-width:850px}
+.one-key-shell .topbar{padding-top:12px;padding-bottom:12px;gap:8px}
+.one-key-shell .top-note{display:none}
+.one-key-shell .one-key-badge{padding:6px 8px}
+.one-key-shell .workspace{grid-template-columns:minmax(0,1fr);gap:16px}
+.one-key-shell .table-panel{min-width:0;padding:0;overflow:visible}
+.one-key-shell .table-heading{padding:12px 16px 8px;margin:0}
+.one-key-shell .table-heading h2{margin:0}
+.one-key-shell .table-surface{padding:12px 16px;min-height:0}
+.one-key-shell .turn-line{margin-bottom:8px;align-items:center}
+.one-key-shell .player-tag{padding:6px 8px}
+.one-key-shell .rounds{gap:6px;margin-bottom:8px}
+.one-key-shell .rounds:empty{display:none}
+.one-key-shell .curtain{padding:16px 12px;margin:0 auto}
+.one-key-shell .curtain-mark{display:none}
+.one-key-shell .hand{margin:8px auto 12px}
+.one-key-shell .one-key-actions{padding:12px 16px 0}
+.one-key-shell .one-key-actions .column-title{margin-bottom:8px}
+.one-key-shell .one-key-actions .choice-buttons,
+.one-key-shell .one-key-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.one-key-shell .one-key-actions .choice-buttons>button,
+.one-key-shell .one-key-controls>button{min-width:0;white-space:normal;overflow-wrap:anywhere}
+.one-key-shell .one-key-panel{margin:12px 16px 16px;padding:12px 0 0;border:0;border-top:1px solid var(--line);border-radius:0;background:transparent}
+.one-key-shell .one-key-panel h3{margin:0 0 10px}
+.one-key-shell .one-key-panel p{margin:10px 0 0}
+.one-key-shell .one-key-welcome{padding:18px 16px}
+.one-key-shell .one-key-welcome h2{margin:0 0 16px}
+.one-key-shell .one-key-welcome .one-key-panel{margin:12px 0 0}
+.one-key-shell .sidebar{display:block;min-width:0}
+
+/* Reflow with the table's actual width, including enlarged content. */
+.one-key-shell{container-type:inline-size}
+@container(max-width:240px){
+ .one-key-shell .game-picker,
+ .one-key-shell .one-key-actions .choice-buttons,
+ .one-key-shell .one-key-controls{grid-template-columns:minmax(0,1fr)}
+ .one-key-shell .game-picker button{flex-wrap:wrap}
+ .one-key-shell .game-picker button>span{min-width:0;overflow-wrap:anywhere}
+ .one-key-shell .one-key-actions .action-arrow{display:none}
+ .one-key-shell .one-key-actions .choice-buttons>button,
+ .one-key-shell .one-key-controls>button{padding-left:8px;padding-right:8px}
+ .one-key-shell .table-heading,
+ .one-key-shell .table-surface,
+ .one-key-shell .one-key-actions{padding-left:10px;padding-right:10px}
+ .one-key-shell .one-key-panel{margin-left:10px;margin-right:10px}
+ .one-key-shell .turn-line,.one-key-shell .scoreline{flex-wrap:wrap}
+ .one-key-shell .hand{flex-wrap:wrap}
+ .one-key-shell .track{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .one-key-shell .rounds{flex-direction:column}
+}

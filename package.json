@@ -1,6 +1,6 @@
 {
   "name": "open-table",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -20,7 +20,8 @@
     "receive:one-key": "node scripts/one-key-receive.mjs",
     "build:offline": "node scripts/build-offline.mjs",
     "receive:offline": "node scripts/offline-receive.mjs",
-    "receive:workshop": "node scripts/workshop-receive.mjs"
+    "receive:workshop": "node scripts/workshop-receive.mjs",
+    "receive:one-key-layout": "node scripts/one-key-layout-receive.mjs"
   },
   "files": [
     "index.html",

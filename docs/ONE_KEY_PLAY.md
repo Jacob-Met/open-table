@@ -40,6 +40,34 @@ The two keys and two games produce four separate completion cases, so the requir
 
 The release evidence records the exact integrated source version, archive hash, runtime versions, actual test outcomes, downloaded-build receiving, and visual review. A local syntax check or a source file present in a checkout is insufficient to establish a delivered playable build.
 
+## Compact layout and receiving
+
+One-key play places the board, legal choices and session controls in one table column. The rules remain below the table. The ordinary interface keeps its original/adapted choice comparison. Compact spacing does not reduce the existing text or card sizes.
+
+At the recorded 320 × 844 viewport, the layout course requires all seven revealed Pocket Signals targets to remain visible throughout a complete focus cycle, including the wrap back to the first choice, with no scan-induced vertical movement. That requirement is bounded to the tested viewport and rendered state. Enlarged content and shorter viewports can require vertical scrolling; controls reflow into one column at narrow effective widths.
+
+Run the maintained layout course as a non-root user:
+
+```sh
+npm run receive:one-key-layout -- --output /absolute/path/fresh-layout-receiving
+```
+
+The course starts and closes its own loopback server by default. Use `--url http://127.0.0.1:PORT/` to receive an existing local server without stopping it, or `--file /absolute/path/open-table-0.5.0.html` to open the standalone artifact offline. Each run needs a fresh output directory.
+
+The seven required cases cover:
+
+1. Exact source or embedded build-input binding.
+2. Setup and private-curtain target visibility at 320 × 844.
+3. A complete seven-target revealed-hand cycle, including wraparound, with actual focus, no overlapping targets, no horizontal overflow, no vertical movement, and unchanged deliberately revealed cards and legal choices.
+4. Pause covering the hand, focus remaining on Resume, and a fresh private gate after resuming.
+5. Beacon Steps completion, terminal actions and replay.
+6. Desktop layout and return to the ordinary hero, choice comparison and rules.
+7. An explicit `document.documentElement.style.zoom = '2'` reflow stress fixture: vertical scrolling is allowed, each focused control must remain reachable, button text must fit, and horizontal overflow is rejected.
+
+The driver sends native keyboard events and observes the player-facing DOM. The course never directly focuses gameplay buttons, changes timers, invokes transitions or inspects hidden game state. It records usable viewport dimensions, target rectangles, actual focus and scroll movement; verifies sandboxed non-root execution; and checks browser errors, requests, artifact bytes and owned-process cleanup. Screenshots require visual review alongside the machine checks. The 2× CSS-zoom fixture is not native browser zoom, operating-system magnification, a physical-switch test or a human accessibility evaluation.
+
+The full extracted-package gate includes this seven-case course and the five-case workshop preservation course alongside the retained behavioral receivers. Release qualification must bind their actual results to the exact source and downloaded artifact; adding the receivers does not itself establish a passing release.
+
 ## Limits
 
 This is cooperative local pass-and-play on a trusted device. Players pass the device and look away during another player's private turn. The interaction gates prevent accidental repeat activation; they do not secure information from someone watching the screen or inspecting application memory.

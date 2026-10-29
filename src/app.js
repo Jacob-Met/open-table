@@ -122,22 +122,21 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
  }
  function oneKeyPanel(){
   const phase=oneKeyPaused?'paused':oneKeyPhase;
+  const controls=el('div',{class:'one-key-controls'},
+   el('button',{id:'one-key-pause',onClick:()=>{cover();oneKeyPaused=!oneKeyPaused;render();announce(oneKeyPaused?'One-key play paused. Private cards are covered.':'One-key play resumed.');}},oneKeyPaused?'Resume one-key play':'Pause one-key play'),
+   el('button',{id:'one-key-pace',onClick:()=>{const paces=[1400,2400,4000];oneKeyPace=paces[(paces.indexOf(oneKeyPace)+1)%paces.length];oneKeyController.setInterval(oneKeyPace);render('one-key-pace');announce('One-key pace: '+oneKeyPace/1000+' seconds.');}},'Pace: '+oneKeyPace/1000+' seconds'),
+   oneKeyPhase==='play'?el('button',{id:'one-key-menu',onClick:()=>{cover();oneKeyPhase='setup';oneKeyPaused=false;render();announce('Choose a game. Private cards are covered.');}},'Choose a game'):null,
+   el('button',{id:'one-key-exit',onClick:leaveOneKey},'Exit one-key play'));
   return el('section',{class:'pack-panel one-key-panel','aria-labelledby':'one-key-title','data-one-key-state':phase},
-   el('p',{class:'eyebrow'},'YOUR PACE. YOUR CHOICE.'),el('h3',{id:'one-key-title'},'Play with one key'),
-   el('p',{},'Wait for the outlined button. Press and release Space or Enter to choose it. Holding a key keeps the focus still. Scanning never makes a move.'),
+   el('h3',{id:'one-key-title'},'Play controls'),controls,
    el('p',{id:'one-key-status'},oneKeyPaused?'Paused. Resume to reach Pace or Exit. Private cards stay covered.':'Focus moves every '+oneKeyPace/1000+' seconds. '+(oneKeyPhase==='setup'?'Choose a game to begin.':'Private hands wait for a fresh press.')),
-   el('div',{class:'one-key-controls'},
-    el('button',{id:'one-key-pause',onClick:()=>{cover();oneKeyPaused=!oneKeyPaused;render();announce(oneKeyPaused?'One-key play paused. Private cards are covered.':'One-key play resumed.');}},oneKeyPaused?'Resume one-key play':'Pause one-key play'),
-    el('button',{id:'one-key-pace',onClick:()=>{const paces=[1400,2400,4000];oneKeyPace=paces[(paces.indexOf(oneKeyPace)+1)%paces.length];oneKeyController.setInterval(oneKeyPace);render('one-key-pace');announce('One-key pace: '+oneKeyPace/1000+' seconds.');}},'Pace: '+oneKeyPace/1000+' seconds'),
-    oneKeyPhase==='play'?el('button',{id:'one-key-menu',onClick:()=>{cover();oneKeyPhase='setup';oneKeyPaused=false;render();announce('Choose a game. Private cards are covered.');}},'Choose a game'):null,
-    el('button',{id:'one-key-exit',onClick:leaveOneKey},'Exit one-key play')));
+   el('p',{class:'one-key-instructions'},'Press and release Space or Enter on the outlined button. Hold to keep focus still. Scanning never makes a move.'));
  }
  function oneKeySetup(){
-  return el('div',{class:'workspace'},el('section',{class:'table-panel one-key-welcome','aria-labelledby':'one-key-setup-title'},
-   el('p',{class:'eyebrow'},'THE TABLE IS READY'),el('h2',{id:'one-key-setup-title'},'Choose a game. Take your time.'),
-   el('p',{},'The focus visits each game and play control in turn. Use the same key to choose a game, make moves, reveal your own hand, and play again.'),
-   el('p',{},'Space or Enter works throughout this play session. Pause whenever you need a break. Choose Pace for a longer interval.')),
-   el('aside',{class:'sidebar'},oneKeyPanel()));
+  return el('div',{class:'workspace'},
+   el('section',{class:'table-panel one-key-welcome','aria-labelledby':'one-key-setup-title'},
+    el('h2',{id:'one-key-setup-title'},'Choose a game. Take your time.'),
+    gamePicker(),oneKeyPanel()));
  }
  function updateOneKey(focusId){
   if(!oneKeyEnabled){oneKeyController.update({enabled:false,buttons:[content.querySelector('#one-key-entry')]});return;}
@@ -247,8 +246,11 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
  }
  function comparison(v){
   if(v.outcome.terminal)return selectedGame==='beacon-steps'?endResult(v):null;
-  if(selectedGame==='pocket-signals'&&seat!==v.turn)return el('div',{class:'checked-note'},el('span',{class:'check-glyph'},'✓'),'Private choices are cleared from both views between turns.');
+  if(selectedGame==='pocket-signals'&&seat!==v.turn)return oneKeyEnabled?null:el('div',{class:'checked-note'},el('span',{class:'check-glyph'},'✓'),'Private choices are cleared from both views between turns.');
   const p=v.turn,adapter=createAdapter(mode),choices=adapter.actions(state,p),original=legalActions(state,p);
+  if(oneKeyEnabled)return el('section',{class:'one-key-actions','aria-label':'Available choices'},
+   el('h3',{class:'column-title'},'Your choices'),
+   el('div',{class:'choice-buttons'},choices.map(c=>el('button',{'data-choice':c.id,onClick:()=>perform(c.id)},c.label,el('span',{class:'action-arrow','aria-hidden':'true'},'↗')))));
   return el('div',{class:'comparison','data-testid':'choice-comparison'},
    el('section',{'aria-label':'Original choices'},el('h3',{class:'column-title'},'01 / Original choices'),
     el('ul',{class:'original-actions'},original.map(a=>el('li',{},actionText(a))))),
@@ -259,11 +261,13 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
   const v=publicView(),check=checkedMode(selectedGame,mode);
   return el('div',{class:'workspace'},
    el('section',{class:'table-panel','aria-labelledby':'table-title'},el('div',{class:'table-heading'},
-    el('div',{},el('h2',{id:'table-title',tabindex:'-1'},GAMES[selectedGame].title),el('p',{},GAMES[selectedGame].description)),
-    el('span',{class:'game-number'},selectedGame==='beacon-steps'?'GAME / 01':'GAME / 02')),
-    board(v),comparison(v),el('div',{class:'checked-note'},el('span',{class:'check-glyph','aria-hidden':'true'},'✓'),
+    el('div',{},el('h2',{id:'table-title',tabindex:'-1'},GAMES[selectedGame].title),
+     oneKeyEnabled?null:el('p',{},GAMES[selectedGame].description)),
+    oneKeyEnabled?null:el('span',{class:'game-number'},selectedGame==='beacon-steps'?'GAME / 01':'GAME / 02')),
+    board(v),comparison(v),
+    oneKeyEnabled?oneKeyPanel():el('div',{class:'checked-note'},el('span',{class:'check-glyph','aria-hidden':'true'},'✓'),
      el('span',{},'Same legal choices. Same outcomes. Same player information. ',el('span',{},'Checked across all '+check.states+' reachable states of this original game.')))),
-   el('aside',{class:'sidebar'},oneKeyEnabled?oneKeyPanel():packPanel(),rulesPanel()));
+   el('aside',{class:'sidebar'},oneKeyEnabled?null:packPanel(),rulesPanel()));
  }
  function runLab(pack,checkedGame=selectedGame){cover();labMode=pack;labResult=checkAdaptation(checkedGame,pack);render('lab-result');}
  function labEvidence(){
@@ -347,15 +351,15 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
  function render(focusId){
   if(!alive)return;
   stopScan();
-  const page=el('div',{class:'shell'},el('header',{class:'topbar'},el('div',{class:'brand'},el('span',{class:'brand-mark','aria-hidden':'true'}),'OPEN TABLE'),
+  const page=el('div',{class:oneKeyEnabled?'shell one-key-shell':'shell'},el('header',{class:'topbar'},el('div',{class:'brand'},el('span',{class:'brand-mark','aria-hidden':'true'}),'OPEN TABLE'),
    el('span',{class:'top-note'},'Original games. Thoughtful adaptations.'),
    oneKeyEnabled?el('span',{class:'one-key-badge'},'ONE-KEY PLAY'):el('nav',{class:'tabs','aria-label':'Workspace'},el('button',{'aria-pressed':screen==='play',id:'play-tab',onClick:()=>changeScreen('play')},'At the table'),
     el('button',{'aria-pressed':screen==='workshop',id:'workshop-tab',onClick:()=>changeScreen('workshop')},'Adaptation workshop'))),
-   el('main',{id:'main'},el('section',{class:'hero'},el('div',{},el('p',{class:'eyebrow'},'EVERYONE HAS A SEAT.'),
+   el('main',{id:'main'},oneKeyEnabled?el('h1',{class:'visually-hidden'},'One-key play'):el('section',{class:'hero'},el('div',{},el('p',{class:'eyebrow'},'EVERYONE HAS A SEAT.'),
     el('h1',{},'Same game. ',el('br'),el('em',{},'New ways to play.')),
     el('p',{class:'intro'},'Make room for different ways of seeing, choosing, and taking a turn. Keep the choices that make the game yours.')),
     el('div',{class:'hero-art','aria-hidden':'true'},el('div',{class:'hero-disc'}),el('div',{class:'hero-card'},'◇'),el('div',{class:'hero-token'},'7'))),
-    !oneKeyEnabled||oneKeyPhase==='setup'?gamePicker():null,oneKeyEnabled&&oneKeyPhase==='setup'?oneKeySetup():screen==='play'?play():workshop()),
+    !oneKeyEnabled?gamePicker():null,oneKeyEnabled&&oneKeyPhase==='setup'?oneKeySetup():screen==='play'?play():workshop()),
    el('footer',{class:'footer'},el('p',{},'OPEN TABLE / An original, private prototype. Rule equivalence is checked for these finite games; accessibility and enjoyment need playtesting with people.'),
     el('p',{},'A place for every player.')));
   content.replaceChildren(page);

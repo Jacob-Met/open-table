@@ -37,7 +37,7 @@ try:
     target.parent.mkdir(parents=True,exist_ok=True)
     with tar.extractfile(member) as stream:target.write_bytes(stream.read())
  package=dest/'package'
- required=['index.html','styles.css','server.mjs','src/app.js','src/one-key.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/browser-focus.mjs','scripts/pack-import-browser.mjs','scripts/continuous-receive.mjs','scripts/continuous-boundary-receive.mjs','scripts/space-confirm-receive.mjs','scripts/one-key-receive.mjs','docs/ONE_KEY_PLAY.md','docs/OFFLINE_PLAY.md','scripts/build-offline.mjs','scripts/offline-receive.mjs','npm-shrinkwrap.json','tests/server.test.mjs']
+ required=['index.html','styles.css','server.mjs','src/app.js','src/one-key.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/browser-focus.mjs','scripts/pack-import-browser.mjs','scripts/continuous-receive.mjs','scripts/continuous-boundary-receive.mjs','scripts/space-confirm-receive.mjs','scripts/one-key-receive.mjs','scripts/one-key-layout-receive.mjs','scripts/workshop-receive.mjs','docs/ONE_KEY_PLAY.md','docs/OFFLINE_PLAY.md','scripts/build-offline.mjs','scripts/offline-receive.mjs','npm-shrinkwrap.json','tests/server.test.mjs']
  for path in required:assert (package/path).is_file(),path
  for forbidden in ['receiving','node_modules','.env','.git']:assert not (package/forbidden).exists(),forbidden
  test=run(['npm','test'],cwd=package)
@@ -116,6 +116,23 @@ try:
   expected=hashlib.sha256((package/path).read_bytes()).hexdigest()
   assert one_key_receipt['hashes'][name]['source']==one_key_receipt['hashes'][name]['served']==one_key_receipt['hashes'][name]['pin']==expected,'One-key source/served/pin differs from extracted package'
  receipt['one_key']={'exit_code':one_key.returncode,'schema':one_key_receipt['schema'],'ok':True,'checks':one_key_receipt['checks'],'hashes':one_key_receipt['hashes'],'errors':one_key_receipt['browserErrors'],'source_hash_agreement':True}
+ workshop=run(['node','scripts/workshop-receive.mjs','--url',url,'--output',str(out/'workshop')],cwd=package,timeout=120)
+ (out/'package-workshop.log').write_text(workshop.stdout+workshop.stderr)
+ assert workshop.returncode==0,workshop.stdout+workshop.stderr
+ workshop_receipt=json.loads((out/'workshop/receipt.json').read_text())
+ assert workshop_receipt['schema']=='open-table.workshop-receiving.v1' and workshop_receipt['ok'] is True
+ assert len(workshop_receipt['checks'])==5 and len(workshop_receipt['observations'])==5
+ assert all(case['passed'] is True for case in workshop_receipt['observations'])
+ assert workshop_receipt['browserErrors']==[] and workshop_receipt['forbiddenRequests']==[] and workshop_receipt['browserClosed'] is True
+ receipt['workshop']={'exit_code':workshop.returncode,'schema':workshop_receipt['schema'],'ok':True,'checks':workshop_receipt['checks'],'errors':workshop_receipt['browserErrors'],'forbiddenRequests':workshop_receipt['forbiddenRequests']}
+ layout=run(['node','scripts/one-key-layout-receive.mjs','--url',url,'--output',str(out/'one-key-layout')],cwd=package,timeout=180)
+ (out/'package-one-key-layout.log').write_text(layout.stdout+layout.stderr)
+ assert layout.returncode==0,layout.stdout+layout.stderr
+ layout_receipt=json.loads((out/'one-key-layout/receipt.json').read_text())
+ assert layout_receipt['format']=='open-table.one-key-layout-receiving.v1' and layout_receipt['status']=='passed'
+ assert len(layout_receipt['checks'])==7 and all(case['status']=='passed' for case in layout_receipt['checks'])
+ assert layout_receipt['errors']==[]
+ receipt['one_key_layout']={'exit_code':layout.returncode,'format':layout_receipt['format'],'status':'passed','checks':layout_receipt['checks'],'errors':layout_receipt['errors'],'localInputs':layout_receipt['localInputs'],'observations':layout_receipt['observations']}
  os.killpg(server.pid,signal.SIGTERM);server.wait(timeout=10);server=None
  install=run(['npm','ci','--include=dev','--ignore-scripts','--no-audit','--no-fund'],cwd=package,timeout=120)
  (out/'offline-build-install.log').write_text(install.stdout+install.stderr)
