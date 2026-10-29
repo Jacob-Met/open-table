@@ -8,7 +8,7 @@ This is selected concept 14 in [the estate product workstream](https://github.co
 
 ## Play offline
 
-Download `open-table-0.5.1.html` from the [private 0.5.1 release](https://github.com/Jacob-Met/open-table/releases/tag/v0.5.1) and open it in your browser. The single file contains the game, checker, styles and one-key controls. Playing does not require Node.js, a local server, an account, or a network connection. Use **Play with one key** or append `#one-key` to the file address for direct entry.
+Download `open-table-0.5.2.html` from the [private 0.5.2 preview](https://github.com/Jacob-Met/open-table/releases/tag/v0.5.2) and open it in your browser. The single file contains the game, checker, styles and one-key controls. Playing does not require Node.js, a local server, an account, or a network connection. Use **Play with one key** or append `#one-key` to the file address for direct entry.
 
 Packs remain separate JSON files that you can save and reopen. Closing or reloading the HTML starts a new session. See [offline play, building, and receiving scope](docs/OFFLINE_PLAY.md).
 
@@ -67,6 +67,8 @@ Two intentionally bad designer controls illustrate failure:
 
 These examples are separate from the live game. Negative controls cannot activate as access packs. The no-hidden-information Beacon game is not falsely rejected merely because a control is named “reveal opponent.”
 
+Selecting the already-current game in the workshop keeps your staged proposal, review evidence, and match progress. Selecting it at the table still starts a new game; choosing a different game in the workshop clears the old game's draft and evidence.
+
 Inspecting a negative control does not replace or restart the game at the table. The result names the game being checked; the Pocket Signals leakage example can be inspected while a Beacon Steps match is in progress. The live match and staged proposal are retained. Private cards stay covered and require the usual handoff before they can be revealed again.
 
 A finite equivalence result establishes preservation for these games and fixed, deterministic adapters. It does not establish universal accessibility, enjoyment, usability with a screen reader or physical switch, or equivalence for arbitrary tabletop games. Human access playtests remain necessary.
@@ -99,6 +101,7 @@ node scripts/browser-receive.mjs
 npm run receive:space
 npm run receive:one-key
 npm run receive:workshop
+node scripts/workshop-reselect-receive.mjs --source . --output /absolute/path/fresh-reselect-receiving
 npm run receive:one-key-layout -- --output /absolute/path/fresh-layout-receiving
 python3 scripts/receive-package.py
 npm pack
@@ -106,7 +109,7 @@ npm pack
 
 The browser course uses the installed Chrome at `/usr/local/bin/google-chrome` and Node's built-in CDP transport. It starts its own loopback server and browser profile, blocks non-loopback page traffic, and closes only the process it launched. Set `OPEN_TABLE_RECEIVING_URL` to receive an already-running copy, or `OPEN_TABLE_RECEIVING_DIR` to retain a separate run. The scripts do not inspect signed-in browser profiles.
 
-The focused workshop course uses ordinary mouse and keyboard play to check match and proposal continuity, private handoffs, and checked-game activation after a cross-game pack import. Run it as a non-root user with `npm run receive:workshop`; it starts its own loopback server. To receive a standalone downloaded build, use `node scripts/workshop-receive.mjs --file /absolute/path/open-table-0.5.1.html --output /absolute/path/fresh-receiving-directory`. File receiving disables networking before navigation and verifies the HTML remains unchanged. `--url http://127.0.0.1:PORT/` receives an existing local server without stopping it. Each run needs a fresh output directory and records the observed browser, checks, screenshots, errors, requests, and cleanup.
+The focused workshop course uses ordinary mouse and keyboard play to check match and proposal continuity, private handoffs, and checked-game activation after a cross-game pack import. Run it as a non-root user with `npm run receive:workshop`; it starts its own loopback server. To receive a standalone downloaded build, use `node scripts/workshop-receive.mjs --file /absolute/path/open-table-0.5.2.html --output /absolute/path/fresh-receiving-directory`. File receiving disables networking before navigation and verifies the HTML remains unchanged. `--url http://127.0.0.1:PORT/` receives an existing local server without stopping it. Each run needs a fresh output directory and records the observed browser, checks, screenshots, errors, requests, and cleanup.
 
 The layout course checks setup, private handoff, every target through a complete revealed-hand focus cycle at 320 × 844, pause/resume, terminal/replay, desktop return to ordinary play, and an explicit 2× CSS-zoom reflow fixture. It records actual focus, target geometry, scroll movement, source hashes and screenshots. The enlarged fixture allows vertical scrolling and is not a native browser-zoom or human accessibility qualification. See [one-key layout receiving](docs/ONE_KEY_PLAY.md#compact-layout-and-receiving).
 
@@ -114,7 +117,7 @@ The initial runtime snapshot `af04f2b1213784b48422cb9fcd8f26aa86dcdbff` passed 4
 
 [PR #1](https://github.com/Jacob-Met/open-table/pull/1) merged the hidden-dependent choice-meaning correction at commit `ec2a618ad2e3a83a69c2777dfff2af4df61cde82`, with tree `1c190a5821fa5f8bcf8cea6364af588461149a9b`. Its recorded qualification covers 48 native/HTTP checks and 15 actual Chrome scenarios for that exact tree. See [the correction evidence and scope](docs/RECEIVING.md#merged-choice-meaning-correction); this documentation update records existing execution.
 
-For the optional Node.js version, download `open-table-0.5.1.tgz` from the [private 0.5.1 release](https://github.com/Jacob-Met/open-table/releases/tag/v0.5.1), extract it, and run `npm start` from its `package` directory with Node.js 22 or later. The [integrated 0.2.0 package](release-artifacts/open-table-0.2.0-integrated-bb3d8e.tgz) remains a historical snapshot. See [continuous-scan integration and receiving scope](docs/CONTINUOUS_INTEGRATION.md) for the preserved corrections, qualification boundaries, and remaining project requirements.
+For the optional Node.js version, download `open-table-0.5.2.tgz` from the [private 0.5.2 preview](https://github.com/Jacob-Met/open-table/releases/tag/v0.5.2), extract it, and run `npm start` from its `package` directory with Node.js 22 or later. The [integrated 0.2.0 package](release-artifacts/open-table-0.2.0-integrated-bb3d8e.tgz) remains a historical snapshot. See [continuous-scan integration and receiving scope](docs/CONTINUOUS_INTEGRATION.md) for the preserved corrections, qualification boundaries, and remaining project requirements.
 
 See [receiving evidence](docs/RECEIVING.md), [research and model-route limits](docs/RESEARCH.md), and [recovery state](docs/RECOVERY.json). The separate initial clean archive also passed all 42 native/HTTP and 15 browser scenarios through its own npm start. Its private remote source/tree identity was verified. The [qualified initial private archive](release-artifacts/open-table-0.1.0-af04f2b.tgz) is retained as a historical snapshot; it does not contain the merged correction.
 
@@ -123,3 +126,4 @@ The [private submission draft](docs/SUBMISSION_DRAFT.md) separates proposed entr
 ## Ownership
 
 Private estate source. All game rules, UI, synthetic fixtures, and visual artwork here are original authored material. No third-party game art, commercial rulebook, audio sample, or model weights are bundled. No public license or release is granted by this prototype.
+

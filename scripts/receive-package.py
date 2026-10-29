@@ -10,6 +10,23 @@ def run(args,cwd=root,env=None,timeout=90):
  r=subprocess.run(args,cwd=cwd,env=env,text=True,capture_output=True,timeout=timeout)
  return r
 server=None
+def receive_reselect(label,extra,expected_checks,artifact_hash=None):
+ assert (package/'scripts/workshop-reselect-receive.mjs').read_bytes()==(root/'scripts/workshop-reselect-receive.mjs').read_bytes(),'Packaged reselect receiver differs from committed source'
+ result=run(['node','scripts/workshop-reselect-receive.mjs','--source',str(package),'--output',str(out/label)]+extra,cwd=package,timeout=120)
+ (out/(label+'.log')).write_text(result.stdout+result.stderr)
+ assert result.returncode==0,result.stdout+result.stderr
+ evidence=json.loads((out/label/'receipt.json').read_text())
+ assert evidence['schema']=='open-table.workshop-reselect-receipt.v1' and evidence['pass'] is True
+ assert len(evidence['checks'])==expected_checks and all(c['pass'] is True for c in evidence['checks'])
+ assert evidence['errors']==[]
+ for path in ['src/app.js','server.mjs','scripts/browser-driver.mjs']:
+  expected=hashlib.sha256((package/path).read_bytes()).hexdigest()
+  assert evidence['hashes'][path]==evidence['finalHashes'][path]==expected
+  assert (package/path).read_bytes()==(root/path).read_bytes(),'Receiver input differs from committed source: '+path
+ assert evidence['offline'] is (artifact_hash is not None)
+ if artifact_hash is not None:
+  assert evidence['artifactHash']==evidence['finalArtifactHash']==artifact_hash
+ receipt[label]={'exit_code':result.returncode,'pass':True,'evidence':str(out/label/'receipt.json'),'checks':evidence['checks'],'hashes':evidence['hashes'],'browserVersion':evidence['browserVersion'],'source_hash_agreement':True}
 try:
  receipt['source_commit']=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
  assert not subprocess.check_output(['git','status','--porcelain'],cwd=root,text=True).strip(),'Source must be committed and clean'
@@ -37,7 +54,7 @@ try:
     target.parent.mkdir(parents=True,exist_ok=True)
     with tar.extractfile(member) as stream:target.write_bytes(stream.read())
  package=dest/'package'
- required=['index.html','styles.css','server.mjs','src/app.js','src/one-key.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/browser-focus.mjs','scripts/pack-import-browser.mjs','scripts/continuous-receive.mjs','scripts/continuous-boundary-receive.mjs','scripts/space-confirm-receive.mjs','scripts/visibility-receive.mjs','scripts/visibility-lifecycle-receive.mjs','docs/HIDDEN_SCANNING.md','scripts/one-key-receive.mjs','scripts/one-key-layout-receive.mjs','scripts/workshop-receive.mjs','docs/ONE_KEY_PLAY.md','docs/OFFLINE_PLAY.md','scripts/build-offline.mjs','scripts/offline-receive.mjs','npm-shrinkwrap.json','tests/server.test.mjs']
+ required=['index.html','styles.css','server.mjs','src/app.js','src/one-key.js','src/games.js','src/adaptations.js','src/catalog.js','src/ruleset-pins.js','src/pack.js','scripts/write-ruleset-pins.mjs','scripts/browser-driver.mjs','scripts/browser-receive.mjs','scripts/browser-focus.mjs','scripts/pack-import-browser.mjs','scripts/continuous-receive.mjs','scripts/continuous-boundary-receive.mjs','scripts/space-confirm-receive.mjs','scripts/visibility-receive.mjs','scripts/visibility-lifecycle-receive.mjs','docs/HIDDEN_SCANNING.md','scripts/one-key-receive.mjs','scripts/one-key-layout-receive.mjs','scripts/workshop-receive.mjs','scripts/workshop-reselect-receive.mjs','docs/ONE_KEY_PLAY.md','docs/OFFLINE_PLAY.md','scripts/build-offline.mjs','scripts/offline-receive.mjs','npm-shrinkwrap.json','tests/server.test.mjs']
  for path in required:assert (package/path).is_file(),path
  for forbidden in ['receiving','node_modules','.env','.git']:assert not (package/forbidden).exists(),forbidden
  test=run(['npm','test'],cwd=package)
@@ -143,6 +160,7 @@ try:
  assert all(case['passed'] is True for case in workshop_receipt['observations'])
  assert workshop_receipt['browserErrors']==[] and workshop_receipt['forbiddenRequests']==[] and workshop_receipt['browserClosed'] is True
  receipt['workshop']={'exit_code':workshop.returncode,'schema':workshop_receipt['schema'],'ok':True,'checks':workshop_receipt['checks'],'errors':workshop_receipt['browserErrors'],'forbiddenRequests':workshop_receipt['forbiddenRequests']}
+ receive_reselect('workshop-reselect',['--url',url],20)
  layout=run(['node','scripts/one-key-layout-receive.mjs','--url',url,'--output',str(out/'one-key-layout')],cwd=package,timeout=180)
  (out/'package-one-key-layout.log').write_text(layout.stdout+layout.stderr)
  assert layout.returncode==0,layout.stdout+layout.stderr
@@ -177,6 +195,7 @@ try:
  assert offline_receipt['browserErrors']==[] and all(not item['forbidden'] for item in offline_receipt['browserRuns'])
  receipt['offline_build']={'install_exit_code':install.returncode,'build_exit_code':offline_build.returncode,'manifest':offline_manifest,'source_input_agreement':True}
  receipt['offline']={'exit_code':offline.returncode,'ok':True,'checks':offline_receipt['checks'],'artifact':offline_receipt['artifact'],'errors':offline_receipt['browserErrors'],'browser_runs':offline_receipt['browserRuns']}
+ receive_reselect('offline-workshop-reselect',['--file',str(offline_file)],21,offline_manifest['output']['sha256'])
  offline_visibility=run(['node','scripts/visibility-receive.mjs'],cwd=package,env=dict(offline_env,OPEN_TABLE_VISIBILITY_DIR=str(out/'offline-visibility')),timeout=120)
  (out/'offline-visibility.log').write_text(offline_visibility.stdout+offline_visibility.stderr)
  assert offline_visibility.returncode==0,offline_visibility.stdout+offline_visibility.stderr
@@ -217,3 +236,4 @@ finally:
  receipt['finished_at']=time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())
  (out/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
  print(json.dumps(receipt))
+
