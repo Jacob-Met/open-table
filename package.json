@@ -1,6 +1,6 @@
 {
   "name": "open-table",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -16,7 +16,8 @@
     "receive:browser": "node scripts/browser-receive.mjs",
     "experiment:development": "node scripts/model-development.mjs",
     "receive:continuous": "node scripts/continuous-receive.mjs",
-    "receive:space": "node scripts/space-confirm-receive.mjs"
+    "receive:space": "node scripts/space-confirm-receive.mjs",
+    "receive:one-key": "node scripts/one-key-receive.mjs"
   },
   "files": [
     "index.html",
