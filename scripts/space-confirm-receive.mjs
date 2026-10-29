@@ -21,7 +21,7 @@ const space={key:' ',code:'Space',windowsVirtualKeyCode:32,text:' ',unmodifiedTe
 const key=(type,repeat=false)=>b.send('Input.dispatchKeyEvent',{...space,type,...(repeat?{autoRepeat:true}:{})});
 const focus=selector=>b.evaluate('document.querySelector('+JSON.stringify(selector)+').focus();true');
 async function state(){
- return b.evaluate("(()=>{const q=s=>document.querySelector(s);return {position:q('.track')?.getAttribute('aria-label')||null,focus:document.activeElement.id,documentFocused:document.hasFocus(),covered:!!q('#reveal-hand'),privateVisible:!!q('#private-title'),choice:q('#confirm-choice')?.textContent||null,toggle:q('#toggle-scan')?.getAttribute('aria-pressed')||null,rounds:q('.rounds')?.textContent||'',live:q('[data-testid=public-live]')?.textContent||''};})()");
+ return b.evaluate("(()=>{const q=s=>document.querySelector(s);return {position:q('.track')?.getAttribute('aria-label')||null,focus:document.activeElement.id,documentFocused:document.hasFocus(),hidden:document.hidden,covered:!!q('#reveal-hand'),privateVisible:!!q('#private-title'),choice:q('#confirm-choice')?.textContent||null,toggle:q('#toggle-scan')?.getAttribute('aria-pressed')||null,rounds:q('.rounds')?.textContent||'',live:q('[data-testid=public-live]')?.textContent||''};})()");
 }
 async function mount(game='beacon-steps',{scan=true}={}){
  await b.evaluate("(async()=>{const g=await import('/src/games.js'),a=await import('/src/app.js');const game="+JSON.stringify(game)+";const initial=game==='pocket-signals'?g.initialStates(game).find(s=>JSON.stringify(s.hands)==='[[2,4],[1,3]]'):g.initialStates(game)[0];a.mountApp(document.getElementById('app'),{gameId:game,initialState:initial});return true;})()");
@@ -105,22 +105,39 @@ try{
   assert.equal((await state()).covered,true);await key('keyUp');const covered=await state();
   assert.equal(covered.covered,true);assert.equal(covered.privateVisible,false);assert.equal(covered.rounds,'');return {covered};
  });
- await check('Real browser focus loss cancels the hold and permits a fresh confirmation',async()=>{
-  await mount();await key('keyDown');const before=await state();
+ await check('Real hidden tab suspends scanning, cancels the hold, and resumes with a fresh dwell',async()=>{
+  await mount();await key('keyDown');
   const original=(await b.send('Target.getTargetInfo')).targetInfo.targetId;
   const other=(await b.send('Target.createTarget',{url:'about:blank'})).targetId;
-  let lost,resumed,returned;
+  let lost,hiddenEnd,visibleStart,resumed,returned;
+  const hiddenSamples=[],dwellSamples=[];
   try{
    await b.send('Target.activateTarget',{targetId:other});await delay(100);lost=await state();
    assert.equal(lost.documentFocused,false,'Browser did not move focus to the owned blank tab');
-   resumed=await scanResumes(before);assert.match(resumed.position,/marker at 0$/);
+   assert.equal(lost.hidden,true,'Owned application tab did not become hidden');
+   const hiddenUntil=Date.now()+1750;
+   do{
+    await delay(50);hiddenEnd=await state();hiddenSamples.push(hiddenEnd.choice);
+    assert.equal(hiddenEnd.hidden,true);assert.equal(hiddenEnd.choice,lost.choice,'Hidden tab advanced the selected choice');
+    assert.match(hiddenEnd.position,/marker at 0$/);
+   }while(Date.now()<hiddenUntil);
    await b.send('Target.activateTarget',{targetId:original});await b.send('Page.bringToFront');
-   assert.equal((await state()).documentFocused,true,'Browser did not restore original focus');
+   visibleStart=await state();
+   assert.equal(visibleStart.documentFocused,true,'Browser did not restore original focus');
+   assert.equal(visibleStart.hidden,false,'Application remained hidden after returning');
+   assert.equal(visibleStart.choice,lost.choice,'Returning changed the selected choice');
+   const dwellUntil=Date.now()+1100;
+   do{
+    const current=await state();dwellSamples.push(current.choice);
+    assert.equal(current.choice,visibleStart.choice,'Returning did not give a fresh scan dwell');
+    await delay(50);
+   }while(Date.now()<dwellUntil);
+   resumed=await scanResumes(visibleStart);assert.match(resumed.position,/marker at 0$/);
    await key('keyUp');returned=await state();assert.match(returned.position,/marker at 0$/);
   }finally{await b.send('Target.closeTarget',{targetId:other});}
   await b.click('#toggle-scan');const selected=await state();await focus('#confirm-choice');await b.key('Space');
   assert.match((await state()).position,new RegExp('marker at '+(/Advance 2/.test(selected.choice)?2:1)+'$'));
-  return {lost,resumed,returned};
+  return {lost,hiddenEnd,visibleStart,resumed,returned,hiddenSamples,dwellSamples};
  });
  await b.send('Emulation.setDeviceMetricsOverride',{width:320,height:900,deviceScaleFactor:1,mobile:false});
  await mount('beacon-steps',{scan:false});await b.evaluate("document.querySelector('.scan-hint').scrollIntoView({block:'center'});true");

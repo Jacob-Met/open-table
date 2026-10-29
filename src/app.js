@@ -44,18 +44,22 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
  outcome(state);
  let screen='play',mode='shape-text',seat=null,status='',statusError=false;
  let alive=true,importGeneration=0,heldSpace=false;
- const appWindow=root.ownerDocument.defaultView;
+ const appDocument=root.ownerDocument,appWindow=appDocument.defaultView;
  let oneKeyEnabled=Boolean(oneKey),oneKeyPaused=false,oneKeyPhase='setup',oneKeyPace=1400,previousMode='shape-text';
  const oneKeyController=createOneKeyController({root});
  const modeAddressChanged=()=>{if(appWindow.location.hash==='#one-key'){if(!oneKeyEnabled)startOneKey();}else if(oneKeyEnabled)leaveOneKey();};
  appWindow?.addEventListener('hashchange',modeAddressChanged);
  const releaseSpace=()=>{heldSpace=false;};
  appWindow?.addEventListener('blur',releaseSpace);
- let scanIndex=0,scanTimer=null,scanDelay=1400,scanEpoch=0,continuousScan=false,labMode=null,labResult=null,proposalText='',proposal=null,proposalError='';
+ let scanIndex=0,scanTimer=null,scanDelay=1400,scanEpoch=0,continuousScan=false,resumeScan=null,labMode=null,labResult=null,proposalText='',proposal=null,proposalError='';
  const checks=new Map(),content=el('div'),live=el('div',{class:'visually-hidden',role:'status','aria-live':'polite','aria-atomic':'true','data-testid':'public-live'});
  root.replaceChildren(content,live);
  function fresh(id){const roots=initialStates(id);return roots[Math.floor(Math.random()*roots.length)];}
  function stopScan(){releaseSpace();if(scanTimer!==null)clearInterval(scanTimer);scanTimer=null;scanEpoch++;}
+ const scanVisibilityChanged=()=>{
+  if(appDocument.hidden)stopScan();else if(alive&&continuousScan)resumeScan?.();
+ };
+ appDocument.addEventListener('visibilitychange',scanVisibilityChanged);
  function announce(text){live.textContent=text;}
  function notify(text,error=false){status=text;statusError=error;}
  function publicView(){
@@ -227,8 +231,8 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
   };
   const next=()=>{scanIndex=(scanIndex+1)%choices.length;paint();};
   const begin=()=>{
-   stopScan();const epoch=scanEpoch;
-   scanTimer=setInterval(()=>{if(epoch===scanEpoch&&continuousScan&&!heldSpace)next();},scanDelay);
+   stopScan();if(!alive||appDocument.hidden||!continuousScan)return;const epoch=scanEpoch;
+   scanTimer=setInterval(()=>{if(epoch===scanEpoch&&continuousScan&&!heldSpace&&!appDocument.hidden)next();},scanDelay);
   };
   const toggle=el('button',{id:'toggle-scan','aria-pressed':continuousScan,onKeyDown:freshActivation,onClick:()=>{
    continuousScan=!continuousScan;
@@ -239,10 +243,10 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
   const speed=el('select',{id:'scan-speed','aria-label':'Scan interval',onChange:e=>{
    scanDelay=Number(e.target.value);if(scanTimer!==null)begin();
   }},[1400,2400,4000].map(ms=>el('option',{value:ms,selected:ms===scanDelay},ms/1000+' seconds')));
-  paint();if(continuousScan)begin();
+  resumeScan=begin;paint();if(continuousScan)begin();
   return el('div',{},list,el('div',{class:'scan-controls'},el('button',{id:'next-choice',onClick:next},'Next choice'),choose),
    el('div',{class:'scan-controls'},toggle,speed),
-   el('p',{class:'scan-hint'},'Start auto scan once to continue across turns. Press Enter on Confirm to make one move, or hold Space to keep the choice fixed and release to confirm. Private hands wait for a fresh press on Show my hand. Pause at any time, or use Next choice manually.'));
+   el('p',{class:'scan-hint'},'Start auto scan once to continue across turns. Press Enter on Confirm to make one move, or hold Space to keep the choice fixed and release to confirm. Private hands wait for a fresh press on Show my hand. Leaving the tab pauses scanning; returning keeps the choice and starts a full interval. Pause at any time, or use Next choice manually.'));
  }
  function comparison(v){
   if(v.outcome.terminal)return selectedGame==='beacon-steps'?endResult(v):null;
@@ -350,7 +354,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
    labEvidence()),proposalPanel()));}
  function render(focusId){
   if(!alive)return;
-  stopScan();
+  resumeScan=null;stopScan();
   const page=el('div',{class:oneKeyEnabled?'shell one-key-shell':'shell'},el('header',{class:'topbar'},el('div',{class:'brand'},el('span',{class:'brand-mark','aria-hidden':'true'}),'OPEN TABLE'),
    el('span',{class:'top-note'},'Original games. Thoughtful adaptations.'),
    oneKeyEnabled?el('span',{class:'one-key-badge'},'ONE-KEY PLAY'):el('nav',{class:'tabs','aria-label':'Workspace'},el('button',{'aria-pressed':screen==='play',id:'play-tab',onClick:()=>changeScreen('play')},'At the table'),
@@ -369,7 +373,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
  }
  function dispose(){
   if(!alive)return;
-  alive=false;importGeneration++;stopScan();oneKeyController.dispose();appWindow?.removeEventListener('hashchange',modeAddressChanged);appWindow?.removeEventListener('blur',releaseSpace);
+  alive=false;importGeneration++;resumeScan=null;stopScan();oneKeyController.dispose();appWindow?.removeEventListener('hashchange',modeAddressChanged);appWindow?.removeEventListener('blur',releaseSpace);appDocument.removeEventListener('visibilitychange',scanVisibilityChanged);
   if(mounted.get(root)===dispose){mounted.delete(root);root.replaceChildren();}
  }
  if(oneKeyEnabled)oneKeyAddress(true);
