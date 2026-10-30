@@ -595,7 +595,8 @@ try{
    await shot('desktop-one-key.png');
 
    await activate('#one-key-exit');
-   await visible('.hero');
+   await visible('main > h1.visually-hidden');
+   await visible('.game-picker');
    await visible('[data-testid="choice-comparison"]');
    await visible('.rules-panel');
 
@@ -606,7 +607,7 @@ try{
     'adaptedChoices:Boolean(document.querySelector(\'[aria-label="Adapted choices"]\')),'+
     'ruleItems:document.querySelectorAll(".rules-panel ol li").length,'+
     'rulesHeading:document.querySelector(".rules-panel h3")?.textContent,'+
-    'heroText:document.querySelector(".hero h1")?.innerText'+
+    'headingText:document.querySelector("main > h1.visually-hidden")?.innerText'+
     '})'
    );
 
@@ -616,7 +617,7 @@ try{
    );
    assert.equal(ordinary.ruleItems,3);
    assert.equal(ordinary.rulesHeading,'How to play');
-   assert(ordinary.heroText?.trim());
+   assert.equal(ordinary.headingText?.trim(),'Open Table');
    receipt.observations.ordinary=ordinary;
    await shot('desktop-ordinary-comparison.png');
   }

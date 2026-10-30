@@ -59,7 +59,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
  appWindow?.addEventListener('blur',releaseSpace);
  const matchEscape=event=>{if(event.key==='Escape'&&matchPrompt){event.preventDefault();cancelMatchAction();}};
  root.addEventListener('keydown',matchEscape);
- let scanIndex=0,scanTimer=null,scanDelay=1400,scanEpoch=0,continuousScan=false,resumeScan=null,labMode=null,labResult=null,proposalText='',proposal=null,proposalError='';
+ let scanIndex=0,scanTimer=null,scanDelay=1400,scanEpoch=0,continuousScan=false,resumeScan=null,labMode=null,labResult=null,proposalText='',proposal=null,proposalError='',nemotron=null;
  const authorDrafts=new Map();
  const checks=new Map(),content=el('div'),live=el('div',{class:'visually-hidden',role:'status','aria-live':'polite','aria-atomic':'true','data-testid':'public-live'});
  root.replaceChildren(content,live);
@@ -358,9 +358,9 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
    el('h3',{class:'column-title'},'Your choices'),
    el('div',{class:'choice-buttons'},choices.map(c=>el('button',{'data-choice':c.id,onClick:()=>perform(c.id)},c.label,el('span',{class:'action-arrow','aria-hidden':'true'},'↗')))));
   return el('div',{class:'comparison','data-testid':'choice-comparison'},
-   el('section',{'aria-label':'Original choices'},el('h3',{class:'column-title'},'01 / Original choices'),
+   el('section',{'aria-label':'Original choices'},el('h3',{class:'column-title'},'Original choices'),
     el('ul',{class:'original-actions'},original.map(a=>el('li',{},actionText(a))))),
-   el('section',{'aria-label':'Adapted choices'},el('h3',{class:'column-title'},'02 / '+labelFor(mode)),
+   el('section',{'aria-label':'Adapted choices'},el('h3',{class:'column-title'},labelFor(mode)),
     mode==='switch-select'?scanActions(choices):el('div',{class:'choice-buttons'},choices.map(c=>el('button',{'data-choice':c.id,onClick:()=>perform(c.id)},c.label,el('span',{class:'action-arrow','aria-hidden':'true'},'↗'))))));
  }
  function play(){
@@ -369,7 +369,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
    el('section',{class:'table-panel','aria-labelledby':'table-title'},el('div',{class:'table-heading'},
     el('div',{},el('h2',{id:'table-title',tabindex:'-1'},GAMES[selectedGame].title),
      oneKeyEnabled?null:el('p',{},GAMES[selectedGame].description)),
-    oneKeyEnabled?null:el('span',{class:'game-number'},selectedGame==='beacon-steps'?'GAME / 01':'GAME / 02')),
+    null),
     board(v),comparison(v),
     oneKeyEnabled?oneKeyPanel():el('div',{class:'checked-note'},el('span',{class:'check-glyph','aria-hidden':'true'},'✓'),
      el('span',{},'Same legal choices. Same outcomes. Same player information. ',el('span',{},'Checked across all '+check.states+' reachable states of this original game.')))),
@@ -454,12 +454,48 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
    }},'Prepare request'),
    el('p',{class:'aside-note'},'Drafts stay in this open page. Preparing or downloading a request makes no model call.'),preview);
  }
+ // Live path: the server calls Nemotron on Nebius and validates and checks its answer.
+ // The result fills the same staged proposal as a pasted answer; nothing is approved here.
+ function askNemotron(){
+  const game=selectedGame,goal=(authorDrafts.get(game)?.goal||'');
+  nemotron={gameId:game,busy:true};render('ask-nemotron');
+  fetch('/api/propose',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({gameId:game,accessGoal:goal})})
+   .then(async response=>({ok:response.ok,body:await response.json().catch(()=>({error:'The server sent an unreadable answer.'}))}))
+   .catch(()=>({ok:false,body:{error:'The local server did not answer. Nothing was sent or checked.'}}))
+   .then(({ok,body})=>{
+    if(selectedGame!==game)return;
+    if(ok){
+     proposalText=JSON.stringify(body.proposal,null,2);proposal=body.proposal;proposalError='';
+     nemotron={gameId:game,busy:false,model:body.model,attempts:body.attempts,checks:body.checks,classification:body.classification};
+     announce('Nemotron answered. The app checked the proposal against the original game.');
+    }else{
+     proposal=null;nemotron={gameId:game,busy:false,error:body.error||'The proposal could not be completed.'};
+     announce(nemotron.error);
+    }
+    if(alive)render('ask-nemotron');
+   });
+ }
+ function nemotronStatus(){
+  if(!nemotron||nemotron.gameId!==selectedGame)return null;
+  if(nemotron.busy)return el('p',{class:'status',role:'status'},'Asking Nemotron on Nebius Token Factory. This takes about 10 to 20 seconds.');
+  if(nemotron.error)return el('p',{class:'status error',role:'alert'},nemotron.error);
+  const box=el('div',{class:'nemotron-result'},el('p',{class:'pin'},'Model: '+nemotron.model+(nemotron.attempts>1?' · corrected once after a failed check':'')));
+  if(!nemotron.checks.length)box.append(el('p',{},'No checks run: the model marked this a variant.'));
+  for(const {pack,result} of nemotron.checks){
+   const r=result;
+   box.append(el('p',{},labelFor(pack)+': '+(r.ok&&r.complete
+    ?'equivalent across all '+r.states+' reachable states and '+r.transitions+' legal transitions.'
+    :'not equivalent ('+r.reason+'). See the lab result above for the counterexample.')));
+  }
+  return box;
+ }
  function proposalPanel(){
   const catalog=getCatalog(selectedGame);
   const text=el('textarea',{id:'proposal-json',spellcheck:'false','aria-label':'Staged proposal JSON'});
   text.value=proposalText;text.addEventListener('input',()=>{proposalText=text.value;proposal=null;proposalError='';preview.replaceChildren();});
   const preview=el('div',{class:'proposal-preview'});
   if(proposalError)preview.append(el('p',{class:'status error'},proposalError));
+  const live=nemotronStatus();if(live)preview.append(live);
   if(proposal){
    preview.append(el('h4',{},proposal.classification==='variant'?'Variant idea — author review required':'Candidate — awaiting author review'),el('p',{},proposal.summary));
    for(const change of proposal.changes){
@@ -476,13 +512,14 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
   return el('section',{class:'proposal-panel'},el('p',{class:'eyebrow'},'AUTHORING, WITH A HUMAN IN THE LOOP'),el('h3',{},'Ground each proposal.'),
    el('p',{},'Review suggested changes beside the approved rule phrases. A proposal cannot change the rules, expose a private hand, or certify itself.'),
    el('label',{class:'input-label',for:'proposal-json'},'Staged proposal'),text,
-   el('div',{class:'proposal-buttons'},el('button',{id:'load-example',onClick:()=>{proposalText=JSON.stringify(exampleProposal(),null,2);proposal=null;proposalError='';render('proposal-json');}},'Load authored example'),
+   el('div',{class:'proposal-buttons'},el('button',{id:'ask-nemotron',class:'primary',...(nemotron?.busy?{disabled:true}:{}),onClick:askNemotron},'Ask Nemotron on Nebius'),
+    el('button',{id:'load-example',onClick:()=>{proposalText=JSON.stringify(exampleProposal(),null,2);proposal=null;proposalError='';render('proposal-json');}},'Load authored example'),
     el('button',{class:'primary',id:'validate-proposal',onClick:()=>{
      try{proposal=parseModelProposal(proposalText,catalog);proposalError='';}
      catch(error){proposal=null;proposalError=error.message;}
      render('validate-proposal');
     }},'Review proposal')),
-   el('p',{class:'aside-note'},'The example is authored test data. No NVIDIA/Nebius inference has run in this prototype yet.'),preview,
+   el('p',{class:'aside-note'},'Ask Nemotron uses the server key when one is set. The authored example is test data and makes no model call.'),preview,
    el('details',{},el('summary',{},'Approved rules & current pin'),el('div',{class:'pin'},catalog.rulesetPin),
     el('ol',{},catalog.rules.map(rule=>el('li',{},rule.text)))));
  }
@@ -502,10 +539,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
    el('span',{class:'top-note'},'Original games. Thoughtful adaptations.'),
    oneKeyEnabled?el('span',{class:'one-key-badge'},'ONE-KEY PLAY'):matchPrompt?null:el('nav',{class:'tabs','aria-label':'Workspace'},el('button',{'aria-pressed':screen==='play',id:'play-tab',onClick:()=>changeScreen('play')},'At the table'),
     el('button',{'aria-pressed':screen==='workshop',id:'workshop-tab',onClick:()=>changeScreen('workshop')},'Adaptation workshop'))),
-   el('main',{id:'main'},oneKeyEnabled?el('h1',{class:'visually-hidden'},'One-key play'):el('section',{class:'hero'},el('div',{},el('p',{class:'eyebrow'},'EVERYONE HAS A SEAT.'),
-    el('h1',{},'Same game. ',el('br'),el('em',{},'New ways to play.')),
-    el('p',{class:'intro'},'Make room for different ways of seeing, choosing, and taking a turn. Keep the choices that make the game yours.')),
-    el('div',{class:'hero-art','aria-hidden':'true'},el('div',{class:'hero-disc'}),el('div',{class:'hero-card'},'◇'),el('div',{class:'hero-token'},'7'))),
+   el('main',{id:'main'},el('h1',{class:'visually-hidden'},oneKeyEnabled?'One-key play':'Open Table'),
     !oneKeyEnabled&&!matchPrompt?gamePicker():null,matchPrompt?matchConfirmation():matchMenu?savedMatchMenu():oneKeyEnabled&&oneKeyPhase==='setup'?oneKeySetup():screen==='play'?play():workshop()),
    el('footer',{class:'footer'},el('p',{},'OPEN TABLE / An original, private prototype. Rule equivalence is checked for these finite games; accessibility and enjoyment need playtesting with people.'),
     el('p',{},'A place for every player.')));

@@ -1,0 +1,33 @@
+{
+  "url": "http://127.0.0.1:4304/",
+  "width": 1440,
+  "height": 900,
+  "steps": [
+    {"say": "Open Table adapts tabletop games for different access needs using NVIDIA Nemotron on Nebius.",
+     "do": [{"wait": 800}]},
+    {"say": "In the workshop, describe an access need and click Ask Nemotron to propose a rule adaptation.",
+     "do": [{"scroll": ".adaptation-input"}, {"wait": 600}]},
+    {"say": "The app sends your need to Nemotron, which proposes concrete changes like adding words and shapes to visual markers.",
+     "do": [{"wait": 1000}]},
+    {"say": "An independent validator then checks whether the adapted rules preserve the game's strategy across all states.",
+     "do": [{"wait": 1000}]},
+    {"say": "If the check passes, you can save the adaptation and play with the new rules.",
+     "do": [{"wait": 1000}]},
+    {"say": "Beacon Steps is a simple race: two players alternate moving a marker one or two spaces.",
+     "do": [{"scroll": ".track"}, {"wait": 600}]},
+    {"say": "Player one moves first, advancing two spaces.",
+     "do": [{"click": "[data-choice=\"1\"]"}]},
+    {"say": "Player two advances one space.",
+     "do": [{"wait": 600}, {"click": "[data-choice=\"0\"]"}]},
+    {"say": "Player one advances two spaces again, to five.",
+     "do": [{"wait": 600}, {"click": "[data-choice=\"1\"]"}]},
+    {"say": "Player two advances two spaces, landing exactly on seven.",
+     "do": [{"wait": 600}, {"click": "[data-choice=\"1\"]"}]},
+    {"say": "Seven wins the game. The app confirms the outcome.",
+     "do": [{"wait": 1500}]},
+    {"say": "Each presentation of the rules is verified to preserve the game across all fourteen reachable states.",
+     "do": [{"scroll": ".checked-note"}, {"wait": 1200}]},
+    {"say": "Open Table lets people play together in the way that works for them. Thanks for watching.",
+     "do": [{"scroll": 0}, {"wait": 800}]}
+  ]
+}
