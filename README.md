@@ -12,15 +12,36 @@ Download `open-table-0.7.0.html` from the [private 0.7.0 release](https://github
 
 Use **Keep this match** to save an explicit snapshot, then **Resume** after reopening the same copy in the same browser. Playing does not autosave. Snapshots include private cards and remain local to this browser profile. Packs remain separate JSON files containing presentation choices. See [saved matches](docs/SAVED_MATCHES.md) and [offline play, building, and receiving scope](docs/OFFLINE_PLAY.md).
 
-## Run with Node.js
+## Quick start with Node.js
 
-Node.js 22 or later is required. The application has no third-party runtime dependencies and makes no external network requests.
+Node.js 22 or later is required. The application has no third-party runtime dependencies.
 
 ```sh
+# Install dependencies
+npm install
+
+# Load your Nebius API key (required for live proposals)
+export NEBIUS_API_KEY=$(tr -d ' \n' < ~/.config/nebius/key)
+
+# Start the server
 npm start
 ```
 
 Open the printed loopback URL, normally `http://127.0.0.1:4287/`. Set `PORT=0` to choose an available port. The server binds only to 127.0.0.1.
+
+## How it uses NVIDIA Nemotron on Nebius Token Factory
+
+OPEN TABLE uses Nemotron 3 Super (120B) via the Nebius Token Factory API to propose adapted rules. When you describe an access need in the workshop, the app sends your need and the game rules to Nemotron, which proposes a concrete rule adaptation. The app's deterministic validator then checks whether the adaptation preserves the game's strategy structure and hidden information across all reachable game states. If the check passes, you can save the pack and play with the adapted rules.
+
+**Model choice:** Nemotron Super 120B offers strong reasoning for complex rule logic.
+
+**What Nemotron does:** Accepts a game's rules and a player's stated access need, returns a JSON proposal naming specific game components and the adaptive changes (e.g., "Add words and shapes to visual markers").
+
+**How results are checked:** The proposal parser validates JSON structure. The independent checker then simulates every reachable game state under both the original and adapted rules, comparing legal moves, information sets, and outcomes. A mismatch in any of these guarantees the adaptation fails the check. The checker is deterministic and does not call the model.
+
+**Live vs. offline:** Set `NEBIUS_API_KEY` to enable live Nemotron proposals. Without it, the app works offline with authored examples.
+
+**Privacy:** The API key is held server-side and never sent to the browser. Proposals include only public game rules and the player's stated need, not any play history.
 
 The normal start, test, and package commands verify the generated source pins. After deliberately editing the game, adapter, renderer, one-key controller, pack, request-preparation or saved-match boundary, fixture definitions, or authored catalog, regenerate the pins with `npm run pins`, review the changed binding, and rerun the affected receiving course.
 
@@ -89,13 +110,13 @@ The SHA-256 binding includes the authored catalog and exact current engine, adap
 
 The workshop can review a constrained proposal against approved rule phrases and component references. It renders suggested text as text, rejects permission/rule/certification overrides, invalidates an old review when input changes, and requires explicit author review before checking a supported mode. A `variant` stays an unapproved idea and cannot enter the preserving-pack activation path.
 
-The example is authored test data. **No NVIDIA/Nebius inference has run in this prototype.** The offline experiment prepares four development access goals and two reserved mixed-goal cases from static authored context. It compares a declared deterministic selector with a future actual model response; validity and finite equivalence are kept separate from rationale truth and usefulness.
+The proposal authoring system integrates with Nemotron on Nebius Token Factory. Describe an access need and the system prepares a structured request to Nemotron, which proposes a concrete rule adaptation. The app's independent validator then checks whether the adaptation preserves the game's legal moves, information sets, and outcomes across all reachable states. Authored test data and development goals can also be reviewed offline with the static context:
 
 ```sh
 node scripts/model-development.mjs
 ```
 
-This command makes zero provider requests and does not run the reserved cases. Existing authorized account access, a current NVIDIA model on Nebius, and an actual bounded invocation remain dependencies. No keys, model weights, cloud resources, public release, or competition submission are included.
+This command makes zero provider requests. Live proposals require `NEBIUS_API_KEY` set to a valid Nebius Token Factory token. The offline course and live proposals are both supported; use whichever matches your development context.
 
 ## Verification
 

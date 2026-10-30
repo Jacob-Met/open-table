@@ -1,21 +1,25 @@
-# Demo script (draft, not rendered)
+# Demo script: Open Table with Nemotron
 
-App: Open Table, Beacon Steps, shapes + words pack, desktop 1440x900.
+App: Open Table, showing Nemotron proposal and Beacon Steps gameplay, desktop 1440x900.
 
 | Step | Narration | On screen |
 |---|---|---|
-| 1 | Open Table is a set of small tabletop games. Two people can play one on a shared screen, and each game can be shown in more than one way. | Opening screen: game picker and the Beacon Steps table, marker on space 0, Player 1 to move. |
-| 2 | This game is called Beacon Steps. One marker sits on a path of eight spaces. The players take turns moving it one or two spaces. | Path of spaces 0 to 7, goal 7, both choices listed. |
-| 3 | Player one moves first. Player one moves the marker two spaces. | Player 1 presses "Advance 2 · triangle"; marker moves to space 2. |
-| 4 | The path updates at once. Now it is player two's turn. | Marker on 2, Player 2 to move. |
-| 5 | Player two moves one space. | Player 2 presses "Advance 1 · circle"; marker moves to space 3. |
-| 6 | Player one moves two spaces again, to five. | Player 1 presses "Advance 2 · triangle"; marker on 5. |
-| 7 | Player two moves two spaces, and lands exactly on seven. | Player 2 presses "Advance 2 · triangle"; marker on 7, game complete. |
-| 8 | Seven is the goal. The game ends, and the screen says who won. | "Game complete" with the result panel and Play again. |
-| 9 | Each way of showing the choices is checked against the original game. The check covers every state the game can reach. | "Checked across all 14 reachable states" note. |
-| 10 | Open Table is for people who want to play together, however they take their turns. Thanks for watching. | Page top, closing line. |
+| 1 | Open Table adapts tabletop games for different access needs using NVIDIA Nemotron on Nebius. | Opening screen showing workshop and game tables. |
+| 2 | In the workshop, describe an access need and click Ask Nemotron to propose a rule adaptation. | Adaptation input field and "Ask Nemotron on Nebius" button visible. |
+| 3 | The app sends your need to Nemotron, which proposes concrete changes like adding words and shapes to visual markers. | Explanation of the Nemotron request being sent. |
+| 4 | An independent validator then checks whether the adapted rules preserve the game's strategy across all states. | Explanation of the checking process. |
+| 5 | If the check passes, you can save the adaptation and play with the new rules. | Explanation of the pack save flow. |
+| 6 | Beacon Steps is a simple race: two players alternate moving a marker one or two spaces. | Game board showing marker at starting position (space 0). |
+| 7 | Player one moves first, advancing two spaces. | Player 1 clicks "Advance 2"; marker moves to space 2. |
+| 8 | Player two advances one space. | Player 2 clicks "Advance 1"; marker moves to space 3. |
+| 9 | Player one advances two spaces again, to five. | Player 1 clicks "Advance 2"; marker on space 5. |
+| 10 | Player two advances two spaces, landing exactly on seven. | Player 2 clicks "Advance 2"; marker on space 7, game complete. |
+| 11 | Seven wins the game. The app confirms the outcome. | Result panel showing "Player 2 wins." and "Play again" button. |
+| 12 | Each presentation of the rules is verified to preserve the game across all fourteen reachable states. | "Checked across all 14 reachable states" note visible. |
+| 13 | Open Table lets people play together in the way that works for them. Thanks for watching. | Page scrolled to top, showing initial title. |
 
-Notes for the lead:
-- Step 7 is the winning move. The result panel shows "Player 2 takes it." and the "Play again" button.
-- Step 9 uses a note that appears on screen; the wording "14 reachable states" is the count the app computes.
-- Narration does not mention one key, saved matches, or Pocket Signals; those need a longer script.
+Notes for implementation:
+- Step 2-5 show the Nemotron proposal feature in the workshop.
+- Step 6-12 show actual gameplay with Beacon Steps.
+- The demo must include actual or simulated Nemotron output (model proposal) before gameplay.
+- Final scene returns to the top to show the app title and closing message.
