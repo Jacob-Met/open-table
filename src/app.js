@@ -358,9 +358,9 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
    el('h3',{class:'column-title'},'Your choices'),
    el('div',{class:'choice-buttons'},choices.map(c=>el('button',{'data-choice':c.id,onClick:()=>perform(c.id)},c.label,el('span',{class:'action-arrow','aria-hidden':'true'},'↗')))));
   return el('div',{class:'comparison','data-testid':'choice-comparison'},
-   el('section',{'aria-label':'Original choices'},el('h3',{class:'column-title'},'01 / Original choices'),
+   el('section',{'aria-label':'Original choices'},el('h3',{class:'column-title'},'Original choices'),
     el('ul',{class:'original-actions'},original.map(a=>el('li',{},actionText(a))))),
-   el('section',{'aria-label':'Adapted choices'},el('h3',{class:'column-title'},'02 / '+labelFor(mode)),
+   el('section',{'aria-label':'Adapted choices'},el('h3',{class:'column-title'},labelFor(mode)),
     mode==='switch-select'?scanActions(choices):el('div',{class:'choice-buttons'},choices.map(c=>el('button',{'data-choice':c.id,onClick:()=>perform(c.id)},c.label,el('span',{class:'action-arrow','aria-hidden':'true'},'↗'))))));
  }
  function play(){
@@ -369,7 +369,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
    el('section',{class:'table-panel','aria-labelledby':'table-title'},el('div',{class:'table-heading'},
     el('div',{},el('h2',{id:'table-title',tabindex:'-1'},GAMES[selectedGame].title),
      oneKeyEnabled?null:el('p',{},GAMES[selectedGame].description)),
-    oneKeyEnabled?null:el('span',{class:'game-number'},selectedGame==='beacon-steps'?'GAME / 01':'GAME / 02')),
+    null),
     board(v),comparison(v),
     oneKeyEnabled?oneKeyPanel():el('div',{class:'checked-note'},el('span',{class:'check-glyph','aria-hidden':'true'},'✓'),
      el('span',{},'Same legal choices. Same outcomes. Same player information. ',el('span',{},'Checked across all '+check.states+' reachable states of this original game.')))),
@@ -502,10 +502,7 @@ export function mountApp(root,{gameId='beacon-steps',initialState,oneKey=false}=
    el('span',{class:'top-note'},'Original games. Thoughtful adaptations.'),
    oneKeyEnabled?el('span',{class:'one-key-badge'},'ONE-KEY PLAY'):matchPrompt?null:el('nav',{class:'tabs','aria-label':'Workspace'},el('button',{'aria-pressed':screen==='play',id:'play-tab',onClick:()=>changeScreen('play')},'At the table'),
     el('button',{'aria-pressed':screen==='workshop',id:'workshop-tab',onClick:()=>changeScreen('workshop')},'Adaptation workshop'))),
-   el('main',{id:'main'},oneKeyEnabled?el('h1',{class:'visually-hidden'},'One-key play'):el('section',{class:'hero'},el('div',{},el('p',{class:'eyebrow'},'EVERYONE HAS A SEAT.'),
-    el('h1',{},'Same game. ',el('br'),el('em',{},'New ways to play.')),
-    el('p',{class:'intro'},'Make room for different ways of seeing, choosing, and taking a turn. Keep the choices that make the game yours.')),
-    el('div',{class:'hero-art','aria-hidden':'true'},el('div',{class:'hero-disc'}),el('div',{class:'hero-card'},'◇'),el('div',{class:'hero-token'},'7'))),
+   el('main',{id:'main'},el('h1',{class:'visually-hidden'},oneKeyEnabled?'One-key play':'Open Table'),
     !oneKeyEnabled&&!matchPrompt?gamePicker():null,matchPrompt?matchConfirmation():matchMenu?savedMatchMenu():oneKeyEnabled&&oneKeyPhase==='setup'?oneKeySetup():screen==='play'?play():workshop()),
    el('footer',{class:'footer'},el('p',{},'OPEN TABLE / An original, private prototype. Rule equivalence is checked for these finite games; accessibility and enjoyment need playtesting with people.'),
     el('p',{},'A place for every player.')));
